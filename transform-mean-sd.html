@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Interactive Stats Lab: Shift & Scale</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.css" />
+    <style>
+        body { background-color: #f8f9fa; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.js"></script>
+    <script>
+      stlite.mount({
+        requirements: ["matplotlib", "numpy"],
+        entrypoint: "app.py",
+        files: {
+          "app.py": `
+import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+
+st.set_page_config(page_title="Statistical Transformation Lab", layout="wide")
+
+st.title("📊 Statistical Transformations: Shift & Scale")
+st.write("Visualizing how adding or multiplying constants affects Mean (μ) and Std Dev (σ).")
+
+# --- Base Data (X) ---
+x = np.array([5, 10, 15, 20, 25])
+
+# --- Sidebar Controls ---
+st.sidebar.header("Transformation Controls")
+shift_val = st.sidebar.slider("Shift (Add/Subtract)", -20, 20, 3)
+scale_val = st.sidebar.slider("Scale (Multiply)", 1.0, 5.0, 2.0)
+
+# --- Derived Data ---
+y = x + shift_val
+z = y * scale_val
+
+def get_stats(data):
+    return np.mean(data), np.std(data)
+
+mu_x, std_x = get_stats(x)
+mu_y, std_y = get_stats(y)
+mu_z, std_z = get_stats(z)
+
+# --- Display Metrics ---
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.info("**Set X (Base)**")
+    st.write(f"Data: {x.tolist()}")
+    st.metric("Mean (μ)", f"{mu_x:.1f}")
+    st.metric("Std Dev (σ)", f"{std_x:.2f}")
+
+with c2:
+    st.success(f"**Set Y (X + {shift_val})**")
+    st.write(f"Data: {y.tolist()}")
+    st.metric("Mean (μ)", f"{mu_y:.1f}", delta=f"{shift_val}")
+    st.metric("Std Dev (σ)", f"{std_y:.2f}", delta="0.0")
+
+with c3:
+    st.warning(f"**Set Z (Y * {scale_val:.1f})**")
+    st.write(f"Data: {np.round(z, 1).tolist()}")
+    st.metric("Mean (μ)", f"{mu_z:.1f}")
+    st.metric("Std Dev (σ)", f"{std_z:.2f}")
+
+# --- Visual Plot ---
+st.subheader("Visual Distribution Plot")
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.scatter(x, [1]*len(x), color='blue', label='X (Original)', s=80, alpha=0.6)
+ax.scatter(y, [0.5]*len(y), color='green', label='Y (Shifted)', s=80, alpha=0.6)
+ax.scatter(z, [0]*len(z), color='orange', label='Z (Scaled)', s=80, alpha=0.6)
+
+ax.set_ylim(-0.5, 1.5)
+ax.set_yticks([0, 0.5, 1])
+ax.set_yticklabels(['Z', 'Y', 'X'])
+ax.legend()
+st.pyplot(fig)
+
+st.divider()
+st.write("🎓 **Teaching Note:** Note that shifting (Y) moves the dots but the 'spread' stays the same. Scaling (Z) stretches the dots further apart, increasing the Standard Deviation.")
+          `,
+        },
+      }, document.getElementById("root"));
+    </script>
+  </body>
+</html>
