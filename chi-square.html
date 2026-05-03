@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi-Square Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+</head>
+<body class="bg-gray-50 p-8" x-data="chiSquareApp()">
+
+    <div class="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Chi-Square Calculator</h1>
+        
+        <div class="grid grid-cols-3 gap-4 mb-8 p-4 bg-blue-50 rounded-lg">
+            <div>
+                <label class="block text-sm font-semibold">Rows</label>
+                <input type="number" x-model.number="rows" @change="initTable" min="2" class="w-full p-2 border rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold">Columns</label>
+                <input type="number" x-model.number="cols" @change="initTable" min="2" class="w-full p-2 border rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold">Alpha (α)</label>
+                <input type="number" x-model.number="alpha" step="0.01" class="w-full p-2 border rounded">
+            </div>
+        </div>
+
+        <h2 class="text-xl font-semibold mb-4">1. Observed Values (Input)</h2>
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border p-2"></th>
+                        <template x-for="c in cols">
+                            <th class="border p-2" x-text="'Col ' + c"></th>
+                        </template>
+                        <th class="border p-2 bg-gray-200">Row Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(r_data, r_idx) in observed">
+                        <tr>
+                            <td class="border p-2 font-semibold bg-gray-100" x-text="'Row ' + (r_idx + 1)"></td>
+                            <template x-for="(cell, c_idx) in r_data">
+                                <td class="border p-0">
+                                    <input type="number" x-model.number="observed[r_idx][c_idx]" 
+                                           class="w-full p-2 text-right focus:bg-yellow-50 outline-none">
+                                </td>
+                            </template>
+                            <td class="border p-2 text-right font-bold bg-gray-50" x-text="rowTotals[r_idx]"></td>
+                        </tr>
+                    </template>
+                    <tr class="bg-gray-200 font-bold">
+                        <td class="border p-2">Col Total</td>
+                        <template x-for="c_total in colTotals">
+                            <td class="border p-2 text-right" x-text="c_total"></td>
+                        </template>
+                        <td class="border p-2 text-right text-blue-600" x-text="grandTotal"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="text-xl font-semibold mb-4 text-gray-600">2. Expected Values</h2>
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full border-collapse border border-gray-200 text-sm">
+                <tbody>
+                    <template x-for="(r_data, r_idx) in expected">
+                        <tr>
+                            <td class="border p-2 font-semibold bg-gray-50" x-text="'Row ' + (r_idx + 1)"></td>
+                            <template x-for="cell in r_data">
+                                <td class="border p-2 text-right italic" x-text="cell.toFixed(2)"></td>
+                            </template>
+                            <td class="border bg-gray-100"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t pt-6">
+            <div class="p-4 bg-gray-100 rounded">
+                <span class="block text-xs uppercase text-gray-500">Chi-Square (χ²)</span>
+                <span class="text-2xl font-mono font-bold" x-text="chiSquare.toFixed(4)"></span>
+            </div>
+            <div class="p-4 bg-gray-100 rounded">
+                <span class="block text-xs uppercase text-gray-500">Degrees of Freedom</span>
+                <span class="text-2xl font-mono font-bold" x-text="df"></span>
+            </div>
+            <div class="p-4 bg-gray-100 rounded">
+                <span class="block text-xs uppercase text-gray-500">P-Value</span>
+                <span class="text-2xl font-mono font-bold" :class="pValue < alpha ? 'text-green-600' : 'text-red-600'" x-text="pValue.toFixed(4)"></span>
+            </div>
+            <div class="p-4 bg-gray-800 text-white rounded">
+                <span class="block text-xs uppercase text-gray-400">Critical Value</span>
+                <span class="text-2xl font-mono font-bold" x-text="criticalValue.toFixed(4)"></span>
+            </div>
+        </div>
+
+        <div class="mt-6 p-4 rounded-lg text-center font-bold" 
+             :class="pValue < alpha ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+            Result: <span x-text="pValue < alpha ? 'Reject Null Hypothesis (Significant)' : 'Fail to Reject Null Hypothesis (Not Significant)'"></span>
+        </div>
+    </div>
+
+    <script>
+        function chiSquareApp() {
+            return {
+                rows: 2,
+                cols: 2,
+                alpha: 0.05,
+                observed: [],
+                
+                init() { this.initTable(); },
+
+                initTable() {
+                    this.observed = Array.from({ length: this.rows }, () => 
+                        Array.from({ length: this.cols }, () => 0)
+                    );
+                },
+
+                get rowTotals() {
+                    return this.observed.map(row => row.reduce((a, b) => a + (b || 0), 0));
+                },
+
+                get colTotals() {
+                    return Array.from({ length: this.cols }, (_, c) => 
+                        this.observed.reduce((sum, row) => sum + (row[c] || 0), 0)
+                    );
+                },
+
+                get grandTotal() {
+                    return this.rowTotals.reduce((a, b) => a + b, 0);
+                },
+
+                get expected() {
+                    if (this.grandTotal === 0) return this.observed.map(r => r.map(c => 0));
+                    return this.rowTotals.map(rt => 
+                        this.colTotals.map(ct => (rt * ct) / this.grandTotal)
+                    );
+                },
+
+                get df() {
+                    return (this.rows - 1) * (this.cols - 1);
+                },
+
+                get chiSquare() {
+                    let score = 0;
+                    this.observed.forEach((row, r) => {
+                        row.forEach((obs, c) => {
+                            let exp = this.expected[r][c];
+                            if (exp > 0) score += Math.pow(obs - exp, 2) / exp;
+                        });
+                    });
+                    return score;
+                },
+
+                get pValue() {
+                    if (this.df <= 0 || isNaN(this.chiSquare)) return 1;
+                    return 1 - jStat.chisquare.cdf(this.chiSquare, this.df);
+                },
+
+                get criticalValue() {
+                    if (this.df <= 0) return 0;
+                    return jStat.chisquare.inv(1 - this.alpha, this.df);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
