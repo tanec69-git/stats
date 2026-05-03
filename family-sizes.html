@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Family Size Statistics Lab</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.js"></script>
+    <script>
+      stlite.mount({
+        requirements: ["matplotlib", "numpy", "pandas"],
+        entrypoint: "app.py",
+        files: {
+          "app.py": `
+import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+st.set_page_config(page_title="Frequency Distribution Lab", layout="wide")
+
+st.title("👨‍👩‍👧‍👦 Family Size: Frequency Distribution Lab")
+st.write("Adjust the number of families in each category to see the impact on weighted statistics.")
+
+# --- Sidebar Inputs based on image_a41529.png ---
+st.sidebar.header("Frequency Inputs")
+f0 = st.sidebar.number_input("Families with 0 children", 0, 100, 3)
+f1 = st.sidebar.number_input("Families with 1 child", 0, 100, 5)
+f2 = st.sidebar.number_input("Families with 2 children", 0, 100, 12)
+f3 = st.sidebar.number_input("Families with 3 children", 0, 100, 9)
+f4 = st.sidebar.number_input("Families with 4 children", 0, 100, 4)
+f5 = st.sidebar.number_input("Families with 5 children", 0, 100, 2)
+
+# --- Data Arrays ---
+x = np.array([0, 1, 2, 3, 4, 5])
+f = np.array([f0, f1, f2, f3, f4, f5])
+n = np.sum(f)
+
+if n > 0:
+    # Calculations
+    sum_fx = np.sum(x * f)
+    mean = sum_fx / n
+    
+    expanded = np.repeat(x, f)
+    median = np.median(expanded)
+    mode = x[np.argmax(f)]
+    
+    variance = np.sum(f * (x - mean)**2) / n
+    std_dev = np.sqrt(variance)
+
+    # --- Metrics Dashboard ---
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Families (N)", n)
+    col2.metric("Mean (μ)", f"{mean:.2f}")
+    col3.metric("Median", int(median))
+    col4.metric("Variance (σ²)", f"{variance:.2f}")
+
+    # --- Table Visualization ---
+    st.subheader("Calculation Table (Step-by-Step)")
+    df = pd.DataFrame({
+        "Children (x)": x,
+        "Families (f)": f,
+        "f * x": x * f,
+        "(x - μ)²": (x - mean)**2,
+        "f * (x - μ)²": f * (x - mean)**2
+    })
+    st.table(df.style.format(precision=2))
+
+    # --- Charts ---
+    st.subheader("Distribution Visualization")
+    fig, ax = plt.subplots(figsize=(10, 4))
+    bars = ax.bar(x, f, color='skyblue', edgecolor='black', alpha=0.7)
+    
+    # Highlight lines
+    ax.axvline(mean, color='red', linestyle='--', label=f'Mean: {mean:.2f}')
+    ax.axvline(median, color='green', linestyle='-', label=f'Median: {median}')
+    
+    ax.set_xlabel("Number of Children")
+    ax.set_ylabel("Frequency")
+    ax.set_xticks(x)
+    ax.legend()
+    st.pyplot(fig)
+else:
+    st.error("Please add at least one family to the data set.")
+          `,
+        },
+      }, document.getElementById("root"));
+    </script>
+  </body>
+</html>
