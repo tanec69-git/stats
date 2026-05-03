@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Stock Price Statistical Visualizer</title>
+    <title>Interactive Stock Price Lab</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.css" />
   </head>
   <body>
@@ -22,61 +22,73 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-st.set_page_config(page_title="Stock Price Analysis", layout="wide")
+st.set_page_config(page_title="Interactive Stock Analysis", layout="wide")
 
-# Data from image_a4e79f.png
-data = [11, 12, 13, 16, 16, 17, 18, 21]
+st.title("📈 Interactive Stock Price Lab")
+st.write("Modify the data in the sidebar to see how statistics and visualizations change.")
 
-st.title("📈 Stock Price Statistical Visualizer")
-st.write("Visualizing Central Tendency, Quartiles, and Population Variance.")
+# --- Sidebar Input ---
+st.sidebar.header("Data Entry")
+input_data = st.sidebar.text_input("Enter stock prices (comma separated):", "11, 12, 13, 16, 16, 17, 18, 21")
 
-# --- Calculations ---
-mean_val = np.mean(data)
-median_val = np.median(data)
-q1 = np.percentile(data, 25)
-q3 = np.percentile(data, 75)
-std_dev = np.std(data)  # Population Standard Deviation
+# Clean and convert input
+try:
+    data = [float(x.strip()) for x in input_data.split(",") if x.strip() != ""]
+except ValueError:
+    st.sidebar.error("Please enter valid numbers separated by commas.")
+    data = [11, 12, 13, 16, 16, 17, 18, 21] # Fallback to original
 
-# --- Sidebar Metrics ---
-st.sidebar.header("Summary Statistics")
-st.sidebar.metric("Mean (μ)", f"{mean_val:.2f}")
-st.sidebar.metric("Median", f"{median_val:.1f}")
-st.sidebar.metric("Std Deviation (σ)", f"{std_dev:.3f}")
-st.sidebar.metric("IQR", f"{q3 - q1:.1f}")
+if len(data) > 0:
+    # --- Calculations ---
+    mean_val = np.mean(data)
+    median_val = np.median(data)
+    q1 = np.percentile(data, 25)
+    q3 = np.percentile(data, 75)
+    std_dev = np.std(data)
 
-# --- Layout ---
-col1, col2 = st.columns(2)
+    # --- Metrics ---
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Mean (μ)", f"{mean_val:.2f}")
+    m2.metric("Median", f"{median_val:.1f}")
+    m3.metric("Std Dev (σ)", f"{std_dev:.3f}")
+    m4.metric("N (Count)", len(data))
 
-with col1:
-    st.subheader("Distribution & Central Tendency")
-    fig, ax = plt.subplots()
-    sns.histplot(data, bins=6, kde=True, ax=ax, color='skyblue')
-    ax.axvline(mean_val, color='red', linestyle='--', label=f'Mean: {mean_val}')
-    ax.axvline(median_val, color='green', linestyle='-', label=f'Median: {median_val}')
-    ax.legend()
-    st.pyplot(fig)
+    # --- Plots ---
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Distribution Density")
+        fig1, ax1 = plt.subplots()
+        sns.histplot(data, bins='auto', kde=True, ax=ax1, color='skyblue')
+        ax1.axvline(mean_val, color='red', linestyle='--', label=f'Mean')
+        ax1.axvline(median_val, color='green', linestyle='-', label=f'Median')
+        ax1.legend()
+        st.pyplot(fig1)
 
-with col2:
-    st.subheader("Boxplot (Quartiles)")
-    fig, ax = plt.subplots()
-    sns.boxplot(x=data, color='lightgreen', ax=ax)
-    sns.swarmplot(x=data, color='black', alpha=0.5, ax=ax)
-    st.pyplot(fig)
+    with col2:
+        st.subheader("Boxplot (Quartile Spread)")
+        fig2, ax2 = plt.subplots()
+        sns.boxplot(x=data, color='lightgreen', ax=ax2)
+        sns.swarmplot(x=data, color='black', alpha=0.5, ax=ax2)
+        st.pyplot(fig2)
 
-# --- Variance Visualization ---
-st.divider()
-st.subheader("Deviation from the Mean (Variance Visualization)")
-fig2, ax2 = plt.subplots(figsize=(10, 3))
-deviations = [x - mean_val for x in data]
-colors = ['red' if x < 0 else 'blue' for x in deviations]
-
-ax2.bar(range(len(data)), deviations, color=colors, alpha=0.6)
-ax2.axhline(0, color='black', linewidth=1)
-ax2.set_xticks(range(len(data)))
-ax2.set_xticklabels(data)
-ax2.set_ylabel("Deviation")
-st.pyplot(fig2)
-st.info("The average of the squared versions of these bars is your Variance.")
+    # --- Deviation Visualization ---
+    st.divider()
+    st.subheader("Visualizing Individual Deviations")
+    fig3, ax3 = plt.subplots(figsize=(10, 3))
+    deviations = [x - mean_val for x in data]
+    colors = ['#EF5350' if x < 0 else '#42A5F5' for x in deviations]
+    
+    ax3.bar(range(len(data)), deviations, color=colors, alpha=0.7)
+    ax3.axhline(0, color='black', linewidth=1)
+    ax3.set_xticks(range(len(data)))
+    ax3.set_xticklabels(data)
+    ax3.set_ylabel("Deviation (X - μ)")
+    st.pyplot(fig3)
+    
+    st.info("Change the numbers in the sidebar to see how outliers pull the mean away from the median.")
+else:
+    st.warning("Please enter at least one number.")
           `,
         },
       }, document.getElementById("root"));
