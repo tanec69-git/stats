@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Calculator - Table A</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .calc-container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .table-input input { border: none; background: transparent; width: 100%; text-align: center; }
+        .table-input input:focus { background: #e9ecef; outline: none; }
+        .results-card { border-left: 5px solid #0d6efd; background: #f0f7ff; }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <h2 class="mb-4 text-center">Grouped Data Calculator</h2>
+    <p class="text-muted text-center">Referencing data structure from <strong>image_4d9d16.png</strong></p>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle text-center" id="data-table">
+            <thead class="table-dark">
+                <tr>
+                    <th>Lower Bound</th>
+                    <th>Upper Bound</th>
+                    <th>Frequency (f)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Default data from image_4d9d16.png -->
+                <tr><td><input type="number" value="300"></td><td><input type="number" value="400"></td><td><input type="number" value="5"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+                <tr><td><input type="number" value="400"></td><td><input type="number" value="500"></td><td><input type="number" value="9"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+                <tr><td><input type="number" value="500"></td><td><input type="number" value="600"></td><td><input type="number" value="14"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+                <tr><td><input type="number" value="600"></td><td><input type="number" value="700"></td><td><input type="number" value="12"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+                <tr><td><input type="number" value="700"></td><td><input type="number" value="800"></td><td><input type="number" value="6"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+                <tr><td><input type="number" value="800"></td><td><input type="number" value="900"></td><td><input type="number" value="4"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between mb-4">
+        <button class="btn btn-outline-secondary" onclick="addRow()">+ Add Row</button>
+        <button class="btn btn-primary px-5" onclick="calculate()">Calculate Stats</button>
+    </div>
+
+    <div id="results" class="row g-3 d-none">
+        <div class="col-md-6">
+            <div class="p-3 results-card rounded">
+                <h5>Central Tendency</h5>
+                <p><strong>Mean (μ):</strong> <span id="res-mean">0</span></p>
+                <p><strong>Median Category:</strong> <span id="res-median">0</span></p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-3 results-card rounded">
+                <h5>Dispersion</h5>
+                <p><strong>Population Variance (σ²):</strong> <span id="res-var">0</span></p>
+                <p><strong>Std. Deviation (σ):</strong> <span id="res-sd">0</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addRow() {
+        const tbody = document.getElementById('table-body');
+        const row = document.createElement('tr');
+        row.innerHTML = `<td><input type="number" value="0"></td><td><input type="number" value="0"></td><td><input type="number" value="0"></td><td><button class="btn btn-sm btn-danger" onclick="removeRow(this)">×</button></td>`;
+        tbody.appendChild(row);
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+    }
+
+    function calculate() {
+        const rows = document.querySelectorAll('#table-body tr');
+        let data = [];
+        let totalF = 0;
+        let totalFX = 0;
+
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll('input');
+            const lower = parseFloat(inputs[0].value);
+            const upper = parseFloat(inputs[1].value);
+            const freq = parseFloat(inputs[2].value);
+            const midpoint = (lower + upper) / 2;
+            
+            data.push({ lower, upper, freq, midpoint });
+            totalF += freq;
+            totalFX += (freq * midpoint);
+        });
+
+        if (totalF === 0) return alert("Please enter valid frequencies.");
+
+        // 1. Mean
+        const mean = totalFX / totalF;
+
+        // 2. Median Category
+        let cumulativeF = 0;
+        let medianCat = "";
+        const medianPos = totalF / 2;
+        for (let item of data) {
+            cumulativeF += item.freq;
+            if (cumulativeF >= medianPos) {
+                medianCat = `${item.lower} - ${item.upper}`;
+                break;
+            }
+        }
+
+        // 3. Population Variance
+        let sumSquaredDiff = 0;
+        data.forEach(item => {
+            sumSquaredDiff += item.freq * Math.pow((item.midpoint - mean), 2);
+        });
+        const variance = sumSquaredDiff / totalF;
+
+        // 4. Std Dev
+        const stdDev = Math.sqrt(variance);
+
+        // Display Results
+        document.getElementById('res-mean').innerText = mean.toFixed(2);
+        document.getElementById('res-median').innerText = medianCat;
+        document.getElementById('res-var').innerText = variance.toFixed(2);
+        document.getElementById('res-sd').innerText = stdDev.toFixed(2);
+        document.getElementById('results').classList.remove('d-none');
+    }
+</script>
+
+</body>
+</html>
