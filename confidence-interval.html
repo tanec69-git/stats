@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidence Interval Visualizer</title>
+    <!-- Include Chart.js for visualization and jStat for statistical functions -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .visualization {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        h2 { margin-top: 0; margin-bottom: 1.5rem; font-size: 1.25rem; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .result-item { display: flex; flex-direction: column; }
+        .result-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem; }
+        .result-value { font-size: 1.25rem; font-weight: 600; }
+        
+        /* Specific styling for the massive final answer */
+        .ci-container {
+            grid-column: span 2;
+            background-color: #eff6ff; /* Light blue background to match the chart */
+            border: 1px solid #bfdbfe;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .ci-label {
+            font-size: 0.875rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .ci-value {
+            font-size: 2.25rem; /* Noticeably larger font */
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        @media (max-width: 800px) {
+            .container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Input Panel -->
+    <div class="panel controls">
+        <h2>Parameters</h2>
+        
+        <div class="form-group">
+            <label>Mean (μ or x̄)</label>
+            <input type="number" id="mean" value="100" step="any">
+        </div>
+        
+        <div class="form-group">
+            <label>Std Dev (σ or s)</label>
+            <input type="number" id="std" value="15" step="any" min="0.0001">
+        </div>
+        
+        <div class="form-group">
+            <label>Sample Size (n)</label>
+            <input type="number" id="n" value="25" step="1" min="2">
+        </div>
+        
+        <div class="form-group">
+            <label>Alpha (α)</label>
+            <input type="number" id="alpha" value="0.05" step="0.01" min="0.01" max="0.50">
+        </div>
+    </div>
+
+    <!-- Output & Visualization Panel -->
+    <div class="panel visualization">
+        <h2>Sampling Distribution & Confidence Interval</h2>
+        
+        <div class="chart-container">
+            <canvas id="ciChart"></canvas>
+        </div>
+
+        <div class="results-grid">
+            <div class="result-item">
+                <span class="result-label">Distribution Used</span>
+                <span class="result-value" id="res-dist">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Standard Error (SE)</span>
+                <span class="result-value" id="res-se">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Critical Value</span>
+                <span class="result-value" id="res-crit">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Margin of Error (E)</span>
+                <span class="result-value" id="res-moe">-</span>
+            </div>
+            
+            <!-- Emphasized Final Answer -->
+            <div class="ci-container">
+                <div class="ci-label">Final Confidence Interval</div>
+                <div class="ci-value" id="res-ci">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let chartInstance = null;
+
+    // Grab input elements
+    const inputs = ['mean', 'std', 'n', 'alpha'].map(id => document.getElementById(id));
+    
+    // Add event listeners to recalculate whenever an input changes
+    inputs.forEach(el => el.addEventListener('input', calculateAndPlot));
+
+    function calculateAndPlot() {
+        // 1. Get Values
+        const mean = parseFloat(document.getElementById('mean').value);
+        const std = parseFloat(document.getElementById('std').value);
+        const n = parseInt(document.getElementById('n').value);
+        const alpha = parseFloat(document.getElementById('alpha').value);
+
+        if (isNaN(mean) || isNaN(std) || isNaN(n) || isNaN(alpha) || n < 2 || std <= 0) return;
+
+        // 2. Math Calculations
+        const df = n - 1;
+        const isTDist = n < 30;
+        const se = std / Math.sqrt(n);
+        
+        let critVal = null;
+
+        // Calculate Critical Value (Two-Tailed)
+        if (isTDist) {
+            critVal = Math.abs(jStat.studentt.inv(alpha / 2, df));
+        } else {
+            critVal = Math.abs(jStat.normal.inv(alpha / 2, 0, 1));
+        }
+
+        const marginOfError = critVal * se;
+        const lowerBound = mean - marginOfError;
+        const upperBound = mean + marginOfError;
+
+        // 3. Update DOM Results
+        document.getElementById('res-dist').innerText = isTDist ? `t-Distribution (df = ${df})` : `Z-Distribution`;
+        document.getElementById('res-se').innerText = se.toFixed(3);
+        document.getElementById('res-crit').innerText = `${isTDist ? 't*' : 'z*'} = ${critVal.toFixed(3)}`;
+        document.getElementById('res-moe').innerText = `± ${marginOfError.toFixed(3)}`;
+        
+        // Format Final Answer exactly as requested with specific decimal rounding
+        document.getElementById('res-ci').innerText = `(${lowerBound.toFixed(3)} ; ${upperBound.toFixed(3)})`;
+
+        // 4. Generate Chart Data
+        const curveData = [];
+        const shadeData = [];
+        
+        // Map X-axis across exactly ±4 Standard Errors
+        const minX = mean - (4 * se);
+        const maxX = mean + (4 * se);
+        const step = (maxX - minX) / 200; // High resolution for a smooth curve
+
+        for (let x = minX; x <= maxX + step; x += step) {
+            // Standardize X to compute the PDF height
+            const standardizedX = (x - mean) / se;
+            
+            let y = 0;
+            if (isTDist) {
+                // Scale the t-distribution PDF back to the original units
+                y = (1 / se) * jStat.studentt.pdf(standardizedX, df);
+            } else {
+                y = jStat.normal.pdf(x, mean, se);
+            }
+            
+            curveData.push({x: x, y: y});
+
+            // If the point is within the Confidence Interval limits, add it to the shade dataset
+            let inCI = (x >= lowerBound && x <= upperBound);
+            shadeData.push({x: x, y: inCI ? y : 0});
+        }
+
+        updateChart(curveData, shadeData, mean, lowerBound, upperBound);
+    }
+
+    function updateChart(curveData, shadeData, mean, lower, upper) {
+        const ctx = document.getElementById('ciChart').getContext('2d');
+        
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Mean',
+                        data: [{x: mean, y: curveData[Math.floor(curveData.length / 2)].y}], 
+                        type: 'scatter',
+                        pointBackgroundColor: '#0f172a',
+                        pointBorderColor: '#ffffff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        showLine: false,
+                        order: 0
+                    },
+                    {
+                        label: 'Sampling Distribution',
+                        data: curveData,
+                        borderColor: '#0f172a', // Dark Slate
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0, 
+                        order: 2
+                    },
+                    {
+                        label: 'Confidence Interval',
+                        data: shadeData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.3)', // Light Blue Shading
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        pointRadius: 0,
+                        fill: 'origin',
+                        tension: 0,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.label === 'Mean') {
+                                    return `Mean = ${mean.toFixed(3)}`;
+                                }
+                                return null;
+                            },
+                            title: function(context) {
+                                return `Value: ${Number(context[0].parsed.x).toFixed(3)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        title: { display: true, text: 'Actual Values (Means)', font: { weight: 'bold' } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        display: false,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize on first load
+    calculateAndPlot();
+</script>
+
+</body>
+</html>
