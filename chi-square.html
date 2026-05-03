@@ -81,6 +81,31 @@
             </table>
         </div>
 
+        <!-- NEW SECTION: Chi-Square Contributions -->
+        <h2 class="text-xl font-semibold mb-4 text-gray-600">3. Chi-Square Contributions [ (O-E)² / E ]</h2>
+        <div class="overflow-x-auto mb-8">
+            <table class="w-full border-collapse border border-gray-200 text-sm">
+                <tbody>
+                    <template x-for="(r_data, r_idx) in contributions">
+                        <tr>
+                            <td class="border p-2 font-semibold bg-gray-50" x-text="'Row ' + (r_idx + 1)"></td>
+                            <template x-for="cell in r_data">
+                                <td class="border p-2 text-right font-mono text-blue-700" x-text="cell.toFixed(3)"></td>
+                            </template>
+                            <td class="border bg-gray-100"></td>
+                        </tr>
+                    </template>
+                </tbody>
+                <tfoot>
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="border p-2">Total Σ</td>
+                        <td :colspan="cols" class="border p-2 text-right text-lg" x-text="chiSquare.toFixed(3)"></td>
+                        <td class="border bg-gray-100"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t pt-6">
             <div class="p-4 bg-gray-100 rounded">
                 <span class="block text-xs uppercase text-gray-500">Chi-Square (χ²)</span>
@@ -143,19 +168,23 @@
                     );
                 },
 
+                get contributions() {
+                    return this.observed.map((row, r) => {
+                        return row.map((obs, c) => {
+                            let exp = this.expected[r][c];
+                            return exp > 0 ? Math.pow(obs - exp, 2) / exp : 0;
+                        });
+                    });
+                },
+
                 get df() {
                     return (this.rows - 1) * (this.cols - 1);
                 },
 
                 get chiSquare() {
-                    let score = 0;
-                    this.observed.forEach((row, r) => {
-                        row.forEach((obs, c) => {
-                            let exp = this.expected[r][c];
-                            if (exp > 0) score += Math.pow(obs - exp, 2) / exp;
-                        });
-                    });
-                    return score;
+                    return this.contributions.reduce((sum, row) => 
+                        sum + row.reduce((s, val) => s + val, 0), 0
+                    );
                 },
 
                 get pValue() {
