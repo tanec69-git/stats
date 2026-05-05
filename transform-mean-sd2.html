@@ -3,55 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dot Plot Transformer</title>
+<title>Mean & SD Transformation Explorer</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f4f6f9;
-        text-align: center;
-        padding: 12px;
-    }
-    .card {
-        background: white;
-        padding: 16px;
-        border-radius: 12px;
-        max-width: 420px;
-        margin: auto;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .slider-container { margin: 12px 0; }
-    input[type=range] { width: 100%; }
-    .data { font-weight: bold; margin: 8px 0; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    text-align: center;
+    padding: 12px;
+}
+.card {
+    background: white;
+    padding: 16px;
+    border-radius: 14px;
+    max-width: 420px;
+    margin: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h2 {
+    margin-bottom: 8px;
+}
+.slider-container {
+    margin: 14px 0;
+}
+input[type=range] {
+    width: 100%;
+}
+.data {
+    font-weight: bold;
+    margin: 8px 0;
+    word-wrap: break-word;
+}
+.stats {
+    margin-top: 6px;
+}
 </style>
 </head>
+
 <body>
 
 <div class="card">
-    <h2>📊 Dot Plot Transformer</h2>
+    <h2>📊 Data Transformation</h2>
 
-    <p><strong>Original Data:</strong></p>
     <div class="data" id="original"></div>
 
-    <p>Original Mean: <span id="origMean"></span></p>
-    <p>Original SD: <span id="origSD"></span></p>
+    <div class="stats">
+        Original Mean: <span id="origMean"></span> |
+        SD: <span id="origSD"></span>
+    </div>
 
     <!-- ADDITION FIRST -->
     <div class="slider-container">
-        <label>Add (c): <span id="cVal">0</span></label>
+        <label>Add (c): <strong id="cVal">0</strong></label>
         <input type="range" id="add" min="-20" max="20" step="1" value="0">
     </div>
 
     <div class="slider-container">
-        <label>Multiply (k): <span id="kVal">1</span></label>
+        <label>Multiply (k): <strong id="kVal">1</strong></label>
         <input type="range" id="mult" min="-3" max="3" step="0.1" value="1">
     </div>
 
-    <p><strong>New Data:</strong></p>
     <div class="data" id="newData"></div>
 
-    <p>New Mean: <span id="mean"></span></p>
-    <p>New SD: <span id="sd"></span></p>
+    <div class="stats">
+        New Mean: <span id="mean"></span> |
+        SD: <span id="sd"></span>
+    </div>
 
     <canvas id="chart"></canvas>
 </div>
@@ -68,99 +86,114 @@ function sd(arr) {
     return Math.sqrt(arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / arr.length);
 }
 
-// Precompute original stats
 const origMean = mean(originalData);
 const origSD = sd(originalData);
 
-// Plugin for vertical lines
+// Plugin for mean & SD lines
 const statLines = {
     id: 'statLines',
     afterDraw(chart, args, options) {
         const {ctx, chartArea: {top, bottom}, scales: {x}} = chart;
 
-        const drawLine = (value, label, style='solid') => {
+        const drawLine = (value, label, position, dashed, color) => {
             const xPos = x.getPixelForValue(value);
+
             ctx.save();
-            if (style === 'dashed') ctx.setLineDash([5,5]);
+            if (dashed) ctx.setLineDash([5,5]);
+
             ctx.beginPath();
             ctx.moveTo(xPos, top);
             ctx.lineTo(xPos, bottom);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
             ctx.stroke();
-            ctx.fillText(label, xPos + 4, top + 10);
+
+            ctx.fillStyle = color;
+
+            if (position === 'top') {
+                ctx.fillText(label, xPos + 4, top + 12);
+            } else {
+                ctx.fillText(label, xPos + 4, bottom - 6);
+            }
+
             ctx.restore();
         };
 
-        // Original (solid)
-        drawLine(origMean, "Orig Mean");
-        drawLine(origMean + origSD, "Orig +SD");
-        drawLine(origMean - origSD, "Orig -SD");
+        // Original (grey, top)
+        drawLine(origMean, "Orig Mean", 'top', false, '#888');
+        drawLine(origMean + origSD, "Orig +SD", 'top', false, '#888');
+        drawLine(origMean - origSD, "Orig -SD", 'top', false, '#888');
 
-        // New (dashed)
-        drawLine(options.mean, "Mean", 'dashed');
-        drawLine(options.mean + options.sd, "+1 SD", 'dashed');
-        drawLine(options.mean - options.sd, "-1 SD", 'dashed');
+        // New (blue, bottom)
+        drawLine(options.mean, "Mean", 'bottom', true, '#007bff');
+        drawLine(options.mean + options.sd, "+1 SD", 'bottom', true, '#007bff');
+        drawLine(options.mean - options.sd, "-1 SD", 'bottom', true, '#007bff');
     }
 };
 
-const ctx = document.getElementById('chart');
-
-const chart = new Chart(ctx, {
+const chart = new Chart(document.getElementById('chart'), {
     type: 'scatter',
     data: {
         datasets: [{
-            label: 'Data Points',
             data: originalData.map(x => ({x: x, y: 0})),
-            pointRadius: 6
+            pointRadius: 6,
+            backgroundColor: '#007bff'
         }]
     },
     options: {
         responsive: true,
+        animation: { duration: 300 },
         scales: {
             x: { type: 'linear', position: 'bottom' },
             y: { display: false, min: -1, max: 1 }
         },
         plugins: {
-            statLines: {
-                mean: 0,
-                sd: 0
-            }
+            legend: { display: false },
+            statLines: { mean: 0, sd: 0 }
         }
     },
     plugins: [statLines]
 });
 
 function update() {
-    const c = parseFloat(document.getElementById("add").value);
-    const k = parseFloat(document.getElementById("mult").value);
+    const c = parseFloat(add.value);
+    const k = parseFloat(mult.value);
 
-    document.getElementById("cVal").innerText = c;
-    document.getElementById("kVal").innerText = k;
+    cVal.innerText = c;
+    kVal.innerText = k;
 
     const newData = originalData.map(x => x * k + c);
     const m = mean(newData);
     const s = sd(newData);
 
-    document.getElementById("newData").innerText = newData.map(x => x.toFixed(1)).join(", ");
-    document.getElementById("mean").innerText = m.toFixed(2);
-    document.getElementById("sd").innerText = s.toFixed(2);
+    newDataDiv.innerText = newData.map(x => x.toFixed(1)).join(", ");
+    meanSpan.innerText = m.toFixed(2);
+    sdSpan.innerText = s.toFixed(2);
 
     chart.data.datasets[0].data = newData.map(x => ({x: x, y: 0}));
-
     chart.options.plugins.statLines.mean = m;
     chart.options.plugins.statLines.sd = s;
 
     chart.update();
 }
 
-// Init display
-document.getElementById("original").innerText = originalData.join(", ");
-document.getElementById("origMean").innerText = origMean.toFixed(2);
-document.getElementById("origSD").innerText = origSD.toFixed(2);
+// Init
+original.innerText = originalData.join(", ");
+origMean.innerText = origMean.toFixed(2);
+origSD.innerText = origSD.toFixed(2);
 
-document.getElementById("add").addEventListener("input", update);
-document.getElementById("mult").addEventListener("input", update);
+const add = document.getElementById("add");
+const mult = document.getElementById("mult");
+
+const cVal = document.getElementById("cVal");
+const kVal = document.getElementById("kVal");
+
+const newDataDiv = document.getElementById("newData");
+const meanSpan = document.getElementById("mean");
+const sdSpan = document.getElementById("sd");
+
+add.addEventListener("input", update);
+mult.addEventListener("input", update);
 
 update();
 </script>
