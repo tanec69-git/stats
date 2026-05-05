@@ -81,7 +81,8 @@ canvas {
 <table>
 <tr>
 <th>Children</th>
-<th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+<th>0</th><th>1</th><th>2</th><th>3</th>
+<th>4</th><th>5</th>
 </tr>
 <tr>
 <th>Frequency</th>
@@ -103,11 +104,11 @@ canvas {
 <h2>📘 Formulas</h2>
 
 <div class="formula">
-Mean = Σxf / Σf
+Mean = Σfx / Σf
 </div>
 
 <div class="formula">
-Variance = Σx²f / Σf − (Mean)²
+Variance = Σfx² / Σf − (Mean)²
 </div>
 
 <div class="formula">
@@ -115,11 +116,11 @@ Standard Deviation = √Variance
 </div>
 
 <div class="formula">
-Median = Middle value from cumulative frequency
+Median = Middle value using cumulative frequency
 </div>
 
 <div class="formula">
-Mode = Highest frequency
+Mode = Value(s) with highest frequency
 </div>
 
 </div>
@@ -155,13 +156,15 @@ function update() {
 
     let N = f.reduce((a,b)=>a+b,0);
 
+    if (N === 0) return;
+
     // Mean
-    let sumxf = xValues.reduce((sum,x,i)=>sum + x*f[i],0);
-    let mean = sumxf / N;
+    let sumfx = xValues.reduce((sum,x,i)=>sum + f[i]*x,0);
+    let mean = sumfx / N;
 
     // Variance
-    let sumx2f = xValues.reduce((sum,x,i)=>sum + x*x*f[i],0);
-    let variance = sumx2f / N - mean*mean;
+    let sumfx2 = xValues.reduce((sum,x,i)=>sum + f[i]*x*x,0);
+    let variance = sumfx2 / N - mean*mean;
 
     let sd = Math.sqrt(variance);
 
@@ -178,16 +181,31 @@ function update() {
         }
     }
 
-    // Mode
+    // Mode logic
     let maxF = Math.max(...f);
-    let mode = xValues[f.indexOf(maxF)];
+    let modes = [];
+
+    f.forEach((freq, i) => {
+        if (freq === maxF) {
+            modes.push(xValues[i]);
+        }
+    });
+
+    let modeDisplay;
+    if (modes.length === 1) {
+        modeDisplay = modes[0];
+    } else if (modes.length === 2) {
+        modeDisplay = modes.join(", ");
+    } else {
+        modeDisplay = "NA";
+    }
 
     // Display
     document.getElementById("mean").innerText = mean.toFixed(2);
     document.getElementById("variance").innerText = variance.toFixed(2);
     document.getElementById("sd").innerText = sd.toFixed(2);
     document.getElementById("median").innerText = median;
-    document.getElementById("mode").innerText = mode;
+    document.getElementById("mode").innerText = modeDisplay;
 
     // Update chart
     chart.data.datasets[0].data = f;
