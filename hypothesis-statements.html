@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hypothesis Generator (Teaching Version)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    h1 { text-align: center; }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .hypothesis {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .steps {
+      margin-top: 15px;
+      background: #eef3ff;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Hypothesis Generator (Teaching Tool)</h1>
+
+<p>Enter a statement (e.g., "Did the new method increase the mean above 50?"):</p>
+
+<textarea id="inputText"></textarea>
+<br>
+<button onclick="generateHypothesis()">Generate</button>
+
+<div class="result" id="output" style="display:none;">
+  <div class="hypothesis"><strong>Null Hypothesis (H₀):</strong> <span id="nullHyp"></span></div>
+  <div class="hypothesis"><strong>Alternative Hypothesis (H₁):</strong> <span id="altHyp"></span></div>
+  
+  <div class="steps">
+    <strong>Step-by-Step Explanation:</strong>
+    <ol id="stepsList"></ol>
+  </div>
+</div>
+
+<script>
+function generateHypothesis() {
+  let text = document.getElementById("inputText").value.toLowerCase();
+
+  let valueMatch = text.match(/\d+(\.\d+)?/);
+  let value = valueMatch ? valueMatch[0] : "?";
+
+  let H0 = "", H1 = "", type = "", keyword = "";
+  let steps = [];
+
+  steps.push("Step 1: Identify the key phrase in the statement.");
+
+  // --- DIFFERENCE ---
+  if (
+    text.includes("different") ||
+    text.includes("difference") ||
+    text.includes("not equal") ||
+    text.includes("changed")
+  ) {
+    keyword = "different / not equal";
+    type = "Two-tailed test";
+    H0 = "μ = " + value;
+    H1 = "μ ≠ " + value;
+  }
+
+  // --- INCREASE ---
+  else if (
+    text.includes("increase") ||
+    text.includes("increased") ||
+    text.includes("higher") ||
+    text.includes("greater") ||
+    text.includes("above")
+  ) {
+    keyword = "increase / greater";
+    type = "Right-tailed test";
+    H0 = "μ ≤ " + value;
+    H1 = "μ > " + value;
+  }
+
+  // --- DECREASE ---
+  else if (
+    text.includes("decrease") ||
+    text.includes("decreased") ||
+    text.includes("reduced") ||
+    text.includes("lower") ||
+    text.includes("below")
+  ) {
+    keyword = "decrease / less";
+    type = "Left-tailed test";
+    H0 = "μ ≥ " + value;
+    H1 = "μ < " + value;
+  }
+
+  // --- AT LEAST ---
+  else if (text.includes("at least") || text.includes("no less than")) {
+    keyword = "at least";
+    type = "Left-tailed test";
+    H0 = "μ ≥ " + value;
+    H1 = "μ < " + value;
+  }
+
+  // --- AT MOST ---
+  else if (text.includes("at most") || text.includes("no more than")) {
+    keyword = "at most";
+    type = "Right-tailed test";
+    H0 = "μ ≤ " + value;
+    H1 = "μ > " + value;
+  }
+
+  // --- EQUAL ---
+  else if (text.includes("equal") || text.includes("=")) {
+    keyword = "equal";
+    type = "Two-tailed test";
+    H0 = "μ = " + value;
+    H1 = "μ ≠ " + value;
+  }
+
+  else {
+    H0 = "Unable to interpret";
+    H1 = "-";
+    steps.push("Could not detect a valid keyword.");
+  }
+
+  // --- BUILD EXPLANATION ---
+  if (keyword !== "") {
+    steps.push("Step 2: Detected keyword → \"" + keyword + "\".");
+    steps.push("Step 3: This implies a " + type + ".");
+    steps.push("Step 4: The alternative hypothesis (H₁) follows the claim direction.");
+    steps.push("Step 5: The null hypothesis (H₀) must include equality (=) and be the opposite.");
+  }
+
+  // --- DISPLAY ---
+  document.getElementById("nullHyp").innerText = H0;
+  document.getElementById("altHyp").innerText = H1;
+
+  let stepsList = document.getElementById("stepsList");
+  stepsList.innerHTML = "";
+  steps.forEach(step => {
+    let li = document.createElement("li");
+    li.textContent = step;
+    stepsList.appendChild(li);
+  });
+
+  document.getElementById("output").style.display = "block";
+}
+</script>
+
+</body>
+</html>
