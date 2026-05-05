@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dot Plot Transformer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        text-align: center;
+        padding: 12px;
+    }
+    .card {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        max-width: 420px;
+        margin: auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .slider-container { margin: 12px 0; }
+    input[type=range] { width: 100%; }
+    .data { font-weight: bold; margin: 8px 0; }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📊 Dot Plot Transformer</h2>
+
+    <p><strong>Original:</strong></p>
+    <div class="data" id="original"></div>
+
+    <div class="slider-container">
+        <label>Multiply (k): <span id="kVal">1</span></label>
+        <input type="range" id="mult" min="-3" max="3" step="0.1" value="1">
+    </div>
+
+    <div class="slider-container">
+        <label>Add (c): <span id="cVal">0</span></label>
+        <input type="range" id="add" min="-20" max="20" step="1" value="0">
+    </div>
+
+    <p><strong>New Data:</strong></p>
+    <div class="data" id="newData"></div>
+
+    <p>Mean: <span id="mean"></span></p>
+    <p>SD: <span id="sd"></span></p>
+
+    <canvas id="chart"></canvas>
+</div>
+
+<script>
+const originalData = [5, 10, 15, 20, 25];
+
+function mean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function sd(arr) {
+    const m = mean(arr);
+    return Math.sqrt(arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / arr.length);
+}
+
+// Plugin for vertical lines (mean & SD)
+const statLines = {
+    id: 'statLines',
+    afterDraw(chart, args, options) {
+        const {ctx, chartArea: {top, bottom}, scales: {x}} = chart;
+
+        const drawLine = (value, label) => {
+            const xPos = x.getPixelForValue(value);
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([5,5]);
+            ctx.moveTo(xPos, top);
+            ctx.lineTo(xPos, bottom);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillText(label, xPos + 4, top + 10);
+            ctx.restore();
+        };
+
+        drawLine(options.mean, "Mean");
+        drawLine(options.mean + options.sd, "+1 SD");
+        drawLine(options.mean - options.sd, "-1 SD");
+    }
+};
+
+const ctx = document.getElementById('chart');
+
+const chart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+        datasets: [{
+            label: 'Data Points',
+            data: originalData.map(x => ({x: x, y: 0})),
+            pointRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                type: 'linear',
+                position: 'bottom'
+            },
+            y: {
+                display: false,
+                min: -1,
+                max: 1
+            }
+        },
+        plugins: {
+            statLines: {
+                mean: 0,
+                sd: 0
+            }
+        }
+    },
+    plugins: [statLines]
+});
+
+function update() {
+    const k = parseFloat(document.getElementById("mult").value);
+    const c = parseFloat(document.getElementById("add").value);
+
+    document.getElementById("kVal").innerText = k;
+    document.getElementById("cVal").innerText = c;
+
+    const newData = originalData.map(x => x * k + c);
+    const m = mean(newData);
+    const s = sd(newData);
+
+    document.getElementById("newData").innerText = newData.map(x => x.toFixed(1)).join(", ");
+    document.getElementById("mean").innerText = m.toFixed(2);
+    document.getElementById("sd").innerText = s.toFixed(2);
+
+    chart.data.datasets[0].data = newData.map(x => ({x: x, y: 0}));
+
+    chart.options.plugins.statLines.mean = m;
+    chart.options.plugins.statLines.sd = s;
+
+    chart.update();
+}
+
+// Init
+document.getElementById("original").innerText = originalData.join(", ");
+document.getElementById("mult").addEventListener("input", update);
+document.getElementById("add").addEventListener("input", update);
+
+update();
+</script>
+
+</body>
+</html>
