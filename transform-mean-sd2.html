@@ -30,24 +30,28 @@
 <div class="card">
     <h2>📊 Dot Plot Transformer</h2>
 
-    <p><strong>Original:</strong></p>
+    <p><strong>Original Data:</strong></p>
     <div class="data" id="original"></div>
+
+    <p>Original Mean: <span id="origMean"></span></p>
+    <p>Original SD: <span id="origSD"></span></p>
+
+    <!-- ADDITION FIRST -->
+    <div class="slider-container">
+        <label>Add (c): <span id="cVal">0</span></label>
+        <input type="range" id="add" min="-20" max="20" step="1" value="0">
+    </div>
 
     <div class="slider-container">
         <label>Multiply (k): <span id="kVal">1</span></label>
         <input type="range" id="mult" min="-3" max="3" step="0.1" value="1">
     </div>
 
-    <div class="slider-container">
-        <label>Add (c): <span id="cVal">0</span></label>
-        <input type="range" id="add" min="-20" max="20" step="1" value="0">
-    </div>
-
     <p><strong>New Data:</strong></p>
     <div class="data" id="newData"></div>
 
-    <p>Mean: <span id="mean"></span></p>
-    <p>SD: <span id="sd"></span></p>
+    <p>New Mean: <span id="mean"></span></p>
+    <p>New SD: <span id="sd"></span></p>
 
     <canvas id="chart"></canvas>
 </div>
@@ -64,17 +68,21 @@ function sd(arr) {
     return Math.sqrt(arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / arr.length);
 }
 
-// Plugin for vertical lines (mean & SD)
+// Precompute original stats
+const origMean = mean(originalData);
+const origSD = sd(originalData);
+
+// Plugin for vertical lines
 const statLines = {
     id: 'statLines',
     afterDraw(chart, args, options) {
         const {ctx, chartArea: {top, bottom}, scales: {x}} = chart;
 
-        const drawLine = (value, label) => {
+        const drawLine = (value, label, style='solid') => {
             const xPos = x.getPixelForValue(value);
             ctx.save();
+            if (style === 'dashed') ctx.setLineDash([5,5]);
             ctx.beginPath();
-            ctx.setLineDash([5,5]);
             ctx.moveTo(xPos, top);
             ctx.lineTo(xPos, bottom);
             ctx.strokeStyle = 'black';
@@ -84,9 +92,15 @@ const statLines = {
             ctx.restore();
         };
 
-        drawLine(options.mean, "Mean");
-        drawLine(options.mean + options.sd, "+1 SD");
-        drawLine(options.mean - options.sd, "-1 SD");
+        // Original (solid)
+        drawLine(origMean, "Orig Mean");
+        drawLine(origMean + origSD, "Orig +SD");
+        drawLine(origMean - origSD, "Orig -SD");
+
+        // New (dashed)
+        drawLine(options.mean, "Mean", 'dashed');
+        drawLine(options.mean + options.sd, "+1 SD", 'dashed');
+        drawLine(options.mean - options.sd, "-1 SD", 'dashed');
     }
 };
 
@@ -104,15 +118,8 @@ const chart = new Chart(ctx, {
     options: {
         responsive: true,
         scales: {
-            x: {
-                type: 'linear',
-                position: 'bottom'
-            },
-            y: {
-                display: false,
-                min: -1,
-                max: 1
-            }
+            x: { type: 'linear', position: 'bottom' },
+            y: { display: false, min: -1, max: 1 }
         },
         plugins: {
             statLines: {
@@ -125,11 +132,11 @@ const chart = new Chart(ctx, {
 });
 
 function update() {
-    const k = parseFloat(document.getElementById("mult").value);
     const c = parseFloat(document.getElementById("add").value);
+    const k = parseFloat(document.getElementById("mult").value);
 
-    document.getElementById("kVal").innerText = k;
     document.getElementById("cVal").innerText = c;
+    document.getElementById("kVal").innerText = k;
 
     const newData = originalData.map(x => x * k + c);
     const m = mean(newData);
@@ -147,10 +154,13 @@ function update() {
     chart.update();
 }
 
-// Init
+// Init display
 document.getElementById("original").innerText = originalData.join(", ");
-document.getElementById("mult").addEventListener("input", update);
+document.getElementById("origMean").innerText = origMean.toFixed(2);
+document.getElementById("origSD").innerText = origSD.toFixed(2);
+
 document.getElementById("add").addEventListener("input", update);
+document.getElementById("mult").addEventListener("input", update);
 
 update();
 </script>
