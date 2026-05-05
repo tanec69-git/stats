@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mean & SD Transformation (Classroom)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f6f9;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    height: 100vh;
+}
+
+.panel {
+    padding: 24px;
+    background: white;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+
+.chart-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+h1 { font-size: 28px; }
+.data { font-size: 20px; font-weight: bold; margin: 10px 0; }
+.stats { font-size: 18px; margin: 6px 0; }
+
+.slider-container { margin: 20px 0; }
+input[type=range] { width: 100%; }
+
+.value { font-size: 22px; font-weight: bold; }
+
+canvas {
+    width: 100% !important;
+    height: 80vh !important;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="panel">
+    <h1>📊 Data Transformation</h1>
+
+    <div class="data" id="original"></div>
+
+    <div class="stats">
+        Original Mean: <span id="origMean"></span><br>
+        Original SD: <span id="origSD"></span>
+    </div>
+
+    <div class="slider-container">
+        <label>Add (c): <span class="value" id="cVal">0</span></label>
+        <input type="range" id="add" min="-20" max="20" step="1" value="0">
+    </div>
+
+    <div class="slider-container">
+        <label>Multiply (k): <span class="value" id="kVal">1</span></label>
+        <input type="range" id="mult" min="-3" max="3" step="0.1" value="1">
+    </div>
+
+    <div class="data" id="newData"></div>
+
+    <div class="stats">
+        New Mean: <span id="mean"></span><br>
+        New SD: <span id="sd"></span>
+    </div>
+</div>
+
+<div class="chart-area">
+    <canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+const originalData = [5, 10, 15, 20, 25];
+
+function mean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function sd(arr) {
+    const m = mean(arr);
+    return Math.sqrt(arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / arr.length);
+}
+
+const originalMeanValue = mean(originalData);
+const originalSDValue = sd(originalData);
+
+// Line plugin
+const statLines = {
+    id: 'statLines',
+    afterDraw(chart, args, options) {
+        const {ctx, chartArea: {top, bottom}, scales: {x}} = chart;
+
+        const drawLine = (value, label, position, dashed, color) => {
+            const xPos = x.getPixelForValue(value);
+
+            ctx.save();
+            if (dashed) ctx.setLineDash([6,6]);
+
+            ctx.beginPath();
+            ctx.moveTo(xPos, top);
+            ctx.lineTo(xPos, bottom);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = "16px Arial";
+
+            if (position === 'top') {
+                ctx.fillText(label, xPos + 6, top + 20);
+            } else {
+                ctx.fillText(label, xPos + 6, bottom - 10);
+            }
+
+            ctx.restore();
+        };
+
+        // Original (grey)
+        drawLine(originalMeanValue, "Orig Mean", 'top', false, '#888');
+        drawLine(originalMeanValue + originalSDValue, "Orig +SD", 'top', false, '#888');
+        drawLine(originalMeanValue - originalSDValue, "Orig -SD", 'top', false, '#888');
+
+        // New (blue)
+        drawLine(options.mean, "Mean", 'bottom', true, '#007bff');
+        drawLine(options.mean + options.sd, "+1 SD", 'bottom', true, '#007bff');
+        drawLine(options.mean - options.sd, "-1 SD", 'bottom', true, '#007bff');
+    }
+};
+
+const chart = new Chart(document.getElementById('chart'), {
+    type: 'scatter',
+    data: {
+        datasets: [
+            // 🔴 ORIGINAL (raised row)
+            {
+                label: "Original",
+                data: originalData.map(x => ({x: x, y: 0.5})),
+                pointRadius: 9,
+                backgroundColor: 'rgba(255,0,0,0.6)'
+            },
+            // 🔵 TRANSFORMED (baseline)
+            {
+                label: "Transformed",
+                data: originalData.map(x => ({x: x, y: 0})),
+                pointRadius: 7,
+                backgroundColor: '#007bff'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        animation: { duration: 400 },
+        scales: {
+            x: { type: 'linear', position: 'bottom' },
+            y: { display: false, min: -1, max: 1.2 }
+        },
+        plugins: {
+            legend: { display: true },
+            statLines: { mean: 0, sd: 0 }
+        }
+    },
+    plugins: [statLines]
+});
+
+// Elements
+const add = document.getElementById("add");
+const mult = document.getElementById("mult");
+
+const elCVal = document.getElementById("cVal");
+const elKVal = document.getElementById("kVal");
+
+const elNewData = document.getElementById("newData");
+const elMean = document.getElementById("mean");
+const elSD = document.getElementById("sd");
+
+// Init
+document.getElementById("original").innerText = originalData.join(", ");
+document.getElementById("origMean").innerText = originalMeanValue.toFixed(2);
+document.getElementById("origSD").innerText = originalSDValue.toFixed(2);
+
+function update() {
+    const c = parseFloat(add.value);
+    const k = parseFloat(mult.value);
+
+    elCVal.innerText = c;
+    elKVal.innerText = k;
+
+    const newData = originalData.map(x => x * k + c);
+    const m = mean(newData);
+    const s = sd(newData);
+
+    elNewData.innerText = newData.map(x => x.toFixed(1)).join(", ");
+    elMean.innerText = m.toFixed(2);
+    elSD.innerText = s.toFixed(2);
+
+    chart.data.datasets[1].data = newData.map(x => ({x: x, y: 0}));
+
+    chart.options.plugins.statLines.mean = m;
+    chart.options.plugins.statLines.sd = s;
+
+    chart.update();
+}
+
+add.addEventListener("input", update);
+mult.addEventListener("input", update);
+
+update();
+</script>
+
+</body>
+</html>
