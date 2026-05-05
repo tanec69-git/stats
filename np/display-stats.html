@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics Visualizer</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f4f6f9;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    height: 100vh;
+}
+
+.panel {
+    padding: 20px;
+    background: white;
+    overflow-y: auto;
+}
+
+h2 { margin-top: 0; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 15px;
+}
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+input {
+    width: 60px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.stats {
+    font-size: 18px;
+    margin: 8px 0;
+}
+
+.formula {
+    background: #f1f3f5;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.chart-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    width: 90% !important;
+    height: 80vh !important;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="panel">
+
+<h2>📊 Frequency Table</h2>
+
+<table>
+<tr>
+<th>Children</th>
+<th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+</tr>
+<tr>
+<th>Frequency</th>
+<td><input value="3"></td>
+<td><input value="5"></td>
+<td><input value="12"></td>
+<td><input value="9"></td>
+<td><input value="4"></td>
+<td><input value="2"></td>
+</tr>
+</table>
+
+<div class="stats">Mean: <span id="mean"></span></div>
+<div class="stats">Median: <span id="median"></span></div>
+<div class="stats">Mode: <span id="mode"></span></div>
+<div class="stats">Variance: <span id="variance"></span></div>
+<div class="stats"><strong>Std Dev: <span id="sd"></span></strong></div>
+
+<h2>📘 Formulas</h2>
+
+<div class="formula">
+Mean = Σxf / Σf
+</div>
+
+<div class="formula">
+Variance = Σx²f / Σf − (Mean)²
+</div>
+
+<div class="formula">
+Standard Deviation = √Variance
+</div>
+
+<div class="formula">
+Median = Middle value from cumulative frequency
+</div>
+
+<div class="formula">
+Mode = Highest frequency
+</div>
+
+</div>
+
+<div class="chart-area">
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<script>
+const xValues = [0,1,2,3,4,5];
+const inputs = document.querySelectorAll("input");
+
+// Chart
+const chart = new Chart(document.getElementById("chart"), {
+    type: "bar",
+    data: {
+        labels: xValues,
+        datasets: [{
+            label: "Frequency",
+            data: [3,5,12,9,4,2]
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+function update() {
+
+    let f = Array.from(inputs).map(i => parseFloat(i.value) || 0);
+
+    let N = f.reduce((a,b)=>a+b,0);
+
+    // Mean
+    let sumxf = xValues.reduce((sum,x,i)=>sum + x*f[i],0);
+    let mean = sumxf / N;
+
+    // Variance
+    let sumx2f = xValues.reduce((sum,x,i)=>sum + x*x*f[i],0);
+    let variance = sumx2f / N - mean*mean;
+
+    let sd = Math.sqrt(variance);
+
+    // Median
+    let cum = 0;
+    let median;
+    let mid = (N+1)/2;
+
+    for (let i=0;i<f.length;i++){
+        cum += f[i];
+        if (cum >= mid){
+            median = xValues[i];
+            break;
+        }
+    }
+
+    // Mode
+    let maxF = Math.max(...f);
+    let mode = xValues[f.indexOf(maxF)];
+
+    // Display
+    document.getElementById("mean").innerText = mean.toFixed(2);
+    document.getElementById("variance").innerText = variance.toFixed(2);
+    document.getElementById("sd").innerText = sd.toFixed(2);
+    document.getElementById("median").innerText = median;
+    document.getElementById("mode").innerText = mode;
+
+    // Update chart
+    chart.data.datasets[0].data = f;
+    chart.update();
+}
+
+// Event listeners
+inputs.forEach(input => input.addEventListener("input", update));
+
+update();
+</script>
+
+</body>
+</html>
