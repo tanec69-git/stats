@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chi-Square Distribution Visualizer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { 
+      font-family: Arial; 
+      margin: 0; 
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .controls {
+      text-align: center;
+      padding: 10px;
+      background: #f5f5f5;
+    }
+
+    input, select { padding: 5px; margin: 5px; width: 100px; }
+
+    .chart-container {
+      flex: 1;
+      position: relative;
+      width: 100%;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .result { 
+      text-align: center;
+      font-size: 18px; 
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <h2>Chi-Square Distribution Visualizer</h2>
+
+  <label>Degrees of Freedom:</label>
+  <input type="number" id="df" value="2" min="1">
+
+  <label>Alpha:</label>
+  <select id="alpha">
+    <option value="0.05">0.05</option>
+    <option value="0.01">0.01</option>
+  </select>
+
+  <label>Test Statistic:</label>
+  <input type="number" id="testStat" value="3" step="0.1">
+
+  <button onclick="updateChart()">Update</button>
+</div>
+
+<div id="decision" class="result"></div>
+
+<div class="chart-container">
+  <canvas id="chiChart"></canvas>
+</div>
+
+<script>
+function gamma(n) {
+  if (n === 1) return 1;
+  if (n === 0.5) return Math.sqrt(Math.PI);
+  return (n - 1) * gamma(n - 1);
+}
+
+function chiSquarePDF(x, k) {
+  if (x <= 0) return 0;
+  const coeff = 1 / (Math.pow(2, k/2) * gamma(k/2));
+  return coeff * Math.pow(x, k/2 - 1) * Math.exp(-x/2);
+}
+
+function chiSquareCriticalValue(k, alpha) {
+  let x = 0;
+  let step = 0.01;
+  let area = 0;
+
+  while (area < 1 - alpha && x < 200) {
+    area += chiSquarePDF(x, k) * step;
+    x += step;
+  }
+  return x;
+}
+
+let chart;
+
+function updateChart() {
+  const k = parseFloat(document.getElementById('df').value);
+  const alpha = parseFloat(document.getElementById('alpha').value);
+  const testStat = parseFloat(document.getElementById('testStat').value);
+
+  const critical = chiSquareCriticalValue(k, alpha);
+
+  let labels = [];
+  let pdfData = [];
+  let rejectionShade = [];
+
+  for (let x = 0; x <= 30; x += 0.1) {
+    labels.push(x.toFixed(1));
+    const y = chiSquarePDF(x, k);
+    pdfData.push(y);
+    rejectionShade.push(x >= critical ? y : null);
+  }
+
+  let decisionText = '';
+  if (testStat > critical) {
+    decisionText = `Reject H₀ (test statistic ${testStat.toFixed(2)} > critical value ${critical.toFixed(2)})`;
+  } else {
+    decisionText = `Fail to Reject H₀ (test statistic ${testStat.toFixed(2)} ≤ critical value ${critical.toFixed(2)})`;
+  }
+  document.getElementById('decision').innerText = decisionText;
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(document.getElementById('chiChart'), {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: `Chi-Square PDF (k=${k})`,
+          data: pdfData,
+          borderWidth: 2,
+          fill: false
+        },
+        {
+          label: 'Rejection Region',
+          data: rejectionShade,
+          borderWidth: 0,
+          fill: true,
+          backgroundColor: 'rgba(255,0,0,0.3)'
+        },
+        {
+          label: 'Critical Value',
+          data: labels.map(x => Math.abs(x - critical) < 0.05 ? chiSquarePDF(x,k) : null),
+          borderColor: 'red',
+          pointRadius: 5,
+          showLine: false
+        },
+        {
+          label: 'Test Statistic',
+          data: labels.map(x => Math.abs(x - testStat) < 0.05 ? chiSquarePDF(x,k) : null),
+          borderColor: 'blue',
+          pointRadius: 5,
+          showLine: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        x: { title: { display: true, text: 'x' } },
+        y: { title: { display: true, text: 'Density' } }
+      }
+    }
+  });
+}
+
+updateChart();
+</script>
+
+</body>
+</html>
