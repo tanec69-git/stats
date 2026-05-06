@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hypothesis Test Solver with Distribution Curve</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      margin:0;
+      padding:20px;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:12px;
+      box-shadow:0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+      gap:18px;
+    }
+
+    .input-group{
+      display:flex;
+      flex-direction:column;
+    }
+
+    label{
+      font-weight:bold;
+      margin-bottom:6px;
+    }
+
+    input, select{
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:16px;
+    }
+
+    button{
+      margin-top:25px;
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:10px;
+      background:#2563eb;
+      color:white;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+
+    .results{
+      margin-top:30px;
+      background:#f9fafb;
+      padding:20px;
+      border-radius:10px;
+      line-height:1.8;
+    }
+
+    .section-title{
+      font-size:20px;
+      margin-top:20px;
+      margin-bottom:10px;
+      color:#1e40af;
+    }
+
+    .formula{
+      background:#eef2ff;
+      padding:10px;
+      border-radius:8px;
+      margin:10px 0;
+      overflow-x:auto;
+    }
+
+    .decision{
+      font-weight:bold;
+      font-size:18px;
+      margin-top:15px;
+    }
+
+    .reject{
+      color:#b91c1c;
+    }
+
+    .fail{
+      color:#065f46;
+    }
+
+    canvas{
+      width:100%;
+      height:500px;
+      margin-top:20px;
+      border:1px solid #ddd;
+      border-radius:10px;
+      background:white;
+    }
+
+    @media(max-width:600px){
+      body{
+        padding:10px;
+      }
+
+      canvas{
+        height:380px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Hypothesis Test Solver</h1>
+
+  <div class="grid">
+
+    <div class="input-group">
+      <label>Distribution Type</label>
+      <select id="distType">
+        <option value="z">Normal (z-test)</option>
+        <option value="t">t-test</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Hypothesized Mean (μ₀)</label>
+      <input type="number" id="mu0" value="50">
+    </div>
+
+    <div class="input-group">
+      <label>Sample Mean (x̄)</label>
+      <input type="number" id="xbar" value="54">
+    </div>
+
+    <div class="input-group">
+      <label>Standard Deviation (σ or s)</label>
+      <input type="number" id="sd" value="10">
+    </div>
+
+    <div class="input-group">
+      <label>Sample Size (n)</label>
+      <input type="number" id="n" value="25">
+    </div>
+
+    <div class="input-group">
+      <label>Significance Level (α)</label>
+      <select id="alpha">
+        <option value="0.10">0.10</option>
+        <option value="0.05" selected>0.05</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Direction of Test</label>
+      <select id="tail">
+        <option value="less">Less Than (Left-tailed)</option>
+        <option value="notequal">Not Equal (Two-tailed)</option>
+        <option value="greater">Greater Than (Right-tailed)</option>
+      </select>
+    </div>
+
+  </div>
+
+  <button onclick="solveTest()">Solve Hypothesis Test</button>
+
+  <canvas id="curveCanvas"></canvas>
+
+  <div class="results" id="results">
+    Enter values and click "Solve Hypothesis Test".
+  </div>
+
+</div>
+
+<script>
+
+function round(value, digits=4){
+  return Number(value).toFixed(digits);
+}
+
+function solveTest(){
+
+  const distType = document.getElementById("distType").value;
+
+  const mu0 = parseFloat(document.getElementById("mu0").value);
+  const xbar = parseFloat(document.getElementById("xbar").value);
+  const sd = parseFloat(document.getElementById("sd").value);
+  const n = parseFloat(document.getElementById("n").value);
+  const alpha = parseFloat(document.getElementById("alpha").value);
+  const tail = document.getElementById("tail").value;
+
+  const results = document.getElementById("results");
+
+  if(sd <= 0 || n <= 1){
+    results.innerHTML = "<b>Please enter valid values.</b>";
+    return;
+  }
+
+  const se = sd / Math.sqrt(n);
+
+  let statistic;
+  let criticalValues = [];
+
+  const df = n - 1;
+
+  statistic = (xbar - mu0) / se;
+
+  let reject = false;
+
+  if(distType === "z"){
+
+    if(tail === "less"){
+
+      const crit = jStat.normal.inv(alpha,0,1);
+      criticalValues = [crit];
+      reject = statistic < crit;
+
+    } else if(tail === "greater"){
+
+      const crit = jStat.normal.inv(1-alpha,0,1);
+      criticalValues = [crit];
+      reject = statistic > crit;
+
+    } else {
+
+      const crit1 = jStat.normal.inv(alpha/2,0,1);
+      const crit2 = jStat.normal.inv(1-alpha/2,0,1);
+      criticalValues = [crit1, crit2];
+
+      reject = statistic < crit1 || statistic > crit2;
+    }
+
+  } else {
+
+    if(tail === "less"){
+
+      const crit = jStat.studentt.inv(alpha, df);
+      criticalValues = [crit];
+      reject = statistic < crit;
+
+    } else if(tail === "greater"){
+
+      const crit = jStat.studentt.inv(1-alpha, df);
+      criticalValues = [crit];
+      reject = statistic > crit;
+
+    } else {
+
+      const crit1 = jStat.studentt.inv(alpha/2, df);
+      const crit2 = jStat.studentt.inv(1-alpha/2, df);
+      criticalValues = [crit1, crit2];
+
+      reject = statistic < crit1 || statistic > crit2;
+    }
+  }
+
+  const statLabel = distType === "z" ? "z" : "t";
+
+  let h0;
+  let h1;
+
+  if(tail === "less"){
+
+    h0 = `μ ≥ ${round(mu0,2)}`;
+    h1 = `μ < ${round(mu0,2)}`;
+
+  }
+  else if(tail === "greater"){
+
+    h0 = `μ ≤ ${round(mu0,2)}`;
+    h1 = `μ > ${round(mu0,2)}`;
+
+  }
+  else{
+
+    h0 = `μ = ${round(mu0,2)}`;
+    h1 = `μ ≠ ${round(mu0,2)}`;
+  }
+
+  results.innerHTML = `
+
+    <div class="section-title">Hypotheses</div>
+
+    <b>H₀:</b> ${h0}<br>
+    <b>H₁:</b> ${h1}
+
+    <div class="section-title">Test Statistic</div>
+
+    <div class="formula">
+      ${statLabel} = (x̄ − μ₀) / (s / √n)
+    </div>
+
+    <b>${statLabel} = ${round(statistic,4)}</b>
+
+    <div class="section-title">Critical Value(s)</div>
+
+    ${criticalValues.map(v => `${statLabel} = ${round(v,3)}`).join("<br>")}
+
+    <div class="section-title">Decision Rule</div>
+
+    ${
+      tail === "less"
+      ? `Reject H₀ if ${statLabel} < ${round(criticalValues[0],3)}`
+      : tail === "greater"
+      ? `Reject H₀ if ${statLabel} > ${round(criticalValues[0],3)}`
+      : `Reject H₀ if ${statLabel} < ${round(criticalValues[0],3)} or ${statLabel} > ${round(criticalValues[1],3)}`
+    }
+
+    <div class="decision ${reject ? 'reject' : 'fail'}">
+      ${reject
+        ? "Reject the null hypothesis. There is sufficient evidence to support the alternative hypothesis."
+        : "Fail to reject the null hypothesis. There is insufficient evidence to support the alternative hypothesis."}
+    </div>
+
+  `;
+
+  drawCurve(distType, df, statistic, criticalValues, tail);
+}
+
+function drawCurve(type, df, statistic, criticalValues, tail){
+
+  const canvas = document.getElementById("curveCanvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const margin = 60;
+
+  const xmin = -5;
+  const xmax = 5;
+
+  function getPDF(x){
+
+    if(type === "z"){
+      return jStat.normal.pdf(x,0,1);
+    } else {
+      return jStat.studentt.pdf(x,df);
+    }
+  }
+
+  const ymax = getPDF(0);
+
+  function mapX(x){
+    return margin + (x - xmin)/(xmax - xmin)*(w - 2*margin);
+  }
+
+  function mapY(y){
+    return h - margin - (y/ymax)*(h - 2*margin);
+  }
+
+  // X-axis
+  ctx.beginPath();
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+
+  ctx.moveTo(margin, h-margin);
+  ctx.lineTo(w-margin, h-margin);
+
+  ctx.stroke();
+
+  // Distribution curve
+  ctx.beginPath();
+  ctx.strokeStyle = "#2563eb";
+  ctx.lineWidth = 3;
+
+  for(let x=xmin; x<=xmax; x+=0.01){
+
+    const px = mapX(x);
+    const py = mapY(getPDF(x));
+
+    if(x===xmin){
+      ctx.moveTo(px, py);
+    } else {
+      ctx.lineTo(px, py);
+    }
+  }
+
+  ctx.stroke();
+
+  // Rejection regions
+  ctx.fillStyle = "rgba(255,0,0,0.25)";
+
+  if(tail === "less"){
+
+    shadeRegion(xmin, criticalValues[0]);
+
+  } else if(tail === "greater"){
+
+    shadeRegion(criticalValues[0], xmax);
+
+  } else {
+
+    shadeRegion(xmin, criticalValues[0]);
+    shadeRegion(criticalValues[1], xmax);
+  }
+
+  function shadeRegion(start, end){
+
+    ctx.beginPath();
+
+    ctx.moveTo(mapX(start), h-margin);
+
+    for(let x=start; x<=end; x+=0.01){
+
+      ctx.lineTo(mapX(x), mapY(getPDF(x)));
+    }
+
+    ctx.lineTo(mapX(end), h-margin);
+    ctx.closePath();
+
+    ctx.fill();
+  }
+
+  // Critical value lines
+  criticalValues.forEach(v => {
+
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 3;
+
+    ctx.moveTo(mapX(v), h-margin);
+    ctx.lineTo(mapX(v), mapY(getPDF(v)));
+
+    ctx.stroke();
+
+    ctx.fillStyle = "red";
+    ctx.font = "16px Arial";
+
+    ctx.fillText(
+      "Critical",
+      mapX(v)-28,
+      mapY(getPDF(v))-10
+    );
+
+    ctx.fillText(
+      round(v,3),
+      mapX(v)-18,
+      h-margin+25
+    );
+  });
+
+  // Test statistic line
+  ctx.beginPath();
+  ctx.strokeStyle = "blue";
+  ctx.lineWidth = 3;
+
+  ctx.moveTo(mapX(statistic), h-margin);
+  ctx.lineTo(mapX(statistic), mapY(getPDF(statistic)));
+
+  ctx.stroke();
+
+  ctx.fillStyle = "blue";
+  ctx.font = "16px Arial";
+
+  ctx.fillText(
+    "Test Statistic",
+    mapX(statistic)-45,
+    mapY(getPDF(statistic))-10
+  );
+
+  ctx.fillText(
+    round(statistic,3),
+    mapX(statistic)-18,
+    h-margin+45
+  );
+
+  // X-axis labels
+  ctx.fillStyle = "black";
+  ctx.font = "14px Arial";
+
+  for(let i=-5; i<=5; i++){
+
+    ctx.fillText(i, mapX(i)-5, h-margin+20);
+  }
+}
+
+solveTest();
+
+</script>
+
+</body>
+</html>
