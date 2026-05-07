@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Chi-Square Distribution Visualizer</title>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -56,6 +57,7 @@
 <body>
 
 <div class="controls">
+
   <h2>Chi-Square Distribution Visualizer</h2>
 
   <label>Degrees of Freedom:</label>
@@ -71,9 +73,11 @@
   <input type="number" id="testStat" value="10" step="0.001">
 
   <button onclick="updateChart()">Update</button>
+
 </div>
 
 <div id="criticalValue" class="critical-display"></div>
+
 <div id="decision" class="result"></div>
 
 <div class="chart-container">
@@ -82,182 +86,243 @@
 
 <script>
 
-// Gamma function
+// Gamma Function
 function gamma(n) {
+
   if (n === 1) return 1;
+
   if (n === 0.5) return Math.sqrt(Math.PI);
+
   return (n - 1) * gamma(n - 1);
+
 }
 
-// Chi-square PDF
+// Chi-Square PDF
 function chiSquarePDF(x, k) {
+
   if (x <= 0) return 0;
 
-  const coeff = 1 / (
-    Math.pow(2, k / 2) * gamma(k / 2)
-  );
+  const coeff =
+    1 / (Math.pow(2, k / 2) * gamma(k / 2));
 
   return coeff *
          Math.pow(x, k / 2 - 1) *
          Math.exp(-x / 2);
+
 }
 
-// More accurate critical value calculator
+// Accurate Critical Value Calculator
 function chiSquareCriticalValue(k, alpha) {
 
   let x = 0;
+
   let step = 0.0001;
+
   let area = 0;
 
   while (area < (1 - alpha) && x < 200) {
+
     area += chiSquarePDF(x, k) * step;
+
     x += step;
+
   }
 
   return x;
+
 }
 
 let chart;
 
 function updateChart() {
 
-  const k = parseFloat(document.getElementById('df').value);
-  const alpha = parseFloat(document.getElementById('alpha').value);
-  const testStat = parseFloat(document.getElementById('testStat').value);
+  const k =
+    parseFloat(document.getElementById('df').value);
 
-  const critical = chiSquareCriticalValue(k, alpha);
+  const alpha =
+    parseFloat(document.getElementById('alpha').value);
+
+  const testStat =
+    parseFloat(document.getElementById('testStat').value);
+
+  const critical =
+    chiSquareCriticalValue(k, alpha);
 
   let labels = [];
+
   let pdfData = [];
+
   let rejectionShade = [];
 
-  // Extend graph automatically if needed
-  const maxX = Math.max(30, critical + 5, testStat + 5);
+  // Automatically extend graph range
+  const maxX =
+    Math.max(30, critical + 5, testStat + 5);
 
   for (let x = 0; x <= maxX; x += 0.1) {
 
-    labels.push(x);
+    labels.push(Number(x.toFixed(1)));
 
     const y = chiSquarePDF(x, k);
 
     pdfData.push(y);
 
-    rejectionShade.push(x >= critical ? y : null);
+    rejectionShade.push(
+      x >= critical ? y : null
+    );
+
   }
 
-  // Decision
+  // Decision text
   let decisionText = '';
 
   if (testStat > critical) {
+
     decisionText =
       `Reject H₀ because ${testStat.toFixed(3)} > ${critical.toFixed(3)}`;
+
   } else {
+
     decisionText =
       `Fail to Reject H₀ because ${testStat.toFixed(3)} ≤ ${critical.toFixed(3)}`;
+
   }
 
-  document.getElementById('decision').innerText = decisionText;
+  document.getElementById('decision').innerText =
+    decisionText;
 
   document.getElementById('criticalValue').innerHTML =
     `Critical Value = ${critical.toFixed(3)}`;
 
-  // Create vertical line helper
+  // Vertical line generator
   function verticalLine(xValue, height) {
 
     return labels.map(x =>
-      Math.abs(x - xValue) < 0.05 ? height : null
+      Math.abs(x - xValue) < 0.05
+        ? height
+        : null
     );
+
   }
 
   const peakHeight = Math.max(...pdfData);
 
-  // Destroy old chart
+  // Destroy previous chart
   if (chart) chart.destroy();
 
   // Create chart
-  chart = new Chart(document.getElementById('chiChart'), {
+  chart = new Chart(
+    document.getElementById('chiChart'),
+    {
 
-    type: 'line',
+      type: 'line',
 
-    data: {
+      data: {
 
-      labels: labels,
+        labels: labels,
 
-      datasets: [
+        datasets: [
 
-        {
-          label: `Chi-Square PDF (df=${k})`,
-          data: pdfData,
-          borderWidth: 2,
-          fill: false,
-          tension: 0.1
-        },
+          {
+            label: `Chi-Square PDF (df=${k})`,
+            data: pdfData,
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1
+          },
 
-        {
-          label: 'Rejection Region',
-          data: rejectionShade,
-          borderWidth: 0,
-          fill: true,
-          backgroundColor: 'rgba(255,0,0,0.3)',
-          pointRadius: 0
-        },
+          {
+            label: 'Rejection Region',
+            data: rejectionShade,
+            borderWidth: 0,
+            fill: true,
+            backgroundColor: 'rgba(255,0,0,0.3)',
+            pointRadius: 0
+          },
 
-        {
-          label: 'Critical Value',
-          data: verticalLine(critical, peakHeight),
-          borderColor: 'red',
-          borderWidth: 3,
-          pointRadius: 0,
-          showLine: true
-        },
+          {
+            label: 'Critical Value',
+            data: verticalLine(
+              critical,
+              peakHeight
+            ),
+            borderColor: 'red',
+            borderWidth: 3,
+            pointRadius: 0,
+            showLine: true
+          },
 
-        {
-          label: 'Test Statistic',
-          data: verticalLine(testStat, peakHeight),
-          borderColor: 'blue',
-          borderWidth: 3,
-          pointRadius: 0,
-          showLine: true
-        }
+          {
+            label: 'Test Statistic',
+            data: verticalLine(
+              testStat,
+              peakHeight
+            ),
+            borderColor: 'blue',
+            borderWidth: 3,
+            pointRadius: 0,
+            showLine: true
+          }
 
-      ]
-    },
+        ]
 
-    options: {
-
-      responsive: true,
-      maintainAspectRatio: false,
-
-      plugins: {
-        legend: {
-          display: true
-        }
       },
 
-      scales: {
+      options: {
 
-        x: {
-          title: {
-            display: true,
-            text: 'x'
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: true
           }
+
         },
 
-        y: {
-          title: {
-            display: true,
-            text: 'Density'
+        scales: {
+
+          x: {
+
+            title: {
+              display: true,
+              text: 'x'
+            },
+
+            ticks: {
+
+              callback: function(value) {
+
+                return Number(
+                  this.getLabelForValue(value)
+                ).toFixed(1);
+
+              }
+
+            }
+
+          },
+
+          y: {
+
+            title: {
+              display: true,
+              text: 'Density'
+            }
+
           }
+
         }
 
       }
 
     }
-
-  });
+  );
 
 }
 
+// Initial chart
 updateChart();
 
 </script>
