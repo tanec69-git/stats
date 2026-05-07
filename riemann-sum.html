@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Riemann Sum Visualizer</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f6f9;
+      color: #222;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .controls label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .controls input {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      margin-top: 24px;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    canvas {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Riemann Sum Visualizer</h1>
+
+  <div class="controls">
+    <div>
+      <label>Function f(x)</label>
+      <input type="text" id="functionInput" value="x*x + 1">
+    </div>
+
+    <div>
+      <label>Lower Bound (a)</label>
+      <input type="number" id="lowerBound" value="2">
+    </div>
+
+    <div>
+      <label>Upper Bound (b)</label>
+      <input type="number" id="upperBound" value="4">
+    </div>
+
+    <div>
+      <label>Number of Intervals (n)</label>
+      <input type="number" id="intervals" value="2" min="1">
+    </div>
+
+    <div>
+      <button onclick="drawGraph()">Visualize</button>
+    </div>
+  </div>
+
+  <canvas id="riemannChart"></canvas>
+
+  <div class="result" id="areaResult">
+    Midpoint Riemann Sum Area = 0 units²
+  </div>
+
+  <script>
+    let chart;
+
+    function f(x, expr) {
+      return Function("x", "return " + expr)(x);
+    }
+
+    function drawGraph() {
+      const expr = document.getElementById("functionInput").value;
+      const a = parseFloat(document.getElementById("lowerBound").value);
+      const b = parseFloat(document.getElementById("upperBound").value);
+      const n = parseInt(document.getElementById("intervals").value);
+
+      const dx = (b - a) / n;
+
+      let curveData = [];
+      let rectPoints = [];
+      let area = 0;
+
+      // Generate smooth curve
+      for (let x = a - 0.5; x <= b + 0.5; x += 0.01) {
+        curveData.push({
+          x: x,
+          y: f(x, expr)
+        });
+      }
+
+      // Generate rectangles using midpoint rule
+      for (let i = 0; i < n; i++) {
+        const left = a + i * dx;
+        const right = left + dx;
+        const midpoint = (left + right) / 2;
+
+        const height = f(midpoint, expr);
+
+        area += height * dx;
+
+        // Rectangle corners
+        rectPoints.push(
+          { x: left, y: 0 },
+          { x: left, y: height },
+          { x: right, y: height },
+          { x: right, y: 0 },
+          { x: left, y: 0 },
+          { x: NaN, y: NaN }
+        );
+      }
+
+      document.getElementById("areaResult").innerHTML =
+        `Midpoint Riemann Sum Area = ${area.toFixed(4)} units²`;
+
+      const ctx = document.getElementById("riemannChart").getContext("2d");
+
+      if (chart) {
+        chart.destroy();
+      }
+
+      chart = new Chart(ctx, {
+        type: "scatter",
+        data: {
+          datasets: [
+            {
+              label: "f(x)",
+              data: curveData,
+              borderColor: "blue",
+              backgroundColor: "blue",
+              showLine: true,
+              pointRadius: 0,
+              borderWidth: 3
+            },
+            {
+              label: "Midpoint Rectangles",
+              data: rectPoints,
+              borderColor: "rgba(255,0,0,0.8)",
+              backgroundColor: "rgba(255,0,0,0.2)",
+              showLine: true,
+              pointRadius: 0,
+              borderWidth: 2,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: "linear",
+              title: {
+                display: true,
+                text: "x"
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: "y"
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true
+            },
+            tooltip: {
+              enabled: true
+            }
+          }
+        }
+      });
+    }
+
+    drawGraph();
+  </script>
+
+</body>
+</html>
