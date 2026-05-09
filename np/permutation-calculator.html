@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Permutation Teaching App</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f6f9;
+        margin:0;
+        padding:20px;
+        color:#222;
+    }
+
+    .container{
+        max-width:1000px;
+        margin:auto;
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+        text-align:center;
+        color:#0b4f9c;
+    }
+
+    .section{
+        margin-top:25px;
+        padding:20px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        background:#fafafa;
+    }
+
+    label{
+        font-weight:bold;
+    }
+
+    input, select{
+        padding:8px;
+        margin-top:5px;
+        margin-bottom:15px;
+        width:100%;
+        font-size:16px;
+    }
+
+    button{
+        background:#0b4f9c;
+        color:white;
+        border:none;
+        padding:12px 20px;
+        font-size:16px;
+        border-radius:8px;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#08376d;
+    }
+
+    .output{
+        margin-top:20px;
+        padding:15px;
+        background:#eef5ff;
+        border-left:5px solid #0b4f9c;
+        border-radius:8px;
+    }
+
+    .formula{
+        font-size:22px;
+        margin:15px 0;
+        color:#c0392b;
+        font-weight:bold;
+    }
+
+    .steps{
+        line-height:1.8;
+        font-size:18px;
+    }
+
+    .answer{
+        font-size:28px;
+        font-weight:bold;
+        color:green;
+        margin-top:15px;
+    }
+
+    .example{
+        background:#fff7d6;
+        padding:12px;
+        border-radius:8px;
+        margin-top:10px;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Permutation Teaching App</h1>
+
+    <div class="section">
+
+        <h2>Permutation Calculator</h2>
+
+        <label for="nValue">Value of n</label>
+        <input type="number" id="nValue" value="6" min="0">
+
+        <label for="rValue">Value of r</label>
+        <input type="number" id="rValue" value="3" min="0">
+
+        <label for="typeSelect">Type</label>
+        <select id="typeSelect">
+            <option value="permutation">Permutation (nPr)</option>
+            <option value="combination">Combination (nCr)</option>
+        </select>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="output" id="output"></div>
+
+    </div>
+
+    <div class="section">
+        <h2>Teaching Notes</h2>
+
+        <div class="example">
+            <strong>Permutation:</strong> Order matters.<br>
+            Example: ABC and BAC are different arrangements.
+        </div>
+
+        <div class="example">
+            <strong>Combination:</strong> Order does NOT matter.<br>
+            Example: ABC and BAC are considered the same selection.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function factorial(num){
+    let result = 1;
+
+    for(let i = 1; i <= num; i++){
+        result *= i;
+    }
+
+    return result;
+}
+
+function factorialExpansion(num){
+    if(num === 0 || num === 1){
+        return "1";
+    }
+
+    let arr = [];
+
+    for(let i = num; i >= 1; i--){
+        arr.push(i);
+    }
+
+    return arr.join(" × ");
+}
+
+function calculate(){
+
+    const n = parseInt(document.getElementById("nValue").value);
+    const r = parseInt(document.getElementById("rValue").value);
+    const type = document.getElementById("typeSelect").value;
+
+    const output = document.getElementById("output");
+
+    if(r > n){
+        output.innerHTML = "<span style='color:red;'>r cannot be greater than n</span>";
+        return;
+    }
+
+    let html = "";
+
+    if(type === "permutation"){
+
+        const answer = factorial(n) / factorial(n-r);
+
+        html += `
+            <div class="formula">
+                nP r = n! / (n-r)!
+            </div>
+
+            <div class="steps">
+                <strong>Step 1:</strong> Substitute values
+                <br><br>
+
+                ${n}P${r} = ${n}! / (${n}-${r})!
+                <br><br>
+
+                = ${n}! / ${(n-r)}!
+                <br><br>
+
+                <strong>Step 2:</strong> Expand factorials
+                <br><br>
+
+                = (${factorialExpansion(n)}) / (${factorialExpansion(n-r)})
+                <br><br>
+
+                <strong>Step 3:</strong> Simplify
+                <br><br>
+
+                = ${answer}
+            </div>
+
+            <div class="answer">
+                Final Answer = ${answer}
+            </div>
+        `;
+
+    }
+
+    else{
+
+        const answer = factorial(n) / (factorial(r) * factorial(n-r));
+
+        html += `
+            <div class="formula">
+                nC r = n! / [r!(n-r)!]
+            </div>
+
+            <div class="steps">
+
+                <strong>Step 1:</strong> Substitute values
+                <br><br>
+
+                ${n}C${r} = ${n}! / [${r}!(${n}-${r})!]
+                <br><br>
+
+                = ${n}! / [${r}!(${n-r})!]
+                <br><br>
+
+                <strong>Step 2:</strong> Expand factorials
+                <br><br>
+
+                = (${factorialExpansion(n)}) / [(${factorialExpansion(r)})(${factorialExpansion(n-r)})]
+                <br><br>
+
+                <strong>Step 3:</strong> Simplify
+                <br><br>
+
+                = ${answer}
+
+            </div>
+
+            <div class="answer">
+                Final Answer = ${answer}
+            </div>
+        `;
+
+    }
+
+    output.innerHTML = html;
+}
+
+calculate();
+
+</script>
+
+</body>
+</html>
