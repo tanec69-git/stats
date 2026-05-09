@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Permutation App</title>
+
+<style>
+
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f6fa;
+        margin:0;
+        padding:20px;
+    }
+
+    .container{
+        max-width:1100px;
+        margin:auto;
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1{
+        text-align:center;
+        color:#0b5394;
+    }
+
+    label{
+        font-weight:bold;
+        display:block;
+        margin-top:15px;
+    }
+
+    input{
+        width:100%;
+        padding:12px;
+        font-size:18px;
+        margin-top:8px;
+        border-radius:8px;
+        border:1px solid #ccc;
+        box-sizing:border-box;
+    }
+
+    button{
+        margin-top:20px;
+        background:#0b5394;
+        color:white;
+        border:none;
+        padding:12px 20px;
+        font-size:18px;
+        border-radius:8px;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#073763;
+    }
+
+    .output{
+        margin-top:25px;
+    }
+
+    .formula{
+        background:#eef5ff;
+        padding:18px;
+        border-left:5px solid #0b5394;
+        border-radius:8px;
+        line-height:1.8;
+        font-size:18px;
+    }
+
+    .count{
+        margin-top:20px;
+        font-size:26px;
+        color:green;
+        font-weight:bold;
+    }
+
+    .permutations{
+        margin-top:20px;
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+        gap:10px;
+    }
+
+    .perm-box{
+        background:#fff8dc;
+        padding:10px;
+        text-align:center;
+        border-radius:8px;
+        border:1px solid #ddd;
+        font-weight:bold;
+        font-size:18px;
+    }
+
+    .note{
+        margin-top:20px;
+        background:#fff3cd;
+        padding:15px;
+        border-radius:8px;
+        border-left:5px solid orange;
+        line-height:1.6;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Word Permutation App</h1>
+
+    <label>Enter a word</label>
+    <input type="text" id="wordInput" value="STATISTICS">
+
+    <label>Maximum permutations to display</label>
+    <input type="number" id="limitInput" value="100" min="1">
+
+    <button onclick="generatePermutations()">
+        Generate Permutations
+    </button>
+
+    <div class="output" id="output"></div>
+
+</div>
+
+<script>
+
+function factorial(n){
+
+    let result = 1;
+
+    for(let i=1; i<=n; i++){
+        result *= i;
+    }
+
+    return result;
+}
+
+function countLetters(word){
+
+    let counts = {};
+
+    for(let char of word){
+
+        counts[char] = (counts[char] || 0) + 1;
+    }
+
+    return counts;
+}
+
+function calculateUniquePermutations(word){
+
+    let counts = countLetters(word);
+
+    let denominator = 1;
+
+    let denominatorText = "";
+
+    for(let char in counts){
+
+        if(counts[char] > 1){
+
+            denominator *= factorial(counts[char]);
+
+            denominatorText += counts[char] + "! × ";
+        }
+    }
+
+    if(denominatorText === ""){
+        denominatorText = "1";
+    }
+    else{
+        denominatorText = denominatorText.slice(0,-3);
+    }
+
+    let total = factorial(word.length) / denominator;
+
+    return {
+        total: total,
+        denominatorText: denominatorText,
+        denominator: denominator
+    };
+}
+
+function limitedPermutations(word, limit){
+
+    let results = new Set();
+
+    function permute(prefix, remaining){
+
+        if(results.size >= limit){
+            return;
+        }
+
+        if(remaining.length === 0){
+
+            results.add(prefix);
+            return;
+        }
+
+        for(let i=0; i<remaining.length; i++){
+
+            let next =
+                remaining.slice(0,i) +
+                remaining.slice(i+1);
+
+            permute(prefix + remaining[i], next);
+
+            if(results.size >= limit){
+                return;
+            }
+        }
+    }
+
+    permute("", word);
+
+    return Array.from(results);
+}
+
+function generatePermutations(){
+
+    let word =
+        document.getElementById("wordInput")
+        .value
+        .trim()
+        .toUpperCase();
+
+    let limit =
+        parseInt(
+            document.getElementById("limitInput").value
+        );
+
+    let output = document.getElementById("output");
+
+    if(word.length === 0){
+
+        output.innerHTML =
+            "<p style='color:red;'>Please enter a word.</p>";
+
+        return;
+    }
+
+    let calc = calculateUniquePermutations(word);
+
+    let samplePermutations =
+        limitedPermutations(word, limit);
+
+    let html = "";
+
+    html += `
+        <div class="formula">
+
+            <strong>Formula:</strong><br><br>
+
+            Number of unique permutations
+            =
+            n! / (repeated letters factorials)
+            <br><br>
+
+            =
+            ${word.length}! / (${calc.denominatorText})
+            <br><br>
+
+            =
+            ${factorial(word.length)} / ${calc.denominator}
+            <br><br>
+
+            =
+            <strong>${calc.total.toLocaleString()}</strong>
+
+        </div>
+
+        <div class="count">
+            Total Unique Permutations:
+            ${calc.total.toLocaleString()}
+        </div>
+
+        <div class="note">
+            Only the first
+            <strong>${samplePermutations.length}</strong>
+            permutations are displayed to prevent browser slowdown.
+        </div>
+
+        <h2>Sample Permutations</h2>
+
+        <div class="permutations">
+    `;
+
+    samplePermutations.forEach(p => {
+
+        html += `
+            <div class="perm-box">${p}</div>
+        `;
+    });
+
+    html += `
+        </div>
+    `;
+
+    output.innerHTML = html;
+}
+
+generatePermutations();
+
+</script>
+
+</body>
+</html>
