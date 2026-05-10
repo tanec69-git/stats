@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Tree Diagram App</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .category-box {
+      margin-bottom: 25px;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .items-container {
+      margin-top: 10px;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      margin: 5px;
+      width: 140px;
+      border-radius: 5px;
+      border: 1px solid #aaa;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin: 8px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    canvas {
+      margin-top: 25px;
+      background: white;
+      border: 2px solid #333;
+      width: 100%;
+      max-width: 1200px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Interactive Tree Diagram App</h1>
+
+  <div class="controls">
+
+    <div class="category-box">
+      <h2>Category 1</h2>
+
+      <label>
+        Category Name:
+        <input type="text" id="cat1Title" value="Material">
+      </label>
+
+      <div id="cat1Items" class="items-container"></div>
+
+      <button onclick="addItem(1)">Add Item</button>
+      <button onclick="removeItem(1)">Remove Item</button>
+    </div>
+
+    <div class="category-box">
+      <h2>Category 2</h2>
+
+      <label>
+        Category Name:
+        <input type="text" id="cat2Title" value="Shape">
+      </label>
+
+      <div id="cat2Items" class="items-container"></div>
+
+      <button onclick="addItem(2)">Add Item</button>
+      <button onclick="removeItem(2)">Remove Item</button>
+    </div>
+
+    <button onclick="drawTree()">Draw Tree Diagram</button>
+
+  </div>
+
+  <canvas id="treeCanvas" width="1400" height="800"></canvas>
+
+  <script>
+
+    // Default items
+    let cat1 = ["Metal", "Plastic"];
+    let cat2 = ["Cube", "Sphere", "Pyramid"];
+
+    // Render input boxes
+    function renderInputs() {
+
+      const cat1Div = document.getElementById("cat1Items");
+      cat1Div.innerHTML = "";
+
+      cat1.forEach((item, index) => {
+        cat1Div.innerHTML += `
+          <input type="text"
+                 value="${item}"
+                 onchange="updateItem(1, ${index}, this.value)">
+        `;
+      });
+
+      const cat2Div = document.getElementById("cat2Items");
+      cat2Div.innerHTML = "";
+
+      cat2.forEach((item, index) => {
+        cat2Div.innerHTML += `
+          <input type="text"
+                 value="${item}"
+                 onchange="updateItem(2, ${index}, this.value)">
+        `;
+      });
+    }
+
+    // Update item names
+    function updateItem(category, index, value) {
+      if(category === 1) {
+        cat1[index] = value;
+      } else {
+        cat2[index] = value;
+      }
+    }
+
+    // Add items
+    function addItem(category) {
+      if(category === 1) {
+        cat1.push("New Item");
+      } else {
+        cat2.push("New Item");
+      }
+
+      renderInputs();
+    }
+
+    // Remove items
+    function removeItem(category) {
+
+      if(category === 1 && cat1.length > 1) {
+        cat1.pop();
+      }
+
+      if(category === 2 && cat2.length > 1) {
+        cat2.pop();
+      }
+
+      renderInputs();
+    }
+
+    // Draw tree
+    function drawTree() {
+
+      const canvas = document.getElementById("treeCanvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const cat1Title = document.getElementById("cat1Title").value;
+      const cat2Title = document.getElementById("cat2Title").value;
+
+      const rootX = 100;
+      const rootY = canvas.height / 2;
+
+      drawNode(rootX, rootY, "Start");
+
+      // Dynamic spacing
+      const cat1Spacing = canvas.height / (cat1.length + 1);
+
+      cat1.forEach((item1, i) => {
+
+        const x1 = 400;
+        const y1 = cat1Spacing * (i + 1);
+
+        drawLine(rootX, rootY, x1, y1);
+        drawNode(x1, y1, item1);
+
+        // Category label
+        ctx.fillStyle = "black";
+        ctx.font = "18px Arial";
+        ctx.fillText(cat1Title, 220, y1 - 10);
+
+        const cat2Spacing = 220;
+
+        const startY =
+          y1 - ((cat2.length - 1) * cat2Spacing / 2);
+
+        cat2.forEach((item2, j) => {
+
+          const x2 = 850;
+          const y2 = startY + j * cat2Spacing;
+
+          drawLine(x1, y1, x2, y2);
+          drawNode(x2, y2, item2);
+
+          // Category label
+          ctx.fillStyle = "black";
+          ctx.font = "18px Arial";
+          ctx.fillText(cat2Title, 620, y2 - 10);
+
+          // Combination
+          ctx.fillStyle = "blue";
+          ctx.font = "17px Arial";
+          ctx.fillText(
+            item1 + " " + item2,
+            x2 + 90,
+            y2 + 5
+          );
+
+        });
+
+      });
+
+    }
+
+    // Draw node
+    function drawNode(x, y, text) {
+
+      const canvas = document.getElementById("treeCanvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.beginPath();
+      ctx.arc(x, y, 40, 0, Math.PI * 2);
+
+      ctx.fillStyle = "#dfefff";
+      ctx.fill();
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#000";
+      ctx.stroke();
+
+      ctx.fillStyle = "#000";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText(text, x, y);
+    }
+
+    // Draw line
+    function drawLine(x1, y1, x2, y2) {
+
+      const canvas = document.getElementById("treeCanvas");
+      const ctx = canvas.getContext("2d");
+
+      ctx.beginPath();
+      ctx.moveTo(x1 + 40, y1);
+      ctx.lineTo(x2 - 40, y2);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#000";
+      ctx.stroke();
+    }
+
+    // Initial setup
+    renderInputs();
+    drawTree();
+
+  </script>
+
+</body>
+</html>
