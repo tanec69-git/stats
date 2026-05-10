@@ -3,80 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Tree Diagram App</title>
+  <title>Draggable Tree Diagram App</title>
 
   <style>
-    body {
+    body{
       font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 20px;
-      text-align: center;
+      background:#f2f2f2;
+      margin:20px;
+      text-align:center;
     }
 
-    h1 {
-      color: #333;
+    h1{
+      color:#333;
     }
 
-    .controls {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 95%;
-      max-width: 1200px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    .controls{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      width:95%;
+      max-width:1200px;
+      margin:auto;
+      box-shadow:0 0 10px rgba(0,0,0,0.1);
     }
 
-    .category-box {
-      margin-bottom: 25px;
-      padding: 15px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
+    .category-box{
+      margin-bottom:25px;
+      padding:15px;
+      border:2px solid #ddd;
+      border-radius:10px;
     }
 
-    .items-container {
-      margin-top: 10px;
+    .items-container{
+      margin-top:10px;
     }
 
-    input[type="text"] {
-      padding: 8px;
-      margin: 5px;
-      width: 150px;
-      border-radius: 5px;
-      border: 1px solid #aaa;
+    input[type="text"]{
+      padding:8px;
+      margin:5px;
+      width:150px;
+      border-radius:5px;
+      border:1px solid #aaa;
     }
 
-    button {
-      padding: 10px 16px;
-      margin: 8px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
-      font-size: 14px;
+    button{
+      padding:10px 16px;
+      margin:8px;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      background:#007bff;
+      color:white;
+      font-size:14px;
     }
 
-    button:hover {
-      background: #0056b3;
+    button:hover{
+      background:#0056b3;
     }
 
-    canvas {
-      margin-top: 25px;
-      background: white;
-      border: 2px solid #333;
-      width: 100%;
-      max-width: 1500px;
+    canvas{
+      margin-top:25px;
+      background:white;
+      border:2px solid #333;
+      width:100%;
+      max-width:1600px;
+      cursor:grab;
+    }
+
+    .instructions{
+      margin-top:10px;
+      font-size:18px;
+      color:#444;
     }
   </style>
 </head>
 <body>
 
-  <h1>Interactive Tree Diagram App</h1>
+  <h1>Draggable Tree Diagram App</h1>
 
   <div class="controls">
 
     <div class="category-box">
+
       <h2>Category 1</h2>
 
       <label>
@@ -88,9 +96,11 @@
 
       <button onclick="addItem(1)">Add Item</button>
       <button onclick="removeItem(1)">Remove Item</button>
+
     </div>
 
     <div class="category-box">
+
       <h2>Category 2</h2>
 
       <label>
@@ -102,258 +112,394 @@
 
       <button onclick="addItem(2)">Add Item</button>
       <button onclick="removeItem(2)">Remove Item</button>
+
     </div>
 
-    <button onclick="drawTree()">Draw Tree Diagram</button>
+    <button onclick="generateTree()">Generate Tree Diagram</button>
 
+  </div>
+
+  <div class="instructions">
+    Drag the circles using your mouse to rearrange the tree diagram.
   </div>
 
   <canvas id="treeCanvas" width="1800" height="1200"></canvas>
 
   <script>
 
-    // Default categories
     let cat1 = ["Metal", "Plastic"];
     let cat2 = ["Cube", "Sphere", "Pyramid"];
 
-    // Render input fields
-    function renderInputs() {
+    const canvas = document.getElementById("treeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let nodes = [];
+    let edges = [];
+
+    let draggedNode = null;
+
+    // =========================
+    // Render Input Boxes
+    // =========================
+    function renderInputs(){
 
       const cat1Div = document.getElementById("cat1Items");
       cat1Div.innerHTML = "";
 
-      cat1.forEach((item, index) => {
+      cat1.forEach((item,index)=>{
+
         cat1Div.innerHTML += `
           <input type="text"
                  value="${item}"
-                 onchange="updateItem(1, ${index}, this.value)">
+                 onchange="updateItem(1,${index},this.value)">
         `;
+
       });
 
       const cat2Div = document.getElementById("cat2Items");
       cat2Div.innerHTML = "";
 
-      cat2.forEach((item, index) => {
+      cat2.forEach((item,index)=>{
+
         cat2Div.innerHTML += `
           <input type="text"
                  value="${item}"
-                 onchange="updateItem(2, ${index}, this.value)">
+                 onchange="updateItem(2,${index},this.value)">
         `;
+
       });
+
     }
 
-    // Update item names
-    function updateItem(category, index, value) {
+    // =========================
+    // Update Items
+    // =========================
+    function updateItem(category,index,value){
 
-      if(category === 1) {
+      if(category === 1){
         cat1[index] = value;
-      } else {
+      }else{
         cat2[index] = value;
       }
+
     }
 
-    // Add item
-    function addItem(category) {
+    // =========================
+    // Add Item
+    // =========================
+    function addItem(category){
 
-      if(category === 1) {
+      if(category === 1){
         cat1.push("New Item");
-      } else {
+      }else{
         cat2.push("New Item");
       }
 
       renderInputs();
+
     }
 
-    // Remove item
-    function removeItem(category) {
+    // =========================
+    // Remove Item
+    // =========================
+    function removeItem(category){
 
-      if(category === 1 && cat1.length > 1) {
+      if(category === 1 && cat1.length > 1){
         cat1.pop();
       }
 
-      if(category === 2 && cat2.length > 1) {
+      if(category === 2 && cat2.length > 1){
         cat2.pop();
       }
 
       renderInputs();
+
     }
 
-    // Draw tree diagram
-    function drawTree() {
+    // =========================
+    // Generate Tree
+    // =========================
+    function generateTree(){
 
-      const canvas = document.getElementById("treeCanvas");
-      const ctx = canvas.getContext("2d");
+      nodes = [];
+      edges = [];
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const root = {
+        id:"root",
+        text:"Start",
+        x:120,
+        y:canvas.height/2,
+        radius:45
+      };
 
-      const cat1Title =
-        document.getElementById("cat1Title").value;
+      nodes.push(root);
 
-      const cat2Title =
-        document.getElementById("cat2Title").value;
-
-      const rootX = 120;
-      const rootY = canvas.height / 2;
-
-      // Horizontal positions
       const level1X = 550;
       const level2X = 1150;
 
-      // Root node
-      drawNode(rootX, rootY, "Start");
-
-      // Dynamic vertical spacing for category 1
       const cat1Spacing =
         canvas.height / (cat1.length + 1);
 
-      cat1.forEach((item1, i) => {
+      cat1.forEach((item1,i)=>{
 
-        const y1 = cat1Spacing * (i + 1);
+        const node1 = {
+          id:"cat1_" + i,
+          text:item1,
+          x:level1X,
+          y:cat1Spacing * (i+1),
+          radius:45
+        };
 
-        // Draw first branch
-        drawLine(rootX, rootY, level1X, y1);
+        nodes.push(node1);
 
-        drawNode(level1X, y1, item1);
+        edges.push({
+          from:root,
+          to:node1
+        });
 
-        // Label
-        ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText(
-          cat1Title,
-          (rootX + level1X) / 2,
-          y1 - 20
-        );
-
-        // Dynamic spacing for second category
-        const totalHeightNeeded =
-          Math.max(250, cat2.length * 130);
+        const totalHeight =
+          Math.max(300, cat2.length * 150);
 
         const startY =
-          y1 - totalHeightNeeded / 2;
+          node1.y - totalHeight/2;
 
-        const cat2Spacing =
-          totalHeightNeeded / Math.max(cat2.length - 1, 1);
+        const spacing =
+          totalHeight /
+          Math.max(cat2.length-1,1);
 
-        cat2.forEach((item2, j) => {
+        cat2.forEach((item2,j)=>{
 
           let y2;
 
-          if(cat2.length === 1) {
-            y2 = y1;
-          } else {
-            y2 = startY + j * cat2Spacing;
+          if(cat2.length === 1){
+            y2 = node1.y;
+          }else{
+            y2 = startY + j * spacing;
           }
 
-          // Prevent excessive overlap
-          y2 = Math.max(80, Math.min(canvas.height - 80, y2));
+          y2 = Math.max(100,
+               Math.min(canvas.height-100,y2));
 
-          // Draw second branch
-          drawLine(level1X, y1, level2X, y2);
+          const node2 = {
+            id:`cat2_${i}_${j}`,
+            text:item2,
+            x:level2X,
+            y:y2,
+            radius:45,
+            combo:item1 + " " + item2
+          };
 
-          drawNode(level2X, y2, item2);
+          nodes.push(node2);
 
-          // Category label
-          ctx.fillStyle = "black";
-          ctx.font = "18px Arial";
-
-          ctx.fillText(
-            cat2Title,
-            (level1X + level2X) / 2,
-            y2 - 18
-          );
-
-          // Final combination
-          ctx.fillStyle = "blue";
-          ctx.font = "18px Arial";
-
-          ctx.fillText(
-            item1 + " " + item2,
-            level2X + 90,
-            y2 + 5
-          );
+          edges.push({
+            from:node1,
+            to:node2
+          });
 
         });
 
       });
 
+      draw();
+
     }
 
-    // Draw node
-    function drawNode(x, y, text) {
+    // =========================
+    // Draw Everything
+    // =========================
+    function draw(){
 
-      const canvas = document.getElementById("treeCanvas");
-      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      ctx.beginPath();
-      ctx.arc(x, y, 42, 0, Math.PI * 2);
+      // Draw edges
+      edges.forEach(edge=>{
 
-      ctx.fillStyle = "#dfefff";
-      ctx.fill();
+        ctx.beginPath();
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#000";
-      ctx.stroke();
+        ctx.moveTo(edge.from.x, edge.from.y);
+        ctx.lineTo(edge.to.x, edge.to.y);
 
-      ctx.fillStyle = "#000";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
 
-      wrapText(ctx, text, x, y, 70, 18);
+      });
+
+      // Draw nodes
+      nodes.forEach(node=>{
+
+        ctx.beginPath();
+
+        ctx.arc(
+          node.x,
+          node.y,
+          node.radius,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle = "#dfefff";
+        ctx.fill();
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
+
+        ctx.fillStyle = "#000";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        wrapText(
+          node.text,
+          node.x,
+          node.y,
+          70,
+          18
+        );
+
+        // Combination text
+        if(node.combo){
+
+          ctx.fillStyle = "blue";
+          ctx.font = "18px Arial";
+
+          ctx.fillText(
+            node.combo,
+            node.x + 120,
+            node.y
+          );
+
+        }
+
+      });
+
     }
 
-    // Draw line
-    function drawLine(x1, y1, x2, y2) {
-
-      const canvas = document.getElementById("treeCanvas");
-      const ctx = canvas.getContext("2d");
-
-      ctx.beginPath();
-      ctx.moveTo(x1 + 42, y1);
-      ctx.lineTo(x2 - 42, y2);
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#000";
-      ctx.stroke();
-    }
-
-    // Wrap text inside node
-    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    // =========================
+    // Wrap Text
+    // =========================
+    function wrapText(text,x,y,maxWidth,lineHeight){
 
       const words = text.split(" ");
+
       let line = "";
       let lines = [];
 
-      for(let n = 0; n < words.length; n++) {
+      for(let n=0;n<words.length;n++){
 
         const testLine = line + words[n] + " ";
-        const metrics = ctx.measureText(testLine);
-        const testWidth = metrics.width;
 
-        if(testWidth > maxWidth && n > 0) {
+        const width =
+          ctx.measureText(testLine).width;
+
+        if(width > maxWidth && n > 0){
+
           lines.push(line);
+
           line = words[n] + " ";
-        } else {
+
+        }else{
+
           line = testLine;
+
         }
+
       }
 
       lines.push(line);
 
-      for(let i = 0; i < lines.length; i++) {
+      for(let i=0;i<lines.length;i++){
 
         ctx.fillText(
           lines[i],
           x,
-          y - ((lines.length - 1) * lineHeight / 2)
-            + (i * lineHeight)
+          y - ((lines.length-1)*lineHeight/2)
+            + i*lineHeight
         );
+
       }
+
     }
 
+    // =========================
+    // Mouse Events
+    // =========================
+    canvas.addEventListener("mousedown", startDrag);
+    canvas.addEventListener("mousemove", drag);
+    canvas.addEventListener("mouseup", stopDrag);
+    canvas.addEventListener("mouseleave", stopDrag);
+
+    function startDrag(event){
+
+      const mouse = getMousePos(event);
+
+      nodes.forEach(node=>{
+
+        const dx = mouse.x - node.x;
+        const dy = mouse.y - node.y;
+
+        const distance =
+          Math.sqrt(dx*dx + dy*dy);
+
+        if(distance < node.radius){
+
+          draggedNode = node;
+
+          canvas.style.cursor = "grabbing";
+
+        }
+
+      });
+
+    }
+
+    function drag(event){
+
+      if(!draggedNode) return;
+
+      const mouse = getMousePos(event);
+
+      draggedNode.x = mouse.x;
+      draggedNode.y = mouse.y;
+
+      draw();
+
+    }
+
+    function stopDrag(){
+
+      draggedNode = null;
+
+      canvas.style.cursor = "grab";
+
+    }
+
+    // =========================
+    // Mouse Position
+    // =========================
+    function getMousePos(event){
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      return {
+
+        x:(event.clientX - rect.left)
+          * (canvas.width / rect.width),
+
+        y:(event.clientY - rect.top)
+          * (canvas.height / rect.height)
+
+      };
+
+    }
+
+    // =========================
     // Initialize
+    // =========================
     renderInputs();
-    drawTree();
+    generateTree();
 
   </script>
 
