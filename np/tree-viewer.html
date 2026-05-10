@@ -21,8 +21,8 @@
       background: white;
       padding: 20px;
       border-radius: 10px;
-      width: 90%;
-      max-width: 1000px;
+      width: 95%;
+      max-width: 1200px;
       margin: auto;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
@@ -41,7 +41,7 @@
     input[type="text"] {
       padding: 8px;
       margin: 5px;
-      width: 140px;
+      width: 150px;
       border-radius: 5px;
       border: 1px solid #aaa;
     }
@@ -66,7 +66,7 @@
       background: white;
       border: 2px solid #333;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1500px;
     }
   </style>
 </head>
@@ -108,15 +108,15 @@
 
   </div>
 
-  <canvas id="treeCanvas" width="1400" height="800"></canvas>
+  <canvas id="treeCanvas" width="1800" height="1200"></canvas>
 
   <script>
 
-    // Default items
+    // Default categories
     let cat1 = ["Metal", "Plastic"];
     let cat2 = ["Cube", "Sphere", "Pyramid"];
 
-    // Render input boxes
+    // Render input fields
     function renderInputs() {
 
       const cat1Div = document.getElementById("cat1Items");
@@ -144,6 +144,7 @@
 
     // Update item names
     function updateItem(category, index, value) {
+
       if(category === 1) {
         cat1[index] = value;
       } else {
@@ -151,8 +152,9 @@
       }
     }
 
-    // Add items
+    // Add item
     function addItem(category) {
+
       if(category === 1) {
         cat1.push("New Item");
       } else {
@@ -162,7 +164,7 @@
       renderInputs();
     }
 
-    // Remove items
+    // Remove item
     function removeItem(category) {
 
       if(category === 1 && cat1.length > 1) {
@@ -176,7 +178,7 @@
       renderInputs();
     }
 
-    // Draw tree
+    // Draw tree diagram
     function drawTree() {
 
       const canvas = document.getElementById("treeCanvas");
@@ -184,54 +186,89 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const cat1Title = document.getElementById("cat1Title").value;
-      const cat2Title = document.getElementById("cat2Title").value;
+      const cat1Title =
+        document.getElementById("cat1Title").value;
 
-      const rootX = 100;
+      const cat2Title =
+        document.getElementById("cat2Title").value;
+
+      const rootX = 120;
       const rootY = canvas.height / 2;
 
+      // Horizontal positions
+      const level1X = 550;
+      const level2X = 1150;
+
+      // Root node
       drawNode(rootX, rootY, "Start");
 
-      // Dynamic spacing
-      const cat1Spacing = canvas.height / (cat1.length + 1);
+      // Dynamic vertical spacing for category 1
+      const cat1Spacing =
+        canvas.height / (cat1.length + 1);
 
       cat1.forEach((item1, i) => {
 
-        const x1 = 400;
         const y1 = cat1Spacing * (i + 1);
 
-        drawLine(rootX, rootY, x1, y1);
-        drawNode(x1, y1, item1);
+        // Draw first branch
+        drawLine(rootX, rootY, level1X, y1);
 
-        // Category label
+        drawNode(level1X, y1, item1);
+
+        // Label
         ctx.fillStyle = "black";
-        ctx.font = "18px Arial";
-        ctx.fillText(cat1Title, 220, y1 - 10);
+        ctx.font = "20px Arial";
+        ctx.fillText(
+          cat1Title,
+          (rootX + level1X) / 2,
+          y1 - 20
+        );
 
-        const cat2Spacing = 220;
+        // Dynamic spacing for second category
+        const totalHeightNeeded =
+          Math.max(250, cat2.length * 130);
 
         const startY =
-          y1 - ((cat2.length - 1) * cat2Spacing / 2);
+          y1 - totalHeightNeeded / 2;
+
+        const cat2Spacing =
+          totalHeightNeeded / Math.max(cat2.length - 1, 1);
 
         cat2.forEach((item2, j) => {
 
-          const x2 = 850;
-          const y2 = startY + j * cat2Spacing;
+          let y2;
 
-          drawLine(x1, y1, x2, y2);
-          drawNode(x2, y2, item2);
+          if(cat2.length === 1) {
+            y2 = y1;
+          } else {
+            y2 = startY + j * cat2Spacing;
+          }
+
+          // Prevent excessive overlap
+          y2 = Math.max(80, Math.min(canvas.height - 80, y2));
+
+          // Draw second branch
+          drawLine(level1X, y1, level2X, y2);
+
+          drawNode(level2X, y2, item2);
 
           // Category label
           ctx.fillStyle = "black";
           ctx.font = "18px Arial";
-          ctx.fillText(cat2Title, 620, y2 - 10);
 
-          // Combination
+          ctx.fillText(
+            cat2Title,
+            (level1X + level2X) / 2,
+            y2 - 18
+          );
+
+          // Final combination
           ctx.fillStyle = "blue";
-          ctx.font = "17px Arial";
+          ctx.font = "18px Arial";
+
           ctx.fillText(
             item1 + " " + item2,
-            x2 + 90,
+            level2X + 90,
             y2 + 5
           );
 
@@ -248,7 +285,7 @@
       const ctx = canvas.getContext("2d");
 
       ctx.beginPath();
-      ctx.arc(x, y, 40, 0, Math.PI * 2);
+      ctx.arc(x, y, 42, 0, Math.PI * 2);
 
       ctx.fillStyle = "#dfefff";
       ctx.fill();
@@ -262,7 +299,7 @@
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      ctx.fillText(text, x, y);
+      wrapText(ctx, text, x, y, 70, 18);
     }
 
     // Draw line
@@ -272,15 +309,49 @@
       const ctx = canvas.getContext("2d");
 
       ctx.beginPath();
-      ctx.moveTo(x1 + 40, y1);
-      ctx.lineTo(x2 - 40, y2);
+      ctx.moveTo(x1 + 42, y1);
+      ctx.lineTo(x2 - 42, y2);
 
       ctx.lineWidth = 2;
       ctx.strokeStyle = "#000";
       ctx.stroke();
     }
 
-    // Initial setup
+    // Wrap text inside node
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+
+      const words = text.split(" ");
+      let line = "";
+      let lines = [];
+
+      for(let n = 0; n < words.length; n++) {
+
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+
+        if(testWidth > maxWidth && n > 0) {
+          lines.push(line);
+          line = words[n] + " ";
+        } else {
+          line = testLine;
+        }
+      }
+
+      lines.push(line);
+
+      for(let i = 0; i < lines.length; i++) {
+
+        ctx.fillText(
+          lines[i],
+          x,
+          y - ((lines.length - 1) * lineHeight / 2)
+            + (i * lineHeight)
+        );
+      }
+    }
+
+    // Initialize
     renderInputs();
     drawTree();
 
