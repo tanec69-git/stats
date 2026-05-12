@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Permutation App with Repeated Letters</title>
 
   <style>
@@ -76,7 +76,7 @@
 
     .formula{
       line-height:1.9;
-      font-size:17px;
+      font-size:18px;
     }
 
     .warning{
@@ -97,8 +97,17 @@
       text-align:center;
     }
 
+    .math-box{
+      background:white;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      margin-top:15px;
+      overflow-x:auto;
+    }
+
     .final-answer{
-      font-size:28px;
+      font-size:30px;
       font-weight:bold;
       color:green;
       margin-top:20px;
@@ -106,6 +115,14 @@
       background:#eefbea;
       border-radius:10px;
       border:2px solid green;
+      text-align:center;
+    }
+
+    .case-title{
+      color:#0056b3;
+      font-size:22px;
+      margin-top:20px;
+      font-weight:bold;
     }
 
   </style>
@@ -131,20 +148,31 @@
   </button>
 
   <div class="section">
+
     <h2>Letter Frequencies</h2>
+
     <div id="frequencyOutput"></div>
+
   </div>
 
   <div class="section">
+
     <h2>Mathematical Working</h2>
+
     <div id="reasoningOutput" class="formula"></div>
+
   </div>
 
   <div class="section">
+
     <h2>Permutations</h2>
+
     <div id="stats"></div>
+
     <div id="warning" class="warning"></div>
+
     <div id="permutationOutput" class="output"></div>
+
   </div>
 
 </div>
@@ -155,11 +183,18 @@ function factorial(n){
 
   let result = 1;
 
-  for(let i=2;i<=n;i++){
+  for(let i = 2; i <= n; i++){
+
     result *= i;
   }
 
   return result;
+}
+
+function combination(n,r){
+
+  return factorial(n) /
+    (factorial(r) * factorial(n-r));
 }
 
 function getFrequencies(word){
@@ -169,20 +204,16 @@ function getFrequencies(word){
   for(const letter of word){
 
     if(freq[letter]){
+
       freq[letter]++;
-    }
-    else{
+
+    }else{
+
       freq[letter] = 1;
     }
   }
 
   return freq;
-}
-
-function combination(n,r){
-
-  return factorial(n) /
-    (factorial(r) * factorial(n-r));
 }
 
 function solve(){
@@ -240,11 +271,12 @@ function solve(){
     return;
   }
 
-  //-------------------------------------
-  // FREQUENCIES
-  //-------------------------------------
+  //-----------------------------------
+  // LETTER FREQUENCIES
+  //-----------------------------------
 
-  const frequencies = getFrequencies(word);
+  const frequencies =
+    getFrequencies(word);
 
   let freqHTML =
     "<table><tr><th>Letter</th><th>Frequency</th></tr>";
@@ -261,11 +293,12 @@ function solve(){
 
   freqHTML += "</table>";
 
-  frequencyOutput.innerHTML = freqHTML;
+  frequencyOutput.innerHTML =
+    freqHTML;
 
-  //-------------------------------------
-  // UNIQUE PERMUTATIONS
-  //-------------------------------------
+  //-----------------------------------
+  // GENERATE UNIQUE PERMUTATIONS
+  //-----------------------------------
 
   const results = new Set();
 
@@ -278,6 +311,7 @@ function solve(){
     if(path.length === r){
 
       results.add(path);
+
       return;
     }
 
@@ -296,11 +330,12 @@ function solve(){
 
   backtrack("", {...frequencies});
 
-  const resultArray = Array.from(results);
+  const resultArray =
+    Array.from(results);
 
-  //-------------------------------------
+  //-----------------------------------
   // DISPLAY PERMUTATIONS
-  //-------------------------------------
+  //-----------------------------------
 
   permutationOutput.textContent =
     resultArray.join("\n");
@@ -315,159 +350,310 @@ function solve(){
       "Maximum display limit reached.";
   }
 
-  //-------------------------------------
+  //-----------------------------------
   // MATHEMATICAL REASONING
-  //-------------------------------------
+  //-----------------------------------
 
-  let reasoningHTML = "";
+  let html = "";
 
-  reasoningHTML += `
-    <strong>Word:</strong> ${word}<br><br>
+  html += `
 
     We must account for repeated letters
-    to avoid overcounting duplicate arrangements.<br><br>
+    so that duplicate arrangements are
+    NOT counted more than once.
 
-    <strong>General Formula:</strong><br><br>
+    <div class="math-box">
 
-    Unique permutations =
-    \\( \\frac{n!}{a!b!c!...} \\)<br><br>
+      <strong>General Formula for Permutations with Repeated Letters</strong>
 
-    where:<br>
+      <br><br>
 
-    n = total letters<br>
+      Unique permutations =
+      n! / (a! × b! × c! ...)
 
-    a,b,c = repeated letter frequencies<br><br>
+      <br><br>
+
+      where:
+
+      <br><br>
+
+      n = total letters
+
+      <br><br>
+
+      a,b,c = repeated letter frequencies
+
+    </div>
   `;
 
-  //-------------------------------------
-  // SPECIAL EXAMPLE
-  //-------------------------------------
+  //-----------------------------------
+  // SPECIAL WORKED EXAMPLE
+  //-----------------------------------
 
   if(word === "STATISTICS" && r === 3){
 
-    const case1 = 60;
-    const case2 = 36;
+    //-----------------------------------
+    // CASE 1
+    //-----------------------------------
+
+    const case1Choices =
+      combination(5,3);
+
+    const case1Arrangements =
+      factorial(3);
+
+    const case1 =
+      case1Choices *
+      case1Arrangements;
+
+    //-----------------------------------
+    // CASE 2
+    //-----------------------------------
+
+    const repeatedArrangement =
+      factorial(3) / factorial(2);
+
+    const repeatedCases =
+      4 * repeatedArrangement;
+
+    const case2 =
+      repeatedCases * 3;
+
+    //-----------------------------------
+    // CASE 3
+    //-----------------------------------
+
     const case3 = 2;
+
+    //-----------------------------------
+    // TOTAL
+    //-----------------------------------
 
     const total =
       case1 + case2 + case3;
 
-    reasoningHTML += `
+    html += `
 
       <hr>
 
-      <h2>Worked Example</h2>
+      <h2>Specific Equation for this Problem</h2>
 
-      <strong>STATISTICS</strong> contains:<br><br>
+      We split the problem into cases.
 
-      S = 3<br>
-      T = 3<br>
-      I = 2<br>
-      A = 1<br>
-      C = 1<br><br>
+      <div class="math-box">
 
-      We count all possible 3-letter arrangements
-      systematically.<br><br>
+        Total permutations
 
-      <h3>Case 1: All 3 letters different</h3>
+        <br><br>
 
-      Distinct letters are:<br><br>
+        =
 
-      {S, T, I, A, C}<br><br>
+        (5C3 × 3!)
 
-      Number of ways to choose 3 distinct letters:<br><br>
+        +
 
-      5C3 =
-      5! / (3! × 2!)<br><br>
+        [3 × (4 × (3!/2!))]
 
-      =
-      120 / (6 × 2)<br><br>
+        +
 
-      = 10 choices<br><br>
+        2
 
-      Each choice can be arranged in:<br><br>
+      </div>
 
-      3! = 6 ways<br><br>
+      <br>
 
-      Therefore:<br><br>
+      Substituting the values:
 
-      10 × 6 = ${case1}<br><br>
+      <div class="math-box">
 
-      <h3>Case 2: One repeated letter</h3>
+        =
 
-      Possible repeated letters are:<br><br>
+        (10 × 6)
 
-      S, T, I<br><br>
+        +
 
-      Example arrangement:<br><br>
+        [3 × (4 × 3)]
 
-      S S A<br><br>
+        +
 
-      Formula:<br><br>
+        2
 
-      3! / 2!<br><br>
+        <br><br>
 
-      = 6 / 2<br><br>
+        =
 
-      = 3 arrangements<br><br>
+        60 + 36 + 2
 
-      Repeated S:<br><br>
+        <br><br>
 
-      4 choices for remaining letter × 3 arrangements<br><br>
+        =
 
-      = 12<br><br>
+        98
 
-      Repeated T:<br><br>
+      </div>
 
-      = 12<br><br>
+      <div class="case-title">
+        Case 1: All Letters Different
+      </div>
 
-      Repeated I:<br><br>
+      Distinct letters are:
 
-      = 12<br><br>
+      <br><br>
 
-      Total for Case 2:<br><br>
+      {S, T, I, A, C}
 
-      12 + 12 + 12 = ${case2}<br><br>
+      <br><br>
 
-      <h3>Case 3: All letters identical</h3>
+      Choose 3 different letters:
 
-      Possible arrangements:<br><br>
+      <div class="math-box">
 
-      SSS<br>
-      TTT<br><br>
+        5C3
 
-      Total = ${case3}<br><br>
+        <br><br>
 
-      <h2>Final Answer</h2>
+        = 5! / (3! × 2!)
 
-      ${case1} + ${case2} + ${case3}
-      = ${total}
+        <br><br>
+
+        = 120 / (6 × 2)
+
+        <br><br>
+
+        = 10
+
+      </div>
+
+      Arrange each selection:
+
+      <div class="math-box">
+
+        3! = 6
+
+      </div>
+
+      Therefore:
+
+      <div class="math-box">
+
+        10 × 6 = 60
+
+      </div>
+
+      <div class="case-title">
+        Case 2: One Repeated Letter
+      </div>
+
+      Possible repeated letters:
+
+      <br><br>
+
+      S, T, I
+
+      <br><br>
+
+      Example arrangement:
+
+      <br><br>
+
+      S S A
+
+      <div class="math-box">
+
+        Number of arrangements
+
+        <br><br>
+
+        = 3! / 2!
+
+        <br><br>
+
+        = 6 / 2
+
+        <br><br>
+
+        = 3
+
+      </div>
+
+      There are 4 choices for the remaining letter.
+
+      <div class="math-box">
+
+        4 × 3 = 12
+
+      </div>
+
+      Since there are 3 repeated-letter groups:
+
+      <div class="math-box">
+
+        12 + 12 + 12 = 36
+
+      </div>
+
+      <div class="case-title">
+        Case 3: All Letters Identical
+      </div>
+
+      Possible arrangements:
+
+      <br><br>
+
+      SSS
+
+      <br>
+
+      TTT
+
+      <div class="math-box">
+
+        Total = 2
+
+      </div>
 
       <div class="final-answer">
-        Total Number of Unique 3-Letter Permutations
-        = ${total}
+
+        Final Answer
+
+        <br><br>
+
+        98 Unique 3-Letter Permutations
+
       </div>
     `;
   }
   else{
 
-    reasoningHTML += `
+    html += `
 
       <hr>
 
-      <h2>Final Answer</h2>
+      <h2>Specific Equation for this Problem</h2>
 
-      The app generated all unique permutations
-      while accounting for repeated letters.
+      <div class="math-box">
+
+        Total Unique Permutations
+
+        <br><br>
+
+        = ${resultArray.length}
+
+      </div>
 
       <div class="final-answer">
-        Total Unique Permutations
-        = ${resultArray.length}
+
+        Final Answer
+
+        <br><br>
+
+        ${resultArray.length} Unique Permutations
+
       </div>
     `;
   }
 
-  reasoningOutput.innerHTML = reasoningHTML;
+  reasoningOutput.innerHTML = html;
 }
 
 </script>
