@@ -3,96 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Word Permutation App</title>
+  <title>Permutation App with Repeated Letters</title>
 
   <style>
-    body {
+
+    body{
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f4f4f4;
+      background:#f4f4f4;
+      margin:20px;
     }
 
-    h1 {
-      text-align: center;
+    .container{
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 0 10px rgba(0,0,0,0.1);
     }
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    h1{
+      text-align:center;
     }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-top: 15px;
+    label{
+      display:block;
+      margin-top:15px;
+      font-weight:bold;
     }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 5px;
-      box-sizing: border-box;
+    input{
+      width:100%;
+      padding:10px;
+      font-size:16px;
+      margin-top:5px;
+      box-sizing:border-box;
     }
 
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-      background: #007bff;
-      color: white;
+    button{
+      margin-top:20px;
+      padding:12px 20px;
+      border:none;
+      border-radius:8px;
+      background:#007bff;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
     }
 
-    button:hover {
-      background: #0056b3;
+    button:hover{
+      background:#0056b3;
     }
 
-    .results {
-      margin-top: 25px;
+    .section{
+      margin-top:25px;
+      background:#fafafa;
+      padding:15px;
+      border-radius:10px;
+      border:1px solid #ddd;
     }
 
-    .stats {
-      margin-bottom: 15px;
-      font-size: 18px;
-      font-weight: bold;
+    .output{
+      max-height:500px;
+      overflow-y:auto;
+      white-space:pre-wrap;
+      font-family:monospace;
+      background:white;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
     }
 
-    .section {
-      margin-top: 25px;
-      padding: 15px;
-      background: #fafafa;
-      border-radius: 10px;
-      border: 1px solid #ddd;
+    .formula{
+      line-height:1.8;
+      font-size:17px;
     }
 
-    .permutation-list {
-      max-height: 500px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-family: monospace;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+    .warning{
+      color:red;
+      font-weight:bold;
+      margin-top:10px;
     }
 
-    .warning {
-      color: red;
-      margin-top: 10px;
-      font-weight: bold;
+    table{
+      border-collapse:collapse;
+      width:100%;
+      margin-top:10px;
     }
 
-    .formula {
-      font-size: 18px;
-      margin-top: 10px;
-      line-height: 1.8;
+    td,th{
+      border:1px solid #ccc;
+      padding:8px;
+      text-align:center;
     }
 
   </style>
@@ -101,166 +103,309 @@
 
 <div class="container">
 
-  <h1>Word Permutation App</h1>
+  <h1>Permutation App (Repeated Letters Included)</h1>
 
-  <label for="wordInput">Enter a Word</label>
+  <label>Enter a Word</label>
   <input type="text" id="wordInput" placeholder="Example: STATISTICS">
 
-  <label for="lengthInput">Number of Letters to Permutate</label>
+  <label>Number of Letters to Permutate</label>
   <input type="number" id="lengthInput" min="1" value="3">
 
-  <label for="maxDisplay">Maximum Number of Permutations to Display</label>
+  <label>Maximum Number of Permutations to Display</label>
   <input type="number" id="maxDisplay" min="1" value="100">
 
-  <button onclick="generatePermutations()">
+  <button onclick="solve()">
     Generate Permutations
   </button>
 
-  <div class="results">
+  <div class="section">
+    <h2>Letter Frequencies</h2>
+    <div id="frequencyOutput"></div>
+  </div>
 
-    <div class="section">
-      <h2>Mathematical Calculations</h2>
-      <div id="mathOutput" class="formula"></div>
-    </div>
+  <div class="section">
+    <h2>Mathematical Reasoning</h2>
+    <div id="reasoningOutput" class="formula"></div>
+  </div>
 
-    <div class="section">
-      <h2>Permutation Results</h2>
-      <div class="stats" id="stats"></div>
-      <div class="warning" id="warning"></div>
-      <div class="permutation-list" id="output"></div>
-    </div>
-
+  <div class="section">
+    <h2>Permutations</h2>
+    <div id="stats"></div>
+    <div id="warning" class="warning"></div>
+    <div id="permutationOutput" class="output"></div>
   </div>
 
 </div>
 
 <script>
 
-  function factorial(n) {
-    let result = 1;
+function factorial(n){
 
-    for (let i = 2; i <= n; i++) {
-      result *= i;
-    }
+  let result = 1;
 
-    return result;
+  for(let i=2;i<=n;i++){
+    result *= i;
   }
 
-  function generatePermutations() {
+  return result;
+}
 
-    const word =
-      document.getElementById("wordInput")
-      .value
-      .trim()
-      .toUpperCase();
+function getFrequencies(word){
 
-    const length =
-      parseInt(
-        document.getElementById("lengthInput").value
-      );
+  const freq = {};
 
-    const maxDisplay =
-      parseInt(
-        document.getElementById("maxDisplay").value
-      );
+  for(const letter of word){
 
-    const output =
-      document.getElementById("output");
-
-    const stats =
-      document.getElementById("stats");
-
-    const warning =
-      document.getElementById("warning");
-
-    const mathOutput =
-      document.getElementById("mathOutput");
-
-    output.textContent = "";
-    stats.textContent = "";
-    warning.textContent = "";
-    mathOutput.innerHTML = "";
-
-    if (word.length === 0) {
-      warning.textContent =
-        "Please enter a word.";
-      return;
+    if(freq[letter]){
+      freq[letter]++;
     }
-
-    if (length > word.length) {
-      warning.textContent =
-        "Permutation length cannot exceed word length.";
-      return;
+    else{
+      freq[letter] = 1;
     }
+  }
 
-    const n = word.length;
-    const r = length;
+  return freq;
+}
 
-    // nPr formula
-    const numerator = factorial(n);
-    const denominator = factorial(n - r);
-    const totalPermutations =
-      numerator / denominator;
+function solve(){
 
-    // Display mathematics
-    mathOutput.innerHTML = `
-      <strong>Word:</strong> ${word}<br><br>
+  const word =
+    document.getElementById("wordInput")
+    .value
+    .trim()
+    .toUpperCase();
 
-      <strong>Total letters (n):</strong> ${n}<br>
-      <strong>Letters selected (r):</strong> ${r}<br><br>
+  const r =
+    parseInt(
+      document.getElementById("lengthInput").value
+    );
 
-      <strong>Permutation Formula:</strong><br>
-      nPr = n! / (n - r)!<br><br>
+  const maxDisplay =
+    parseInt(
+      document.getElementById("maxDisplay").value
+    );
 
-      ${n}P${r} = ${n}! / (${n} - ${r})!<br><br>
+  const frequencyOutput =
+    document.getElementById("frequencyOutput");
 
-      = ${n}! / ${n-r}!<br><br>
+  const reasoningOutput =
+    document.getElementById("reasoningOutput");
 
-      = ${numerator} / ${denominator}<br><br>
+  const permutationOutput =
+    document.getElementById("permutationOutput");
 
-      = <strong>${totalPermutations}</strong>
+  const stats =
+    document.getElementById("stats");
+
+  const warning =
+    document.getElementById("warning");
+
+  frequencyOutput.innerHTML = "";
+  reasoningOutput.innerHTML = "";
+  permutationOutput.textContent = "";
+  stats.textContent = "";
+  warning.textContent = "";
+
+  if(word.length === 0){
+    warning.textContent = "Please enter a word.";
+    return;
+  }
+
+  if(r > word.length){
+    warning.textContent =
+      "Permutation length cannot exceed word length.";
+    return;
+  }
+
+  //-----------------------------------------
+  // FREQUENCY TABLE
+  //-----------------------------------------
+
+  const frequencies = getFrequencies(word);
+
+  let freqHTML =
+    "<table><tr><th>Letter</th><th>Frequency</th></tr>";
+
+  for(const letter in frequencies){
+
+    freqHTML += `
+      <tr>
+        <td>${letter}</td>
+        <td>${frequencies[letter]}</td>
+      </tr>
     `;
+  }
 
-    let results = new Set();
+  freqHTML += "</table>";
 
-    function permute(path, remaining) {
+  frequencyOutput.innerHTML = freqHTML;
 
-      if (results.size >= maxDisplay) return;
+  //-----------------------------------------
+  // GENERATE UNIQUE PERMUTATIONS
+  //-----------------------------------------
 
-      if (path.length === length) {
-        results.add(path);
-        return;
-      }
+  const results = new Set();
 
-      for (let i = 0; i < remaining.length; i++) {
+  function backtrack(path, freqMap){
 
-        if (results.size >= maxDisplay) return;
-
-        const next =
-          remaining.slice(0, i) +
-          remaining.slice(i + 1);
-
-        permute(path + remaining[i], next);
-      }
+    if(results.size >= maxDisplay){
+      return;
     }
 
-    permute("", word);
+    if(path.length === r){
 
-    const resultArray = Array.from(results);
+      results.add(path);
+      return;
+    }
 
-    stats.textContent =
-      "Displayed " +
-      resultArray.length +
-      " permutation(s)";
+    for(const letter in freqMap){
 
-    output.textContent =
-      resultArray.join("\n");
+      if(freqMap[letter] > 0){
 
-    if (resultArray.length >= maxDisplay) {
-      warning.textContent =
-        "Maximum display limit reached.";
+        freqMap[letter]--;
+
+        backtrack(path + letter, freqMap);
+
+        freqMap[letter]++;
+      }
     }
   }
+
+  backtrack("", {...frequencies});
+
+  //-----------------------------------------
+  // DISPLAY PERMUTATIONS
+  //-----------------------------------------
+
+  const resultArray = Array.from(results);
+
+  permutationOutput.textContent =
+    resultArray.join("\n");
+
+  stats.innerHTML =
+    `<strong>Total Unique Permutations:</strong>
+    ${resultArray.length}`;
+
+  if(resultArray.length >= maxDisplay){
+
+    warning.textContent =
+      "Maximum display limit reached.";
+  }
+
+  //-----------------------------------------
+  // MATHEMATICAL REASONING
+  //-----------------------------------------
+
+  let reasoningHTML = "";
+
+  reasoningHTML += `
+    <strong>Word:</strong> ${word}<br><br>
+
+    We must account for repeated letters.<br><br>
+
+    The app generates ONLY UNIQUE permutations.<br><br>
+
+    <strong>Method Used:</strong><br>
+    1. Count the frequency of each letter.<br>
+    2. Build permutations one letter at a time.<br>
+    3. A letter can only be used as many times as it appears.<br>
+    4. Duplicate arrangements are automatically avoided.<br><br>
+  `;
+
+  //-----------------------------------------
+  // SHOW FORMULA EXPLANATION
+  //-----------------------------------------
+
+  reasoningHTML += `
+    <strong>Permutation Formula with Repeated Letters:</strong><br><br>
+
+    If all letters were different:<br><br>
+
+    nPr = n! / (n-r)!<br><br>
+
+    However, when letters repeat, we divide by
+    repeated factorials to avoid overcounting.<br><br>
+
+    General Formula:<br><br>
+
+    Total Unique Permutations =
+    n! / (a! × b! × c! ...)<br><br>
+
+    where a, b, c are repeated letter counts.<br><br>
+  `;
+
+  //-----------------------------------------
+  // SPECIAL CASE EXAMPLE
+  //-----------------------------------------
+
+  if(word === "STATISTICS" && r === 3){
+
+    reasoningHTML += `
+      <hr>
+
+      <h3>Worked Example: STATISTICS (3-letter permutations)</h3>
+
+      STATISTICS contains:<br><br>
+
+      S = 3<br>
+      T = 3<br>
+      I = 2<br>
+      A = 1<br>
+      C = 1<br><br>
+
+      <strong>Case 1: All letters different</strong><br><br>
+
+      Choose 3 different letters from 5 distinct letters:<br><br>
+
+      5C3 = 10 selections<br><br>
+
+      Each selection can be arranged in:<br><br>
+
+      3! = 6 ways<br><br>
+
+      Total:<br><br>
+
+      10 × 6 = 60<br><br>
+
+      <strong>Case 2: One repeated letter</strong><br><br>
+
+      Possible repeated letters:<br>
+      S, T, I<br><br>
+
+      Example: S S A<br><br>
+
+      Number of arrangements:<br><br>
+
+      3! / 2! = 3<br><br>
+
+      Repeated S gives:<br>
+
+      4 choices for the remaining letter × 3 arrangements<br>
+
+      = 12<br><br>
+
+      Repeated T gives 12<br><br>
+
+      Repeated I gives 12<br><br>
+
+      Total for Case 2:<br><br>
+
+      12 + 12 + 12 = 36<br><br>
+
+      <strong>Case 3: All letters identical</strong><br><br>
+
+      SSS and TTT<br><br>
+
+      Total = 2<br><br>
+
+      <strong>Final Total:</strong><br><br>
+
+      60 + 36 + 2 = 98
+    `;
+  }
+
+  reasoningOutput.innerHTML = reasoningHTML;
+}
 
 </script>
 
