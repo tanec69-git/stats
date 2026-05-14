@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Ball Probability Distribution</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+.description{
+    max-width:900px;
+    margin:auto;
+    margin-bottom:20px;
+    color:#444;
+}
+
+.controls{
+    background:white;
+    padding:20px;
+    max-width:950px;
+    margin:auto;
+    margin-bottom:25px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.color-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+}
+
+.color-row input{
+    padding:8px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    margin-top:10px;
+}
+
+.generateBtn{
+    background:#2d6cdf;
+    color:white;
+}
+
+.generateBtn:hover{
+    background:#1f56b5;
+}
+
+.clearBtn{
+    background:#e53935;
+    color:white;
+}
+
+.clearBtn:hover{
+    background:#c62828;
+}
+
+table{
+    margin:auto;
+    border-collapse:collapse;
+    background:white;
+    width:95%;
+    max-width:1000px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:12px;
+    font-size:17px;
+}
+
+th{
+    background:#2d6cdf;
+    color:white;
+}
+
+tr:hover td{
+    background:#eaf1ff;
+}
+
+td{
+    cursor:pointer;
+}
+
+.selected td{
+    background:#4caf50 !important;
+    color:white;
+    font-weight:bold;
+}
+
+.results{
+    margin-top:30px;
+    background:white;
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.probability{
+    font-size:28px;
+    color:#2d6cdf;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.fraction{
+    font-size:22px;
+    margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Ball Probability Distribution Generator</h1>
+
+<div class="description">
+Adjust the number of balls in the bag and the number of balls drawn.
+Click on outcomes to calculate combined probabilities.
+</div>
+
+<div class="controls">
+
+    <h2>Bag Contents</h2>
+
+    <div id="colorInputs">
+
+        <div class="color-row">
+            <input type="text" value="Red" class="colorName">
+            <input type="number" value="6" min="0" class="colorCount">
+        </div>
+
+        <div class="color-row">
+            <input type="text" value="Blue" class="colorName">
+            <input type="number" value="1" min="0" class="colorCount">
+        </div>
+
+        <div class="color-row">
+            <input type="text" value="Yellow" class="colorName">
+            <input type="number" value="4" min="0" class="colorCount">
+        </div>
+
+    </div>
+
+    <button onclick="addColorRow()">
+        Add Colour
+    </button>
+
+    <br><br>
+
+    <label>
+        Number of Balls Drawn:
+    </label>
+
+    <input type="number" id="ballsDrawn" value="3" min="1">
+
+    <br>
+
+    <button class="generateBtn" onclick="generateDistribution()">
+        Generate Distribution
+    </button>
+
+</div>
+
+<table>
+
+    <thead>
+        <tr>
+            <th>Outcome</th>
+            <th>Ways</th>
+            <th>Probability</th>
+        </tr>
+    </thead>
+
+    <tbody id="distributionTable"></tbody>
+
+</table>
+
+<div class="results">
+
+    <h2>Selected Outcomes</h2>
+
+    <div id="selectedOutcomes">
+        None
+    </div>
+
+    <div class="fraction" id="fractionResult">
+        Probability = 0
+    </div>
+
+    <div class="probability" id="decimalResult">
+        0%
+    </div>
+
+    <button class="clearBtn" onclick="clearSelections()">
+        Clear Selections
+    </button>
+
+</div>
+
+<script>
+
+let selected = [];
+let totalOutcomes = 0;
+let currentDistribution = [];
+
+function factorial(n){
+
+    if(n <= 1) return 1;
+
+    let result = 1;
+
+    for(let i=2;i<=n;i++){
+        result *= i;
+    }
+
+    return result;
+
+}
+
+function combination(n,r){
+
+    if(r > n || r < 0) return 0;
+
+    return factorial(n) /
+           (factorial(r) * factorial(n-r));
+
+}
+
+function addColorRow(){
+
+    const container =
+        document.getElementById("colorInputs");
+
+    const row = document.createElement("div");
+
+    row.className = "color-row";
+
+    row.innerHTML = `
+        <input type="text" value="NewColour" class="colorName">
+        <input type="number" value="0" min="0" class="colorCount">
+    `;
+
+    container.appendChild(row);
+
+}
+
+function generateCombinations(colors, drawCount){
+
+    const results = [];
+
+    function helper(index, remaining, current){
+
+        if(index === colors.length){
+
+            if(remaining === 0){
+
+                results.push([...current]);
+
+            }
+
+            return;
+
+        }
+
+        for(let i=0;
+            i<=Math.min(colors[index].count, remaining);
+            i++){
+
+            current.push(i);
+
+            helper(
+                index + 1,
+                remaining - i,
+                current
+            );
+
+            current.pop();
+
+        }
+
+    }
+
+    helper(0, drawCount, []);
+
+    return results;
+
+}
+
+function generateDistribution(){
+
+    selected = [];
+
+    const names =
+        [...document.querySelectorAll(".colorName")]
+        .map(x => x.value.trim());
+
+    const counts =
+        [...document.querySelectorAll(".colorCount")]
+        .map(x => parseInt(x.value));
+
+    const colors = [];
+
+    for(let i=0;i<names.length;i++){
+
+        if(names[i] !== "" && counts[i] > 0){
+
+            colors.push({
+                name:names[i],
+                count:counts[i]
+            });
+
+        }
+
+    }
+
+    const drawCount =
+        parseInt(
+            document.getElementById("ballsDrawn").value
+        );
+
+    const totalBalls =
+        colors.reduce((sum,c)=>sum+c.count,0);
+
+    totalOutcomes =
+        combination(totalBalls, drawCount);
+
+    const combos =
+        generateCombinations(colors, drawCount);
+
+    currentDistribution = [];
+
+    combos.forEach(combo => {
+
+        let ways = 1;
+
+        let description = [];
+
+        for(let i=0;i<combo.length;i++){
+
+            if(combo[i] > 0){
+
+                ways *= combination(
+                    colors[i].count,
+                    combo[i]
+                );
+
+                description.push(
+                    combo[i] + " " + colors[i].name
+                );
+
+            }
+
+        }
+
+        currentDistribution.push({
+            outcome:description.join(", "),
+            ways:ways
+        });
+
+    });
+
+    displayDistribution();
+
+}
+
+function displayDistribution(){
+
+    const table =
+        document.getElementById("distributionTable");
+
+    table.innerHTML = "";
+
+    currentDistribution.sort((a,b)=>b.ways-a.ways);
+
+    currentDistribution.forEach(item => {
+
+        const row =
+            document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${item.outcome}</td>
+            <td>${item.ways}</td>
+            <td>${item.ways}/${totalOutcomes}</td>
+        `;
+
+        row.addEventListener("click", ()=>{
+
+            toggleSelection(item, row);
+
+        });
+
+        table.appendChild(row);
+
+    });
+
+    updateResults();
+
+}
+
+function toggleSelection(item, row){
+
+    const exists =
+        selected.find(
+            x => x.outcome === item.outcome
+        );
+
+    if(exists){
+
+        selected =
+            selected.filter(
+                x => x.outcome !== item.outcome
+            );
+
+        row.classList.remove("selected");
+
+    }else{
+
+        selected.push(item);
+
+        row.classList.add("selected");
+
+    }
+
+    updateResults();
+
+}
+
+function updateResults(){
+
+    const selectedOutcomes =
+        document.getElementById("selectedOutcomes");
+
+    const fractionResult =
+        document.getElementById("fractionResult");
+
+    const decimalResult =
+        document.getElementById("decimalResult");
+
+    if(selected.length === 0){
+
+        selectedOutcomes.innerHTML = "None";
+
+        fractionResult.innerHTML =
+            "Probability = 0";
+
+        decimalResult.innerHTML = "0%";
+
+        return;
+
+    }
+
+    const totalWays =
+        selected.reduce(
+            (sum,item)=>sum+item.ways,
+            0
+        );
+
+    const probability =
+        totalWays / totalOutcomes;
+
+    selectedOutcomes.innerHTML =
+        selected.map(x=>x.outcome)
+        .join("<br>");
+
+    fractionResult.innerHTML =
+        `Probability = ${totalWays}/${totalOutcomes}`;
+
+    decimalResult.innerHTML =
+        `${(probability*100).toFixed(2)}%`;
+
+}
+
+function clearSelections(){
+
+    selected = [];
+
+    document.querySelectorAll("tr")
+    .forEach(row=>{
+        row.classList.remove("selected");
+    });
+
+    updateResults();
+
+}
+
+generateDistribution();
+
+</script>
+
+</body>
+</html>
