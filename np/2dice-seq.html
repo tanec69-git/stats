@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Two Dice Probability Distribution</title>
+
+<style>
+
+body{
+    font-family:Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:20px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+.description{
+    max-width:900px;
+    margin:auto;
+    margin-bottom:20px;
+    color:#444;
+}
+
+table{
+    border-collapse:collapse;
+    margin:auto;
+    width:95%;
+    max-width:1000px;
+    background:white;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
+    font-size:17px;
+}
+
+th{
+    background:#2d6cdf;
+    color:white;
+}
+
+td{
+    cursor:pointer;
+    transition:0.2s;
+}
+
+tr:hover td{
+    background:#eaf1ff;
+}
+
+.selected td{
+    background:#4caf50 !important;
+    color:white;
+    font-weight:bold;
+}
+
+.results{
+    margin-top:30px;
+    background:white;
+    max-width:800px;
+    margin-left:auto;
+    margin-right:auto;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.fraction{
+    font-size:24px;
+    margin-top:10px;
+}
+
+.percentage{
+    font-size:30px;
+    color:#2d6cdf;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+button{
+    margin-top:15px;
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:16px;
+    background:#e53935;
+    color:white;
+}
+
+button:hover{
+    background:#c62828;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Probability Distribution of Two Dice Rolled Sequentially</h1>
+
+<div class="description">
+Click on any outcomes below to select them.
+The app will calculate the combined probability of the selected outcomes.
+</div>
+
+<table>
+
+<thead>
+<tr>
+    <th>First Die</th>
+    <th>Second Die</th>
+    <th>Outcome</th>
+    <th>Probability</th>
+</tr>
+</thead>
+
+<tbody id="distributionTable"></tbody>
+
+</table>
+
+<div class="results">
+
+<h2>Selected Outcomes</h2>
+
+<div id="selectedOutcomes">
+None
+</div>
+
+<div class="fraction" id="fractionResult">
+Probability = 0 / 36
+</div>
+
+<div class="percentage" id="percentageResult">
+0%
+</div>
+
+<button onclick="clearSelections()">
+Clear Selections
+</button>
+
+</div>
+
+<script>
+
+const totalOutcomes = 36;
+
+const table =
+    document.getElementById("distributionTable");
+
+let selected = [];
+
+for(let first=1; first<=6; first++){
+
+    for(let second=1; second<=6; second++){
+
+        const row =
+            document.createElement("tr");
+
+        const outcome =
+            "(" + first + ", " + second + ")";
+
+        row.innerHTML = `
+            <td>${first}</td>
+            <td>${second}</td>
+            <td>${outcome}</td>
+            <td>1/36</td>
+        `;
+
+        const item = {
+            outcome: outcome,
+            probability: 1
+        };
+
+        row.addEventListener("click", ()=>{
+
+            toggleSelection(item, row);
+
+        });
+
+        table.appendChild(row);
+
+    }
+
+}
+
+function toggleSelection(item, row){
+
+    const exists =
+        selected.find(
+            x => x.outcome === item.outcome
+        );
+
+    if(exists){
+
+        selected =
+            selected.filter(
+                x => x.outcome !== item.outcome
+            );
+
+        row.classList.remove("selected");
+
+    }else{
+
+        selected.push(item);
+
+        row.classList.add("selected");
+
+    }
+
+    updateResults();
+
+}
+
+function updateResults(){
+
+    const selectedOutcomes =
+        document.getElementById("selectedOutcomes");
+
+    const fractionResult =
+        document.getElementById("fractionResult");
+
+    const percentageResult =
+        document.getElementById("percentageResult");
+
+    if(selected.length === 0){
+
+        selectedOutcomes.innerHTML = "None";
+
+        fractionResult.innerHTML =
+            "Probability = 0 / 36";
+
+        percentageResult.innerHTML = "0%";
+
+        return;
+
+    }
+
+    const totalWays = selected.length;
+
+    const probability =
+        totalWays / totalOutcomes;
+
+    selectedOutcomes.innerHTML =
+        selected.map(x => x.outcome)
+        .join(", ");
+
+    fractionResult.innerHTML =
+        `Probability = ${totalWays} / 36`;
+
+    percentageResult.innerHTML =
+        `${(probability * 100).toFixed(2)}%`;
+
+}
+
+function clearSelections(){
+
+    selected = [];
+
+    document.querySelectorAll("tr")
+    .forEach(row => {
+        row.classList.remove("selected");
+    });
+
+    updateResults();
+
+}
+
+</script>
+
+</body>
+</html>
