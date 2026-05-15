@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Camera Selection Combination App</title>
 
+<!-- MathJax -->
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
+    },
+    svg: {
+        fontCache: 'global'
+    }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
 <style>
 
 body{
@@ -63,7 +78,7 @@ h1{
 
 .solutions{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
     gap:20px;
 }
 
@@ -97,65 +112,38 @@ button:hover{
 .steps{
     margin-top:18px;
     background:#eef4ff;
-    padding:18px;
+    padding:20px;
     border-radius:12px;
     display:none;
     animation:fadeIn 0.5s ease;
 }
 
-.formula{
-    color:#d62828;
-    font-size:24px;
-    font-weight:bold;
-    margin-top:14px;
+.case-box{
+    margin-top:12px;
+    background:white;
+    padding:14px;
+    border-radius:10px;
+    border-left:5px solid #457b9d;
+}
+
+.math{
+    margin-top:25px;
+    text-align:center;
+    overflow-x:auto;
 }
 
 .answer{
     color:#2a9d8f;
     font-size:30px;
     font-weight:bold;
-    margin-top:18px;
-}
-
-.case-box{
-    margin-top:12px;
-    background:white;
-    padding:12px;
-    border-radius:10px;
-    border-left:5px solid #457b9d;
+    text-align:center;
+    margin-top:25px;
 }
 
 .highlight{
     background:yellow;
     padding:2px 6px;
     border-radius:6px;
-}
-
-.ncr{
-    display:inline-block;
-    position:relative;
-    margin:0 4px;
-    font-size:30px;
-    line-height:1;
-}
-
-.ncr .top{
-    position:absolute;
-    top:-18px;
-    left:12px;
-    font-size:18px;
-}
-
-.ncr .bottom{
-    position:absolute;
-    bottom:-18px;
-    left:12px;
-    font-size:18px;
-}
-
-.ncr .c{
-    font-size:34px;
-    font-weight:bold;
 }
 
 @keyframes fadeIn{
@@ -227,239 +215,197 @@ Find the number of ways if:
 
 <div class="solutions">
 
-    <!-- PART I -->
-    <div class="solution-card">
+<!-- PART I -->
+<div class="solution-card">
 
-        <h2>(i) No Restrictions</h2>
+<h2>(i) No Restrictions</h2>
 
-        <div class="case-box">
-            Choose any 4 cameras from 12 cameras
-        </div>
+<div class="case-box">
+Choose any 4 cameras from 12 cameras.
+</div>
 
-        <button onclick="toggleSteps('part1')">
-            Show Solution
-        </button>
+<button onclick="toggleSteps('part1')">
+Show Solution
+</button>
 
-        <div class="steps" id="part1">
+<div class="steps" id="part1">
 
-            <div class="formula">
+<div class="math">
 
-                <span class="ncr">
-                    <span class="top">12</span>
-                    <span class="c">C</span>
-                    <span class="bottom">4</span>
-                </span>
+\[
+^{12}C_4
+\]
 
-            </div>
+</div>
 
-            <div class="formula">
-                = 495
-            </div>
+<div class="math">
 
-            <div class="answer">
-                495 ways
-            </div>
+\[
+= 495
+\]
 
-        </div>
+</div>
 
-    </div>
+<div class="answer">
+495 ways
+</div>
 
-    <!-- PART II -->
-    <div class="solution-card">
+</div>
 
-        <h2>(ii) No Defective Cameras</h2>
+</div>
 
-        <div class="case-box">
-            Choose all 4 cameras from the 9 good cameras
-        </div>
+<!-- PART II -->
+<div class="solution-card">
 
-        <button onclick="toggleSteps('part2')">
-            Show Solution
-        </button>
+<h2>(ii) No Defective Cameras</h2>
 
-        <div class="steps" id="part2">
+<div class="case-box">
+Choose all 4 cameras from the 9 good cameras.
+</div>
 
-            <div class="formula">
+<button onclick="toggleSteps('part2')">
+Show Solution
+</button>
 
-                <span class="ncr">
-                    <span class="top">9</span>
-                    <span class="c">C</span>
-                    <span class="bottom">4</span>
-                </span>
+<div class="steps" id="part2">
 
-            </div>
+<div class="math">
 
-            <div class="formula">
-                = 126
-            </div>
+\[
+^{9}C_4
+\]
 
-            <div class="answer">
-                126 ways
-            </div>
+</div>
 
-        </div>
+<div class="math">
 
-    </div>
+\[
+= 126
+\]
 
-    <!-- PART III -->
-    <div class="solution-card">
+</div>
 
-        <h2>(iii) Exactly 2 Defective Cameras</h2>
+<div class="answer">
+126 ways
+</div>
 
-        <div class="case-box">
-            Choose:
-            <br><br>
-            2 defective cameras from 3
-            <br>
-            and
-            <br>
-            2 good cameras from 9
-        </div>
+</div>
 
-        <button onclick="toggleSteps('part3')">
-            Show Solution
-        </button>
+</div>
 
-        <div class="steps" id="part3">
+<!-- PART III -->
+<div class="solution-card">
 
-            <div class="formula">
+<h2>(iii) Exactly 2 Defective Cameras</h2>
 
-                <span class="ncr">
-                    <span class="top">3</span>
-                    <span class="c">C</span>
-                    <span class="bottom">2</span>
-                </span>
+<div class="case-box">
+Choose:
+<br><br>
+2 defective cameras from 3
+<br><br>
+and
+<br><br>
+2 good cameras from 9
+</div>
 
-                ×
+<button onclick="toggleSteps('part3')">
+Show Solution
+</button>
 
-                <span class="ncr">
-                    <span class="top">9</span>
-                    <span class="c">C</span>
-                    <span class="bottom">2</span>
-                </span>
+<div class="steps" id="part3">
 
-            </div>
+<div class="math">
 
-            <div class="formula">
-                = 3 × 36
-            </div>
+\[
+^{3}C_2 \times \, ^{9}C_2
+\]
 
-            <div class="formula">
-                = 108
-            </div>
+</div>
 
-            <div class="answer">
-                108 ways
-            </div>
+<div class="math">
 
-        </div>
+\[
+= 3 \times 36
+\]
 
-    </div>
+</div>
 
-    <!-- PART IV -->
-    <div class="solution-card">
+<div class="math">
 
-        <h2>(iv) No More Than 2 Defective Cameras</h2>
+\[
+= 108
+\]
 
-        <p>
-            Possible cases:
-        </p>
+</div>
 
-        <div class="case-box">
-            0 defective cameras
-        </div>
+<div class="answer">
+108 ways
+</div>
 
-        <div class="case-box">
-            1 defective camera
-        </div>
+</div>
 
-        <div class="case-box">
-            2 defective cameras
-        </div>
+</div>
 
-        <button onclick="toggleSteps('part4')">
-            Show Solution
-        </button>
+<!-- PART IV -->
+<div class="solution-card">
 
-        <div class="steps" id="part4">
+<h2>(iv) No More Than 2 Defective Cameras</h2>
 
-            <p>
-                Use the <span class="highlight">Addition Principle</span>.
-            </p>
+<div class="case-box">
+Possible cases:
+<br><br>
+• 0 defective cameras
+<br><br>
+• 1 defective camera
+<br><br>
+• 2 defective cameras
+</div>
 
-            <div class="formula">
+<button onclick="toggleSteps('part4')">
+Show Solution
+</button>
 
-                <span class="ncr">
-                    <span class="top">3</span>
-                    <span class="c">C</span>
-                    <span class="bottom">0</span>
-                </span>
+<div class="steps" id="part4">
 
-                ×
+<p>
+Use the <span class="highlight">Addition Principle</span>.
+</p>
 
-                <span class="ncr">
-                    <span class="top">9</span>
-                    <span class="c">C</span>
-                    <span class="bottom">4</span>
-                </span>
+<div class="math">
 
-            </div>
+\[
+^{3}C_0 \times \, ^{9}C_4
++
+^{3}C_1 \times \, ^{9}C_3
++
+^{3}C_2 \times \, ^{9}C_2
+\]
 
-            <div class="formula">+</div>
+</div>
 
-            <div class="formula">
+<div class="math">
 
-                <span class="ncr">
-                    <span class="top">3</span>
-                    <span class="c">C</span>
-                    <span class="bottom">1</span>
-                </span>
+\[
+= 126 + 252 + 108
+\]
 
-                ×
+</div>
 
-                <span class="ncr">
-                    <span class="top">9</span>
-                    <span class="c">C</span>
-                    <span class="bottom">3</span>
-                </span>
+<div class="math">
 
-            </div>
+\[
+= 486
+\]
 
-            <div class="formula">+</div>
+</div>
 
-            <div class="formula">
+<div class="answer">
+486 ways
+</div>
 
-                <span class="ncr">
-                    <span class="top">3</span>
-                    <span class="c">C</span>
-                    <span class="bottom">2</span>
-                </span>
+</div>
 
-                ×
-
-                <span class="ncr">
-                    <span class="top">9</span>
-                    <span class="c">C</span>
-                    <span class="bottom">2</span>
-                </span>
-
-            </div>
-
-            <div class="formula">
-                = 126 + 252 + 108
-            </div>
-
-            <div class="formula">
-                = 486
-            </div>
-
-            <div class="answer">
-                486 ways
-            </div>
-
-        </div>
-
-    </div>
+</div>
 
 </div>
 
@@ -476,6 +422,11 @@ function toggleSteps(id){
     }
     else{
         box.style.display = "block";
+    }
+
+    // Re-render MathJax after content is displayed
+    if(window.MathJax){
+        MathJax.typesetPromise();
     }
 }
 
