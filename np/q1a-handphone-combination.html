@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handphone Combination App</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    padding:0;
+    background:#f4f7fb;
+    color:#222;
+}
+
+.container{
+    max-width:1250px;
+    margin:auto;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    color:#1d3557;
+    margin-bottom:25px;
+}
+
+.question-box{
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    line-height:1.7;
+    font-size:18px;
+    margin-bottom:25px;
+}
+
+.phone-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.card{
+    background:#ffffff;
+    border-radius:16px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 3px 8px rgba(0,0,0,0.08);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.emoji{
+    font-size:45px;
+}
+
+.solutions{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+    gap:20px;
+}
+
+.solution-card{
+    background:white;
+    border-radius:16px;
+    padding:22px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.solution-card h2{
+    margin-top:0;
+    color:#264653;
+}
+
+button{
+    background:#1d3557;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+    margin-top:12px;
+}
+
+button:hover{
+    background:#457b9d;
+}
+
+.steps{
+    margin-top:18px;
+    background:#eef4ff;
+    padding:18px;
+    border-radius:12px;
+    display:none;
+    animation:fadeIn 0.5s ease;
+}
+
+.formula{
+    color:#d62828;
+    font-size:24px;
+    font-weight:bold;
+    margin-top:14px;
+}
+
+.answer{
+    color:#2a9d8f;
+    font-size:30px;
+    font-weight:bold;
+    margin-top:18px;
+}
+
+.case-box{
+    margin-top:12px;
+    background:white;
+    padding:12px;
+    border-radius:10px;
+    border-left:5px solid #457b9d;
+}
+
+.highlight{
+    background:yellow;
+    padding:2px 6px;
+    border-radius:6px;
+}
+
+.ncr{
+    display:inline-block;
+    position:relative;
+    margin:0 6px;
+    font-size:30px;
+    line-height:1;
+}
+
+.ncr .top{
+    position:absolute;
+    top:-18px;
+    left:12px;
+    font-size:18px;
+}
+
+.ncr .bottom{
+    position:absolute;
+    bottom:-18px;
+    left:12px;
+    font-size:18px;
+}
+
+.ncr .c{
+    font-size:34px;
+    font-weight:bold;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Handphone Combination App</h1>
+
+<div class="question-box">
+
+<h2>Problem</h2>
+
+A telecommunications shop was having a discount on some handphones.
+
+<div class="phone-grid">
+
+    <div class="card">
+        <div class="emoji">🍎</div>
+        <h3>Apple Phones</h3>
+        <p>9 phones</p>
+    </div>
+
+    <div class="card">
+        <div class="emoji">📱</div>
+        <h3>Samsung Phones</h3>
+        <p>5 phones</p>
+    </div>
+
+    <div class="card">
+        <div class="emoji">📲</div>
+        <h3>Huawei Phones</h3>
+        <p>3 phones</p>
+    </div>
+
+    <div class="card">
+        <div class="emoji">🛒</div>
+        <h3>Purchase</h3>
+        <p>Choose 6 phones</p>
+    </div>
+
+</div>
+
+<br>
+
+Find the number of ways John can buy 6 handphones if:
+
+<ol>
+    <li>There are no restrictions</li>
+    <li>All the phones must be Apple phones</li>
+    <li>He did not want any Huawei phones</li>
+    <li>He wants exactly 3 Samsung phones</li>
+    <li>He wants at least 2 Huawei phones</li>
+</ol>
+
+</div>
+
+<div class="solutions">
+
+<!-- PART I -->
+<div class="solution-card">
+
+<h2>(i) No Restrictions</h2>
+
+<div class="case-box">
+Choose any 6 phones from 17 phones
+</div>
+
+<button onclick="toggleSteps('part1')">
+Show Solution
+</button>
+
+<div class="steps" id="part1">
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">17</span>
+<span class="c">C</span>
+<span class="bottom">6</span>
+</span>
+
+</div>
+
+<div class="formula">
+= 12376
+</div>
+
+<div class="answer">
+12376 ways
+</div>
+
+</div>
+
+</div>
+
+<!-- PART II -->
+<div class="solution-card">
+
+<h2>(ii) All Apple Phones</h2>
+
+<div class="case-box">
+Choose all 6 phones from the 9 Apple phones
+</div>
+
+<button onclick="toggleSteps('part2')">
+Show Solution
+</button>
+
+<div class="steps" id="part2">
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">9</span>
+<span class="c">C</span>
+<span class="bottom">6</span>
+</span>
+
+</div>
+
+<div class="formula">
+= 84
+</div>
+
+<div class="answer">
+84 ways
+</div>
+
+</div>
+
+</div>
+
+<!-- PART III -->
+<div class="solution-card">
+
+<h2>(iii) No Huawei Phones</h2>
+
+<div class="case-box">
+Choose 6 phones from Apple and Samsung phones only
+<br><br>
+9 + 5 = 14 phones
+</div>
+
+<button onclick="toggleSteps('part3')">
+Show Solution
+</button>
+
+<div class="steps" id="part3">
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">14</span>
+<span class="c">C</span>
+<span class="bottom">6</span>
+</span>
+
+</div>
+
+<div class="formula">
+= 3003
+</div>
+
+<div class="answer">
+3003 ways
+</div>
+
+</div>
+
+</div>
+
+<!-- PART IV -->
+<div class="solution-card">
+
+<h2>(iv) Exactly 3 Samsung Phones</h2>
+
+<div class="case-box">
+Choose:
+<br><br>
+3 Samsung phones from 5
+<br>
+and
+<br>
+3 other phones from 12 non-Samsung phones
+</div>
+
+<button onclick="toggleSteps('part4')">
+Show Solution
+</button>
+
+<div class="steps" id="part4">
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">5</span>
+<span class="c">C</span>
+<span class="bottom">3</span>
+</span>
+
+×
+
+<span class="ncr">
+<span class="top">12</span>
+<span class="c">C</span>
+<span class="bottom">3</span>
+</span>
+
+</div>
+
+<div class="formula">
+= 10 × 220
+</div>
+
+<div class="formula">
+= 2200
+</div>
+
+<div class="answer">
+2200 ways
+</div>
+
+</div>
+
+</div>
+
+<!-- PART V -->
+<div class="solution-card">
+
+<h2>(v) At Least 2 Huawei Phones</h2>
+
+<p>
+Possible cases:
+</p>
+
+<div class="case-box">
+2 Huawei phones
+</div>
+
+<div class="case-box">
+3 Huawei phones
+</div>
+
+<button onclick="toggleSteps('part5')">
+Show Solution
+</button>
+
+<div class="steps" id="part5">
+
+<p>
+Use the <span class="highlight">Addition Principle</span>.
+</p>
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">3</span>
+<span class="c">C</span>
+<span class="bottom">2</span>
+</span>
+
+×
+
+<span class="ncr">
+<span class="top">14</span>
+<span class="c">C</span>
+<span class="bottom">4</span>
+</span>
+
+</div>
+
+<div class="formula">
++
+</div>
+
+<div class="formula">
+
+<span class="ncr">
+<span class="top">3</span>
+<span class="c">C</span>
+<span class="bottom">3</span>
+</span>
+
+×
+
+<span class="ncr">
+<span class="top">14</span>
+<span class="c">C</span>
+<span class="bottom">3</span>
+</span>
+
+</div>
+
+<div class="formula">
+= (3 × 1001) + (1 × 364)
+</div>
+
+<div class="formula">
+= 3003 + 364
+</div>
+
+<div class="formula">
+= 3367
+</div>
+
+<div class="answer">
+3367 ways
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function toggleSteps(id){
+
+    let box = document.getElementById(id);
+
+    if(box.style.display === "block"){
+        box.style.display = "none";
+    }
+    else{
+        box.style.display = "block";
+    }
+}
+
+</script>
+
+</body>
+</html>
