@@ -3,7 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Handphone Combination App</title>
+<title>Handphone Combination App - MathJax Version</title>
+
+<!-- MathJax Configuration -->
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
+    },
+    svg: {
+        fontCache: 'global'
+    }
+};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
 <style>
 
@@ -63,7 +78,7 @@ h1{
 
 .solutions{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
     gap:20px;
 }
 
@@ -97,65 +112,38 @@ button:hover{
 .steps{
     margin-top:18px;
     background:#eef4ff;
-    padding:18px;
+    padding:20px;
     border-radius:12px;
     display:none;
     animation:fadeIn 0.5s ease;
 }
 
-.formula{
-    color:#d62828;
-    font-size:24px;
-    font-weight:bold;
-    margin-top:14px;
+.case-box{
+    margin-top:12px;
+    background:white;
+    padding:14px;
+    border-radius:10px;
+    border-left:5px solid #457b9d;
+}
+
+.math{
+    margin-top:25px;
+    text-align:center;
+    overflow-x:auto;
 }
 
 .answer{
     color:#2a9d8f;
     font-size:30px;
     font-weight:bold;
-    margin-top:18px;
-}
-
-.case-box{
-    margin-top:12px;
-    background:white;
-    padding:12px;
-    border-radius:10px;
-    border-left:5px solid #457b9d;
+    text-align:center;
+    margin-top:25px;
 }
 
 .highlight{
     background:yellow;
     padding:2px 6px;
     border-radius:6px;
-}
-
-.ncr{
-    display:inline-block;
-    position:relative;
-    margin:0 6px;
-    font-size:30px;
-    line-height:1;
-}
-
-.ncr .top{
-    position:absolute;
-    top:-18px;
-    left:12px;
-    font-size:18px;
-}
-
-.ncr .bottom{
-    position:absolute;
-    bottom:-18px;
-    left:12px;
-    font-size:18px;
-}
-
-.ncr .c{
-    font-size:34px;
-    font-weight:bold;
 }
 
 @keyframes fadeIn{
@@ -234,7 +222,7 @@ Find the number of ways John can buy 6 handphones if:
 <h2>(i) No Restrictions</h2>
 
 <div class="case-box">
-Choose any 6 phones from 17 phones
+Choose any 6 phones from 17 phones.
 </div>
 
 <button onclick="toggleSteps('part1')">
@@ -243,18 +231,20 @@ Show Solution
 
 <div class="steps" id="part1">
 
-<div class="formula">
+<div class="math">
 
-<span class="ncr">
-<span class="top">17</span>
-<span class="c">C</span>
-<span class="bottom">6</span>
-</span>
+\[
+^{17}C_6
+\]
 
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 12376
+\]
+
 </div>
 
 <div class="answer">
@@ -271,7 +261,7 @@ Show Solution
 <h2>(ii) All Apple Phones</h2>
 
 <div class="case-box">
-Choose all 6 phones from the 9 Apple phones
+Choose all 6 phones from the 9 Apple phones.
 </div>
 
 <button onclick="toggleSteps('part2')">
@@ -280,18 +270,20 @@ Show Solution
 
 <div class="steps" id="part2">
 
-<div class="formula">
+<div class="math">
 
-<span class="ncr">
-<span class="top">9</span>
-<span class="c">C</span>
-<span class="bottom">6</span>
-</span>
+\[
+^{9}C_6
+\]
 
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 84
+\]
+
 </div>
 
 <div class="answer">
@@ -308,9 +300,11 @@ Show Solution
 <h2>(iii) No Huawei Phones</h2>
 
 <div class="case-box">
-Choose 6 phones from Apple and Samsung phones only
+Choose 6 phones from Apple and Samsung phones only.
 <br><br>
-9 + 5 = 14 phones
+\[
+9 + 5 = 14
+\]
 </div>
 
 <button onclick="toggleSteps('part3')">
@@ -319,18 +313,20 @@ Show Solution
 
 <div class="steps" id="part3">
 
-<div class="formula">
+<div class="math">
 
-<span class="ncr">
-<span class="top">14</span>
-<span class="c">C</span>
-<span class="bottom">6</span>
-</span>
+\[
+^{14}C_6
+\]
 
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 3003
+\]
+
 </div>
 
 <div class="answer">
@@ -350,9 +346,9 @@ Show Solution
 Choose:
 <br><br>
 3 Samsung phones from 5
-<br>
+<br><br>
 and
-<br>
+<br><br>
 3 other phones from 12 non-Samsung phones
 </div>
 
@@ -362,30 +358,28 @@ Show Solution
 
 <div class="steps" id="part4">
 
-<div class="formula">
+<div class="math">
 
-<span class="ncr">
-<span class="top">5</span>
-<span class="c">C</span>
-<span class="bottom">3</span>
-</span>
-
-×
-
-<span class="ncr">
-<span class="top">12</span>
-<span class="c">C</span>
-<span class="bottom">3</span>
-</span>
+\[
+^{5}C_3 \times \, ^{12}C_3
+\]
 
 </div>
 
-<div class="formula">
-= 10 × 220
+<div class="math">
+
+\[
+= 10 \times 220
+\]
+
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 2200
+\]
+
 </div>
 
 <div class="answer">
@@ -401,16 +395,12 @@ Show Solution
 
 <h2>(v) At Least 2 Huawei Phones</h2>
 
-<p>
+<div class="case-box">
 Possible cases:
-</p>
-
-<div class="case-box">
-2 Huawei phones
-</div>
-
-<div class="case-box">
-3 Huawei phones
+<br><br>
+• 2 Huawei phones
+<br><br>
+• 3 Huawei phones
 </div>
 
 <button onclick="toggleSteps('part5')">
@@ -423,56 +413,38 @@ Show Solution
 Use the <span class="highlight">Addition Principle</span>.
 </p>
 
-<div class="formula">
+<div class="math">
 
-<span class="ncr">
-<span class="top">3</span>
-<span class="c">C</span>
-<span class="bottom">2</span>
-</span>
-
-×
-
-<span class="ncr">
-<span class="top">14</span>
-<span class="c">C</span>
-<span class="bottom">4</span>
-</span>
-
-</div>
-
-<div class="formula">
+\[
+^{3}C_2 \times \, ^{14}C_4
 +
-</div>
-
-<div class="formula">
-
-<span class="ncr">
-<span class="top">3</span>
-<span class="c">C</span>
-<span class="bottom">3</span>
-</span>
-
-×
-
-<span class="ncr">
-<span class="top">14</span>
-<span class="c">C</span>
-<span class="bottom">3</span>
-</span>
+^{3}C_3 \times \, ^{14}C_3
+\]
 
 </div>
 
-<div class="formula">
-= (3 × 1001) + (1 × 364)
+<div class="math">
+
+\[
+= (3 \times 1001) + (1 \times 364)
+\]
+
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 3003 + 364
+\]
+
 </div>
 
-<div class="formula">
+<div class="math">
+
+\[
 = 3367
+\]
+
 </div>
 
 <div class="answer">
@@ -498,6 +470,11 @@ function toggleSteps(id){
     }
     else{
         box.style.display = "block";
+    }
+
+    // Re-render MathJax after showing content
+    if(window.MathJax){
+        MathJax.typesetPromise();
     }
 }
 
