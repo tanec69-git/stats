@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Counting Principle Restaurant Problem</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        margin:0;
+        padding:0;
+        background:#f4f6f9;
+        color:#222;
+    }
+
+    .container{
+        max-width:1200px;
+        margin:auto;
+        padding:20px;
+    }
+
+    h1{
+        text-align:center;
+        color:#1d3557;
+    }
+
+    .question-box{
+        background:white;
+        padding:20px;
+        border-radius:15px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.1);
+        margin-bottom:25px;
+        line-height:1.7;
+        font-size:18px;
+    }
+
+    .categories{
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
+        gap:15px;
+        margin-top:20px;
+    }
+
+    .card{
+        background:#ffffff;
+        border-radius:15px;
+        padding:15px;
+        text-align:center;
+        box-shadow:0 3px 8px rgba(0,0,0,0.08);
+        transition:0.3s;
+    }
+
+    .card:hover{
+        transform:translateY(-4px);
+    }
+
+    .emoji{
+        font-size:40px;
+    }
+
+    .friends{
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+        gap:20px;
+    }
+
+    .friend-card{
+        background:white;
+        border-radius:15px;
+        padding:20px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .friend-card h2{
+        margin-top:0;
+        color:#264653;
+    }
+
+    button{
+        background:#1d3557;
+        color:white;
+        border:none;
+        padding:10px 18px;
+        border-radius:10px;
+        cursor:pointer;
+        font-size:16px;
+        margin-top:10px;
+    }
+
+    button:hover{
+        background:#457b9d;
+    }
+
+    .steps{
+        margin-top:15px;
+        background:#f1f5ff;
+        padding:15px;
+        border-radius:12px;
+        display:none;
+        animation:fadeIn 0.5s ease;
+    }
+
+    .formula{
+        font-size:22px;
+        color:#d62828;
+        font-weight:bold;
+        margin-top:12px;
+    }
+
+    .answer{
+        font-size:28px;
+        color:#2a9d8f;
+        margin-top:10px;
+        font-weight:bold;
+    }
+
+    .tree{
+        margin-top:15px;
+        font-size:18px;
+        line-height:1.8;
+    }
+
+    .highlight{
+        background:yellow;
+        padding:2px 6px;
+        border-radius:6px;
+    }
+
+    @keyframes fadeIn{
+        from{
+            opacity:0;
+            transform:translateY(10px);
+        }
+        to{
+            opacity:1;
+            transform:translateY(0);
+        }
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Restaurant Counting Principle App</h1>
+
+    <div class="question-box">
+
+        <h2>Problem</h2>
+
+        After a movie, Andy, Brenda and David decided to go to a restaurant to get some food.
+
+        <div class="categories">
+
+            <div class="card">
+                <div class="emoji">🍲</div>
+                <h3>Soups</h3>
+                <p>5 kinds</p>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🥗</div>
+                <h3>Appetizers</h3>
+                <p>4 kinds</p>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🍛</div>
+                <h3>Main Courses</h3>
+                <p>6 kinds</p>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🥤</div>
+                <h3>Drinks</h3>
+                <p>7 kinds</p>
+            </div>
+
+            <div class="card">
+                <div class="emoji">🍰</div>
+                <h3>Desserts</h3>
+                <p>3 kinds</p>
+            </div>
+
+        </div>
+
+        <br>
+
+        <strong>Andy</strong> wants:
+        soup + main course + drink
+
+        <br><br>
+
+        <strong>Brenda</strong> wants:
+        (soup + appetizer) OR (dessert + drink)
+
+        <br><br>
+
+        <strong>David</strong> wants:
+        either a soup OR drink OR dessert
+
+    </div>
+
+    <div class="friends">
+
+        <!-- Andy -->
+        <div class="friend-card">
+            <h2>👦 Andy</h2>
+
+            <div class="tree">
+                🍲 Soup → 5 choices<br>
+                🍛 Main Course → 6 choices<br>
+                🥤 Drink → 7 choices
+            </div>
+
+            <button onclick="toggleSteps('andy')">
+                Show Solution
+            </button>
+
+            <div class="steps" id="andy">
+
+                <p>
+                    By the <span class="highlight">Multiplication Principle</span>,
+                    multiply the number of choices.
+                </p>
+
+                <div class="formula">
+                    5 × 6 × 7
+                </div>
+
+                <div class="formula">
+                    = 210
+                </div>
+
+                <div class="answer">
+                    Andy has 210 ways
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Brenda -->
+        <div class="friend-card">
+            <h2>👧 Brenda</h2>
+
+            <div class="tree">
+                Option 1:<br>
+                🍲 Soup → 5 choices<br>
+                🥗 Appetizer → 4 choices
+
+                <br><br>
+
+                OR
+
+                <br><br>
+
+                Option 2:<br>
+                🍰 Dessert → 3 choices<br>
+                🥤 Drink → 7 choices
+            </div>
+
+            <button onclick="toggleSteps('brenda')">
+                Show Solution
+            </button>
+
+            <div class="steps" id="brenda">
+
+                <p>
+                    Use the multiplication principle for each option,
+                    then use the <span class="highlight">Addition Principle</span>.
+                </p>
+
+                <div class="formula">
+                    (5 × 4) + (3 × 7)
+                </div>
+
+                <div class="formula">
+                    = 20 + 21
+                </div>
+
+                <div class="formula">
+                    = 41
+                </div>
+
+                <div class="answer">
+                    Brenda has 41 ways
+                </div>
+
+            </div>
+        </div>
+
+        <!-- David -->
+        <div class="friend-card">
+            <h2>👦 David</h2>
+
+            <div class="tree">
+                🍲 Soup → 5 choices<br>
+                OR<br>
+                🥤 Drink → 7 choices<br>
+                OR<br>
+                🍰 Dessert → 3 choices
+            </div>
+
+            <button onclick="toggleSteps('david')">
+                Show Solution
+            </button>
+
+            <div class="steps" id="david">
+
+                <p>
+                    Since David chooses only ONE item,
+                    use the <span class="highlight">Addition Principle</span>.
+                </p>
+
+                <div class="formula">
+                    5 + 7 + 3
+                </div>
+
+                <div class="formula">
+                    = 15
+                </div>
+
+                <div class="answer">
+                    David has 15 ways
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function toggleSteps(id){
+
+    let box = document.getElementById(id);
+
+    if(box.style.display === "block"){
+        box.style.display = "none";
+    }
+    else{
+        box.style.display = "block";
+    }
+}
+
+</script>
+
+</body>
+</html>
