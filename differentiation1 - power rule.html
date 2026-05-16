@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Function Differentiation Generator</title>
+  <title>Power Rule Differentiation Generator</title>
 
   <!-- MathJax -->
   <script>
@@ -112,7 +112,7 @@
 
 <div class="container">
 
-  <h1>Function Differentiation Generator</h1>
+  <h1>Power Rule Differentiation Generator</h1>
 
   <button onclick="generateProblem()">Generate Problem</button>
   <button onclick="toggleSolution()">Show / Hide Solution</button>
@@ -137,19 +137,60 @@ function randInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
+// ======================================
+// Format coefficient
+// Removes coefficient 1
+// ======================================
+
+function formatCoefficient(coefficient){
+
+  if(coefficient === 1){
+    return "";
+  }
+
+  if(coefficient === -1){
+    return "-";
+  }
+
+  return coefficient;
+}
+
+// ======================================
+// Format exponent
+// Removes exponent 1
+// ======================================
+
+function formatPower(power){
+
+  if(power === 1){
+    return "";
+  }
+
+  return `^{${power}}`;
+}
+
+// ======================================
+// Generate Problem
+// ======================================
+
 function generateProblem(){
 
-  const a = randInt(2,9);
+  const a = randInt(1,9);
   const b = randInt(1,9);
   const c = randInt(1,20);
 
-  const power = randInt(2,5);
+  const power = randInt(2,6);
 
   const sign1 = Math.random() < 0.5 ? "+" : "-";
   const sign2 = Math.random() < 0.5 ? "+" : "-";
 
   const functionLatex =
-    `f(x)=${a}x^{${power}} ${sign1} ${b}\\sqrt{x} ${sign2} ${c}`;
+    `f(x)=
+    ${formatCoefficient(a)}x${formatPower(power)}
+    ${sign1}
+    ${formatCoefficient(b)}\\sqrt{x}
+    ${sign2}
+    ${c}`;
 
   currentData = {
     a,b,c,power,sign1,sign2,functionLatex
@@ -166,6 +207,10 @@ function generateProblem(){
   MathJax.typesetPromise();
 }
 
+// ======================================
+// Generate Solution
+// ======================================
+
 function generateSolution(){
 
   const {
@@ -178,19 +223,33 @@ function generateSolution(){
   const signedB =
     sign1 === "+" ? b : -b;
 
-  // Build sqrt derivative correctly
   let sqrtDerivativeLatex = "";
 
   if(signedB > 0){
 
-    sqrtDerivativeLatex =
-      `+\\frac{${signedB}}{2\\sqrt{x}}`;
+    if(Math.abs(signedB) === 1){
+
+      sqrtDerivativeLatex =
+        `+\\frac{1}{2\\sqrt{x}}`;
+
+    } else {
+
+      sqrtDerivativeLatex =
+        `+\\frac{${Math.abs(signedB)}}{2\\sqrt{x}}`;
+    }
 
   } else {
 
-    sqrtDerivativeLatex =
-      `-\\frac{${Math.abs(signedB)}}{2\\sqrt{x}}`;
+    if(Math.abs(signedB) === 1){
 
+      sqrtDerivativeLatex =
+        `-\\frac{1}{2\\sqrt{x}}`;
+
+    } else {
+
+      sqrtDerivativeLatex =
+        `-\\frac{${Math.abs(signedB)}}{2\\sqrt{x}}`;
+    }
   }
 
   const solutionHTML = `
@@ -203,9 +262,9 @@ function generateSolution(){
       \\[
       f(x)
       =
-      ${a}x^{${power}}
+      ${formatCoefficient(a)}x${formatPower(power)}
       ${sign1}
-      ${b}\\sqrt{x}
+      ${formatCoefficient(b)}\\sqrt{x}
       ${sign2}
       ${c}
       \\]
@@ -218,9 +277,12 @@ function generateSolution(){
     <div class="math">
       \\[
       \\frac{d}{dx}
-      \\left(${a}x^{${power}}\\right)
+      \\left(
+      ${formatCoefficient(a)}x${formatPower(power)}
+      \\right)
       =
-      ${polyDerivativeCoeff}x^{${polyDerivativePower}}
+      ${formatCoefficient(polyDerivativeCoeff)}
+      x${formatPower(polyDerivativePower)}
       \\]
     </div>
 
@@ -229,11 +291,15 @@ function generateSolution(){
       \\frac{d}{dx}
       \\left(
       ${sign1 === "+" ? "" : "-"}
-      ${b}\\sqrt{x}
+      ${formatCoefficient(b)}\\sqrt{x}
       \\right)
       =
       ${signedB < 0 ? "-" : ""}
-      \\frac{${Math.abs(signedB)}}{2\\sqrt{x}}
+      \\frac{
+      ${Math.abs(signedB)}
+      }{
+      2\\sqrt{x}
+      }
       \\]
     </div>
 
@@ -254,7 +320,8 @@ function generateSolution(){
         \\[
         f'(x)
         =
-        ${polyDerivativeCoeff}x^{${polyDerivativePower}}
+        ${formatCoefficient(polyDerivativeCoeff)}
+        x${formatPower(polyDerivativePower)}
         ${sqrtDerivativeLatex}
         \\]
       </div>
@@ -268,6 +335,10 @@ function generateSolution(){
 
   MathJax.typesetPromise();
 }
+
+// ======================================
+// Toggle Solution
+// ======================================
 
 function toggleSolution(){
 
