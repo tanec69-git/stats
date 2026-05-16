@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Chain Rule Generator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:20px;
+      font-family:Arial, sans-serif;
+      background:#f4f6f9;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:950px;
+      max-width:95%;
+      background:white;
+      padding:30px;
+      border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:20px;
+      color:#222;
+    }
+
+    .card{
+      background:#fafafa;
+      border:1px solid #ddd;
+      border-radius:14px;
+      padding:20px;
+      margin-top:20px;
+    }
+
+    .label{
+      font-size:22px;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .math{
+      font-size:30px;
+      margin:18px 0;
+      overflow-x:auto;
+    }
+
+    .solution{
+      font-size:20px;
+      line-height:1.9;
+    }
+
+    .step{
+      margin-top:15px;
+    }
+
+    .answer{
+      margin-top:20px;
+      background:#e0f2fe;
+      padding:18px;
+      border-radius:12px;
+      font-weight:bold;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:14px 22px;
+      border-radius:12px;
+      font-size:18px;
+      cursor:pointer;
+      margin-right:10px;
+      margin-top:10px;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+      transform:scale(1.03);
+    }
+
+    .hidden{
+      display:none;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Chain Rule Generator</h1>
+
+  <button onclick="generateProblem()">Generate Problem</button>
+  <button onclick="toggleSolution()">Show / Hide Solution</button>
+
+  <div class="card">
+    <div class="label">Generated Question</div>
+    <div id="question" class="math"></div>
+  </div>
+
+  <div id="solutionCard" class="card hidden">
+    <div class="label">Solution</div>
+    <div id="solution" class="solution"></div>
+  </div>
+
+</div>
+
+<script>
+
+let currentProblem = {};
+
+function randInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function generateProblem(){
+
+  const type = randInt(1,3);
+
+  let questionLatex = "";
+  let solutionLatex = "";
+
+  // TYPE 1 : Exponential
+  if(type === 1){
+
+    const a = randInt(2,5);
+    const b = randInt(1,5);
+    const c = randInt(1,9);
+
+    questionLatex =
+      `f(x)=${a}e^{${b}x+${c}}`;
+
+    solutionLatex = `
+      <div class="step">
+      Use the chain rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}
+      \\left(
+      ${a}e^{${b}x+${c}}
+      \\right)
+      =
+      ${a}e^{${b}x+${c}}
+      \\cdot
+      \\frac{d}{dx}(${b}x+${c})
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}(${b}x+${c})=${b}
+      \\]
+      </div>
+
+      <div class="answer">
+      Final Answer:
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      ${a*b}e^{${b}x+${c}}
+      \\]
+      </div>
+      </div>
+    `;
+  }
+
+  // TYPE 2 : Power
+  else if(type === 2){
+
+    const a = randInt(2,5);
+    const b = randInt(1,9);
+    const power = randInt(2,6);
+    const outside = randInt(2,10);
+
+    questionLatex =
+      `f(x)=(${a}x^{${power}}+${b})^{${outside}}`;
+
+    const outerCoeff = outside * a * power;
+
+    solutionLatex = `
+      <div class="step">
+      Use the chain rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}
+      \\left(
+      (${a}x^{${power}}+${b})^{${outside}}
+      \\right)
+      =
+      ${outside}
+      (${a}x^{${power}}+${b})^{${outside-1}}
+      \\cdot
+      \\frac{d}{dx}
+      (${a}x^{${power}}+${b})
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}
+      (${a}x^{${power}}+${b})
+      =
+      ${a*power}x^{${power-1}}
+      \\]
+      </div>
+
+      <div class="answer">
+      Final Answer:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      ${outerCoeff}x^{${power-1}}
+      (${a}x^{${power}}+${b})^{${outside-1}}
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  // TYPE 3 : ln
+  else{
+
+    const a = randInt(2,5);
+    const b = randInt(1,9);
+    const power = randInt(2,5);
+
+    questionLatex =
+      `f(x)=\\ln(${a}x^{${power}}+${b})`;
+
+    solutionLatex = `
+      <div class="step">
+      Use the chain rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}
+      \\left(
+      \\ln(${a}x^{${power}}+${b})
+      \\right)
+      =
+      \\frac{1}{${a}x^{${power}}+${b}}
+      \\cdot
+      \\frac{d}{dx}
+      (${a}x^{${power}}+${b})
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}
+      (${a}x^{${power}}+${b})
+      =
+      ${a*power}x^{${power-1}}
+      \\]
+      </div>
+
+      <div class="answer">
+      Final Answer:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      \\frac{
+      ${a*power}x^{${power-1}}
+      }{
+      ${a}x^{${power}}+${b}
+      }
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  currentProblem = {
+    questionLatex,
+    solutionLatex
+  };
+
+  document.getElementById("question").innerHTML =
+    `\\[ ${questionLatex} \\]`;
+
+  document.getElementById("solution").innerHTML =
+    solutionLatex;
+
+  document.getElementById("solutionCard")
+    .classList.add("hidden");
+
+  MathJax.typesetPromise();
+}
+
+function toggleSolution(){
+
+  document.getElementById("solutionCard")
+    .classList.toggle("hidden");
+
+  MathJax.typesetPromise();
+}
+
+generateProblem();
+
+</script>
+
+</body>
+</html>

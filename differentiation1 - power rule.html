@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Function Differentiation Generator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      margin:0;
+      padding:20px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:950px;
+      max-width:95%;
+      background:white;
+      padding:30px;
+      border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      color:#222;
+      margin-bottom:20px;
+    }
+
+    .card{
+      background:#fafafa;
+      border-radius:14px;
+      padding:20px;
+      margin-top:20px;
+      border:1px solid #ddd;
+    }
+
+    .label{
+      font-size:22px;
+      font-weight:bold;
+      margin-bottom:10px;
+      color:#333;
+    }
+
+    .math{
+      font-size:30px;
+      margin:15px 0;
+      overflow-x:auto;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:14px 22px;
+      border-radius:12px;
+      font-size:18px;
+      cursor:pointer;
+      transition:0.2s;
+      margin-right:10px;
+      margin-top:10px;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+      transform:scale(1.03);
+    }
+
+    .solution{
+      line-height:1.9;
+      font-size:20px;
+    }
+
+    .step{
+      margin-top:15px;
+    }
+
+    .answer{
+      margin-top:20px;
+      background:#e0f2fe;
+      padding:18px;
+      border-radius:12px;
+      font-weight:bold;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Function Differentiation Generator</h1>
+
+  <button onclick="generateProblem()">Generate Problem</button>
+  <button onclick="toggleSolution()">Show / Hide Solution</button>
+
+  <div class="card">
+    <div class="label">Generated Function</div>
+    <div id="question" class="math"></div>
+  </div>
+
+  <div id="solutionCard" class="card hidden">
+    <div class="label">Solution</div>
+    <div id="solution" class="solution"></div>
+  </div>
+
+</div>
+
+<script>
+
+let currentData = {};
+
+function randInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function generateProblem(){
+
+  const a = randInt(2,9);
+  const b = randInt(1,9);
+  const c = randInt(1,20);
+
+  const power = randInt(2,5);
+
+  const sign1 = Math.random() < 0.5 ? "+" : "-";
+  const sign2 = Math.random() < 0.5 ? "+" : "-";
+
+  const functionLatex =
+    `f(x)=${a}x^{${power}} ${sign1} ${b}\\sqrt{x} ${sign2} ${c}`;
+
+  currentData = {
+    a,b,c,power,sign1,sign2,functionLatex
+  };
+
+  document.getElementById("question").innerHTML =
+    `\\[ ${functionLatex} \\]`;
+
+  generateSolution();
+
+  document.getElementById("solutionCard")
+    .classList.add("hidden");
+
+  MathJax.typesetPromise();
+}
+
+function generateSolution(){
+
+  const {
+    a,b,c,power,sign1,sign2
+  } = currentData;
+
+  const polyDerivativeCoeff = a * power;
+  const polyDerivativePower = power - 1;
+
+  const signedB =
+    sign1 === "+" ? b : -b;
+
+  // Build sqrt derivative correctly
+  let sqrtDerivativeLatex = "";
+
+  if(signedB > 0){
+
+    sqrtDerivativeLatex =
+      `+\\frac{${signedB}}{2\\sqrt{x}}`;
+
+  } else {
+
+    sqrtDerivativeLatex =
+      `-\\frac{${Math.abs(signedB)}}{2\\sqrt{x}}`;
+
+  }
+
+  const solutionHTML = `
+
+    <div class="step">
+      Differentiate the function:
+    </div>
+
+    <div class="math">
+      \\[
+      f(x)
+      =
+      ${a}x^{${power}}
+      ${sign1}
+      ${b}\\sqrt{x}
+      ${sign2}
+      ${c}
+      \\]
+    </div>
+
+    <div class="step">
+      Differentiate each term separately.
+    </div>
+
+    <div class="math">
+      \\[
+      \\frac{d}{dx}
+      \\left(${a}x^{${power}}\\right)
+      =
+      ${polyDerivativeCoeff}x^{${polyDerivativePower}}
+      \\]
+    </div>
+
+    <div class="math">
+      \\[
+      \\frac{d}{dx}
+      \\left(
+      ${sign1 === "+" ? "" : "-"}
+      ${b}\\sqrt{x}
+      \\right)
+      =
+      ${signedB < 0 ? "-" : ""}
+      \\frac{${Math.abs(signedB)}}{2\\sqrt{x}}
+      \\]
+    </div>
+
+    <div class="math">
+      \\[
+      \\frac{d}{dx}
+      (${sign2 === "+" ? c : "-" + c})
+      =
+      0
+      \\]
+    </div>
+
+    <div class="answer">
+
+      Final Answer:
+
+      <div class="math">
+        \\[
+        f'(x)
+        =
+        ${polyDerivativeCoeff}x^{${polyDerivativePower}}
+        ${sqrtDerivativeLatex}
+        \\]
+      </div>
+
+    </div>
+
+  `;
+
+  document.getElementById("solution").innerHTML =
+    solutionHTML;
+
+  MathJax.typesetPromise();
+}
+
+function toggleSolution(){
+
+  document.getElementById("solutionCard")
+    .classList.toggle("hidden");
+
+  MathJax.typesetPromise();
+}
+
+generateProblem();
+
+</script>
+
+</body>
+</html>

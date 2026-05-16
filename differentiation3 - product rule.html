@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Product Rule Generator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:20px;
+      font-family:Arial, sans-serif;
+      background:#f4f6f9;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:1000px;
+      max-width:95%;
+      background:white;
+      padding:30px;
+      border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:20px;
+      color:#222;
+    }
+
+    .card{
+      background:#fafafa;
+      border:1px solid #ddd;
+      border-radius:14px;
+      padding:20px;
+      margin-top:20px;
+    }
+
+    .label{
+      font-size:22px;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .math{
+      font-size:30px;
+      margin:18px 0;
+      overflow-x:auto;
+    }
+
+    .solution{
+      font-size:20px;
+      line-height:1.9;
+    }
+
+    .step{
+      margin-top:15px;
+    }
+
+    .answer{
+      margin-top:20px;
+      background:#e0f2fe;
+      padding:18px;
+      border-radius:12px;
+      font-weight:bold;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:14px 22px;
+      border-radius:12px;
+      font-size:18px;
+      cursor:pointer;
+      margin-right:10px;
+      margin-top:10px;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+      transform:scale(1.03);
+    }
+
+    .hidden{
+      display:none;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Product Rule Generator</h1>
+
+  <button onclick="generateProblem()">Generate Problem</button>
+  <button onclick="toggleSolution()">Show / Hide Solution</button>
+
+  <div class="card">
+    <div class="label">Generated Question</div>
+    <div id="question" class="math"></div>
+  </div>
+
+  <div id="solutionCard" class="card hidden">
+    <div class="label">Solution</div>
+    <div id="solution" class="solution"></div>
+  </div>
+
+</div>
+
+<script>
+
+function randInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function generateProblem(){
+
+  const type = randInt(1,3);
+
+  let questionLatex = "";
+  let solutionLatex = "";
+
+  // ==================================================
+  // TYPE 1
+  // Polynomial × Exponential
+  // ==================================================
+
+  if(type === 1){
+
+    const a = randInt(2,6);
+    const power = randInt(2,5);
+    const b = randInt(1,5);
+
+    const firstCoeff = a * b;
+    const secondCoeff = a * power;
+
+    const simplifiedCoeff =
+      firstCoeff + secondCoeff;
+
+    questionLatex =
+      `f(x)=(${a}x^{${power}})(e^{${b}x})`;
+
+    solutionLatex = `
+
+      <div class="step">
+      Let
+      \\[
+      u=${a}x^{${power}}
+      \\]
+      and
+      \\[
+      v=e^{${b}x}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{du}{dx}
+      =
+      ${a*power}x^{${power-1}}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{dv}{dx}
+      =
+      ${b}e^{${b}x}
+      \\]
+      </div>
+
+      <div class="step">
+      Apply the product rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}(uv)
+      =
+      u\\frac{dv}{dx}
+      +
+      v\\frac{du}{dx}
+      \\]
+      </div>
+
+      <div class="answer">
+
+      Step 1:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      (${a}x^{${power}})
+      (${b}e^{${b}x})
+      +
+      (e^{${b}x})
+      (${a*power}x^{${power-1}})
+      \\]
+      </div>
+
+      Step 2: Simplify
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      ${firstCoeff}x^{${power}}e^{${b}x}
+      +
+      ${secondCoeff}x^{${power-1}}e^{${b}x}
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  // ==================================================
+  // TYPE 2
+  // Polynomial × ln(x)
+  // ==================================================
+
+  else if(type === 2){
+
+    const a = randInt(2,6);
+    const power = randInt(2,5);
+    const b = randInt(1,5);
+
+    questionLatex =
+      `f(x)=(${a}x^{${power}})(\\ln(${b}x))`;
+
+    solutionLatex = `
+
+      <div class="step">
+      Let
+      \\[
+      u=${a}x^{${power}}
+      \\]
+      and
+      \\[
+      v=\\ln(${b}x)
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{du}{dx}
+      =
+      ${a*power}x^{${power-1}}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{dv}{dx}
+      =
+      \\frac{1}{x}
+      \\]
+      </div>
+
+      <div class="step">
+      Apply the product rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}(uv)
+      =
+      u\\frac{dv}{dx}
+      +
+      v\\frac{du}{dx}
+      \\]
+      </div>
+
+      <div class="answer">
+
+      Step 1:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      (${a}x^{${power}})
+      \\left(
+      \\frac{1}{x}
+      \\right)
+      +
+      (\\ln(${b}x))
+      (${a*power}x^{${power-1}})
+      \\]
+      </div>
+
+      Step 2: Simplify
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      ${a}x^{${power-1}}
+      +
+      ${a*power}x^{${power-1}}
+      \\ln(${b}x)
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  // ==================================================
+  // TYPE 3
+  // Exponential × ln(x)
+  // ==================================================
+
+  else{
+
+    const a = randInt(1,5);
+    const b = randInt(1,5);
+
+    questionLatex =
+      `f(x)=(e^{${a}x})(\\ln(${b}x))`;
+
+    solutionLatex = `
+
+      <div class="step">
+      Let
+      \\[
+      u=e^{${a}x}
+      \\]
+      and
+      \\[
+      v=\\ln(${b}x)
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{du}{dx}
+      =
+      ${a}e^{${a}x}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{dv}{dx}
+      =
+      \\frac{1}{x}
+      \\]
+      </div>
+
+      <div class="step">
+      Apply the product rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}(uv)
+      =
+      u\\frac{dv}{dx}
+      +
+      v\\frac{du}{dx}
+      \\]
+      </div>
+
+      <div class="answer">
+
+      Step 1:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      (e^{${a}x})
+      \\left(
+      \\frac{1}{x}
+      \\right)
+      +
+      (\\ln(${b}x))
+      (${a}e^{${a}x})
+      \\]
+      </div>
+
+      Step 2: Simplify
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      \\frac{e^{${a}x}}{x}
+      +
+      ${a}e^{${a}x}
+      \\ln(${b}x)
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  document.getElementById("question").innerHTML =
+    `\\[ ${questionLatex} \\]`;
+
+  document.getElementById("solution").innerHTML =
+    solutionLatex;
+
+  document.getElementById("solutionCard")
+    .classList.add("hidden");
+
+  MathJax.typesetPromise();
+}
+
+function toggleSolution(){
+
+  document.getElementById("solutionCard")
+    .classList.toggle("hidden");
+
+  MathJax.typesetPromise();
+}
+
+generateProblem();
+
+</script>
+
+</body>
+</html>
