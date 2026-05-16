@@ -1,15 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Indefinite Integrals Practice App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Indefinite Integrals Solver</title>
 
   <!-- MathJax -->
   <script>
     window.MathJax = {
       tex: {
-        inlineMath: [['\\(','\\)'], ['$', '$']]
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
       },
       svg: {
         fontCache: 'global'
@@ -17,22 +20,25 @@
     };
   </script>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
 
   <style>
+
     body{
-      font-family: Arial, sans-serif;
-      background:#f4f7fb;
       margin:0;
       padding:30px;
+      font-family:Arial, sans-serif;
+      background:#f4f7fb;
       display:flex;
       justify-content:center;
     }
 
     .container{
-      background:white;
-      width:900px;
+      width:950px;
       max-width:100%;
+      background:white;
       padding:30px;
       border-radius:20px;
       box-shadow:0 6px 20px rgba(0,0,0,0.12);
@@ -40,7 +46,7 @@
 
     h1{
       text-align:center;
-      color:#1e3a5f;
+      color:#1d4ed8;
       margin-bottom:10px;
     }
 
@@ -52,40 +58,40 @@
 
     .question-box{
       background:#eef4ff;
-      border-left:8px solid #4a7cff;
+      border-left:8px solid #2563eb;
       padding:25px;
-      border-radius:12px;
-      font-size:28px;
-      margin-bottom:25px;
+      border-radius:15px;
+      font-size:30px;
       text-align:center;
-      min-height:80px;
+      margin-bottom:25px;
+      min-height:90px;
     }
 
     .buttons{
       display:flex;
-      gap:15px;
       justify-content:center;
+      gap:15px;
       flex-wrap:wrap;
       margin-bottom:25px;
     }
 
     button{
       padding:14px 24px;
-      font-size:16px;
       border:none;
       border-radius:12px;
       cursor:pointer;
-      transition:0.2s;
+      font-size:16px;
       font-weight:bold;
+      transition:0.2s;
     }
 
     .generate-btn{
-      background:#4a7cff;
+      background:#2563eb;
       color:white;
     }
 
     .generate-btn:hover{
-      background:#2f61e6;
+      background:#1d4ed8;
     }
 
     .solution-btn{
@@ -94,45 +100,40 @@
     }
 
     .solution-btn:hover{
-      background:#0f7a36;
+      background:#15803d;
     }
 
     .solution-area{
       background:#fafafa;
-      border-radius:15px;
-      padding:25px;
       border:2px solid #ddd;
-      min-height:120px;
+      border-radius:16px;
+      padding:25px;
+      min-height:150px;
     }
 
     .step{
-      margin-bottom:22px;
-      font-size:22px;
-      line-height:1.8;
+      margin-bottom:35px;
+      font-size:24px;
+      line-height:2;
     }
 
     .step-title{
       color:#1d4ed8;
       font-weight:bold;
-      margin-bottom:8px;
+      margin-bottom:10px;
     }
 
     .final-answer{
-      background:#dcfce7;
-      padding:18px;
-      border-radius:12px;
-      border-left:8px solid #16a34a;
+      background:#fef9c3;
+      border-left:8px solid #eab308;
+      padding:20px;
+      border-radius:14px;
+      font-size:26px;
       margin-top:20px;
-      font-size:24px;
     }
 
-    .note{
-      margin-top:20px;
-      color:#666;
-      text-align:center;
-      font-size:14px;
-    }
   </style>
+
 </head>
 
 <body>
@@ -142,14 +143,15 @@
   <h1>Indefinite Integrals Solver</h1>
 
   <div class="subtitle">
-    Practice solving integrals using the Power Rule
+    Practice the Power Rule with square roots and fractional indices
   </div>
 
   <div class="question-box" id="questionBox">
-    Press "Generate Question"
+    Press Generate Question
   </div>
 
   <div class="buttons">
+
     <button class="generate-btn" onclick="generateQuestion()">
       Generate Question
     </button>
@@ -157,14 +159,11 @@
     <button class="solution-btn" onclick="showSolution()">
       Show Solution
     </button>
+
   </div>
 
   <div class="solution-area" id="solutionArea">
     Solution steps will appear here.
-  </div>
-
-  <div class="note">
-    Includes square roots rewritten as fractional powers.
   </div>
 
 </div>
@@ -177,45 +176,121 @@ function randomInt(min, max){
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function simplifyFraction(numerator, denominator){
+
+  function gcd(a,b){
+    return b ? gcd(b, a % b) : a;
+  }
+
+  const g = gcd(Math.abs(numerator), Math.abs(denominator));
+
+  return {
+    numerator: numerator / g,
+    denominator: denominator / g
+  };
+}
+
+function frac(num, den){
+
+  if(den === 1){
+    return `${num}`;
+  }
+
+  return `\\frac{${num}}{${den}}`;
+}
+
+function powerLatex(num, den){
+
+  if(den === 1){
+
+    if(num === 1){
+      return "x";
+    }
+
+    return `x^{${num}}`;
+  }
+
+  return `x^{${frac(num,den)}}`;
+}
+
 function generateQuestion(){
 
   const coefficient = randomInt(2,9);
 
-  const powers = [2,3,4,5,6,7];
-  const power = powers[randomInt(0, powers.length-1)];
+  const type = randomInt(1,3);
 
-  const useSquareRoot = Math.random() < 0.5;
+  let question = "";
 
-  let questionLatex = "";
-  let internalPower = power;
+  let numerator;
+  let denominator;
 
-  if(useSquareRoot){
+  // NORMAL POWER
+  if(type === 1){
 
-    // sqrt(x^n) = x^(n/2)
-    const sqrtPower = randomInt(1,7);
+    numerator = randomInt(1,6);
+    denominator = 1;
 
-    questionLatex =
-      `\\int ${coefficient}\\sqrt{x^{${sqrtPower}}}\\,dx`;
+    if(numerator === 1){
 
-    internalPower = sqrtPower / 2;
+      question =
+        `\\int ${coefficient}x\\,dx`;
 
-  } else {
+    }else{
 
-    questionLatex =
-      `\\int ${coefficient}x^{${power}}\\,dx`;
+      question =
+        `\\int ${coefficient}x^{${numerator}}\\,dx`;
+    }
+  }
 
-    internalPower = power;
+  // SQRT IN NUMERATOR
+  else if(type === 2){
+
+    const n = randomInt(1,7);
+
+    numerator = n;
+    denominator = 2;
+
+    if(n === 1){
+
+      question =
+        `\\int ${coefficient}\\sqrt{x}\\,dx`;
+
+    }else{
+
+      question =
+        `\\int ${coefficient}\\sqrt{x^{${n}}}\\,dx`;
+    }
+  }
+
+  // SQRT IN DENOMINATOR
+  else{
+
+    const n = randomInt(1,7);
+
+    numerator = -n;
+    denominator = 2;
+
+    if(n === 1){
+
+      question =
+        `\\int \\frac{${coefficient}}{\\sqrt{x}}\\,dx`;
+
+    }else{
+
+      question =
+        `\\int \\frac{${coefficient}}{\\sqrt{x^{${n}}}}\\,dx`;
+    }
   }
 
   currentQuestion = {
     coefficient,
-    power: internalPower,
-    questionLatex,
-    useSquareRoot
+    numerator,
+    denominator,
+    question
   };
 
   document.getElementById("questionBox").innerHTML =
-    `\\(${questionLatex}\\)`;
+    `\\(${question}\\)`;
 
   document.getElementById("solutionArea").innerHTML =
     "Solution steps will appear here.";
@@ -230,115 +305,159 @@ function showSolution(){
   }
 
   const a = currentQuestion.coefficient;
-  const n = currentQuestion.power;
+  const nNum = currentQuestion.numerator;
+  const nDen = currentQuestion.denominator;
 
-  const newPower = n + 1;
-  const denominator = newPower;
-  const finalCoefficient = a / denominator;
+  // new power
+  const top = nNum + nDen;
+  const bottom = nDen;
 
-  let steps = "";
+  const newPower =
+    simplifyFraction(top, bottom);
 
-  steps += `
+  // coefficient
+  const coeff =
+    simplifyFraction(
+      a * newPower.denominator,
+      newPower.numerator
+    );
+
+  let html = "";
+
+  // STEP 1
+  html += `
     <div class="step">
-      <div class="step-title">Step 1: Rewrite the square root (if needed)</div>
-  `;
 
-  if(currentQuestion.useSquareRoot){
+      <div class="step-title">
+        Step 1: Rewrite using fractional indices
+      </div>
 
-    steps += `
       \\[
-      \\sqrt{x^${n*2}} = x^{${n}}
+      ${currentQuestion.question}
       \\]
-    `;
-
-  } else {
-
-    steps += `
-      \\[
-      \\int ${a}x^{${n}}\\,dx
-      \\]
-    `;
-  }
-
-  steps += `</div>`;
-
-  steps += `
-    <div class="step">
-      <div class="step-title">Step 2: Apply the Power Rule</div>
-
-      Using the rule:
 
       \\[
-      \\int x^n\\,dx =
-      \\frac{x^{n+1}}{n+1} + C
-      \\]
-    </div>
-  `;
-
-  steps += `
-    <div class="step">
-      <div class="step-title">Step 3: Increase the power by 1</div>
-
-      \\[
-      n + 1 = ${n} + 1 = ${newPower}
-      \\]
-    </div>
-  `;
-
-  steps += `
-    <div class="step">
-      <div class="step-title">Step 4: Divide by the new power</div>
-
-      \\[
-      \\int ${a}x^{${n}}\\,dx
       =
-      ${a}
-      \\left(
-      \\frac{x^{${newPower}}}{${newPower}}
-      \\right)
-      + C
+      \\int ${a}${powerLatex(nNum,nDen)}\\,dx
       \\]
+
     </div>
   `;
 
-  steps += `
+  // STEP 2
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 2: Apply the Power Rule
+      </div>
+
+      \\[
+      \\int x^n\\,dx
+      =
+      \\frac{x^{n+1}}{n+1} + c
+      \\]
+
+    </div>
+  `;
+
+  // STEP 3
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 3: Increase the power by 1
+      </div>
+
+      \\[
+      ${frac(nNum,nDen)}
+      + 1
+      =
+      ${frac(top,bottom)}
+      \\]
+
+    </div>
+  `;
+
+  // STEP 4
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 4: Divide by the new power
+      </div>
+
+      \\[
+      =
+      ${frac(coeff.numerator, coeff.denominator)}
+      x^{
+      ${frac(newPower.numerator,newPower.denominator)}
+      }
+      + c
+      \\]
+
+    </div>
+  `;
+
+  // FINAL ANSWER
+  html += `
     <div class="final-answer">
 
-      <strong>Final Answer:</strong>
+      <strong>Final Answer</strong>
 
       \\[
-      = ${formatFraction(finalCoefficient)}x^{${newPower}} + C
+      =
+      ${finalAnswer(
+        coeff.numerator,
+        coeff.denominator,
+        newPower.numerator,
+        newPower.denominator
+      )}
+      + c
       \\]
 
     </div>
   `;
 
-  document.getElementById("solutionArea").innerHTML = steps;
+  document.getElementById("solutionArea").innerHTML = html;
 
   MathJax.typesetPromise();
 }
 
-function formatFraction(value){
+function finalAnswer(cNum, cDen, pNum, pDen){
 
-  if(Number.isInteger(value)){
-    return value;
+  let coefficient = "";
+
+  if(cDen === 1){
+    coefficient = `${cNum}`;
+  }
+  else{
+    coefficient = `\\frac{${cNum}}{${cDen}}`;
   }
 
-  const tolerance = 1.0E-6;
+  // x
+  if(pNum === pDen){
+    return `${coefficient}x`;
+  }
 
-  let numerator = 1;
-  let denominator = 1;
+  // square roots
+  if(pDen === 2){
 
-  while(Math.abs(numerator / denominator - value) > tolerance){
-
-    if(numerator / denominator < value){
-      numerator++;
-    } else {
-      denominator++;
+    // sqrt(x)
+    if(pNum === 1){
+      return `${coefficient}\\sqrt{x}`;
     }
+
+    // sqrt(x^n)
+    if(pNum > 1){
+      return `${coefficient}\\sqrt{x^{${pNum}}}`;
+    }
+
+    // negative powers
+    return `${coefficient}x^{${frac(pNum,pDen)}}`;
   }
 
-  return `\\frac{${numerator}}{${denominator}}`;
+  return `${coefficient}x^{${frac(pNum,pDen)}}`;
 }
 
 generateQuestion();
