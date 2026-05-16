@@ -135,9 +135,56 @@ function randInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
+// ========================================
+// Remove coefficient 1
+// ========================================
+
+function coeff(n){
+
+  if(n === 1){
+    return "";
+  }
+
+  if(n === -1){
+    return "-";
+  }
+
+  return n;
+}
+
+// ========================================
+// Remove exponent 1
+// ========================================
+
+function powerString(power){
+
+  if(power === 1){
+    return "";
+  }
+
+  return `^{${power}}`;
+}
+
+// ========================================
+// Exponential string
+// ========================================
+
+function expString(coefficient){
+
+  if(coefficient === 1){
+    return "x";
+  }
+
+  return `${coefficient}x`;
+}
+
+// ========================================
+// Generate Problem
+// ========================================
+
 function generateProblem(){
 
-  const type = randInt(1,3);
+  const type = randInt(1,4);
 
   let questionLatex = "";
   let solutionLatex = "";
@@ -151,27 +198,27 @@ function generateProblem(){
 
     const a = randInt(2,6);
     const power = randInt(2,5);
+    const c = randInt(1,9);
+
     const b = randInt(1,5);
 
-    const firstCoeff = a * b;
-    const secondCoeff = a * power;
-
-    const simplifiedCoeff =
-      firstCoeff + secondCoeff;
+    const exponent = expString(b);
 
     questionLatex =
-      `f(x)=(${a}x^{${power}})(e^{${b}x})`;
+      `f(x)=
+      (${coeff(a)}x${powerString(power)}+${c})
+      (e^{${exponent}})`;
 
     solutionLatex = `
 
       <div class="step">
       Let
       \\[
-      u=${a}x^{${power}}
+      u=${coeff(a)}x${powerString(power)}+${c}
       \\]
       and
       \\[
-      v=e^{${b}x}
+      v=e^{${exponent}}
       \\]
       </div>
 
@@ -179,7 +226,7 @@ function generateProblem(){
       \\[
       \\frac{du}{dx}
       =
-      ${a*power}x^{${power-1}}
+      ${coeff(a*power)}x${powerString(power-1)}
       \\]
       </div>
 
@@ -187,7 +234,7 @@ function generateProblem(){
       \\[
       \\frac{dv}{dx}
       =
-      ${b}e^{${b}x}
+      ${b === 1 ? "" : b}e^{${exponent}}
       \\]
       </div>
 
@@ -213,23 +260,25 @@ function generateProblem(){
       \\[
       f'(x)
       =
-      (${a}x^{${power}})
-      (${b}e^{${b}x})
+      (${coeff(a)}x${powerString(power)}+${c})
+      (${b === 1 ? "" : b}e^{${exponent}})
       +
-      (e^{${b}x})
-      (${a*power}x^{${power-1}})
+      (e^{${exponent}})
+      (${coeff(a*power)}x${powerString(power-1)})
       \\]
       </div>
 
-      Step 2: Simplify
+      Step 2: Expand
 
       <div class="math">
       \\[
       f'(x)
       =
-      ${firstCoeff}x^{${power}}e^{${b}x}
+      ${coeff(a*b)}x${powerString(power)}e^{${exponent}}
       +
-      ${secondCoeff}x^{${power-1}}e^{${b}x}
+      ${c*b === 1 ? "" : c*b}e^{${exponent}}
+      +
+      ${coeff(a*power)}x${powerString(power-1)}e^{${exponent}}
       \\]
       </div>
 
@@ -246,21 +295,25 @@ function generateProblem(){
 
     const a = randInt(2,6);
     const power = randInt(2,5);
+    const c = randInt(1,9);
+
     const b = randInt(1,5);
 
     questionLatex =
-      `f(x)=(${a}x^{${power}})(\\ln(${b}x))`;
+      `f(x)=
+      (${coeff(a)}x${powerString(power)}+${c})
+      (\\ln(${coeff(b)}x))`;
 
     solutionLatex = `
 
       <div class="step">
       Let
       \\[
-      u=${a}x^{${power}}
+      u=${coeff(a)}x${powerString(power)}+${c}
       \\]
       and
       \\[
-      v=\\ln(${b}x)
+      v=\\ln(${coeff(b)}x)
       \\]
       </div>
 
@@ -268,7 +321,7 @@ function generateProblem(){
       \\[
       \\frac{du}{dx}
       =
-      ${a*power}x^{${power-1}}
+      ${coeff(a*power)}x${powerString(power-1)}
       \\]
       </div>
 
@@ -302,13 +355,13 @@ function generateProblem(){
       \\[
       f'(x)
       =
-      (${a}x^{${power}})
+      (${coeff(a)}x${powerString(power)}+${c})
       \\left(
       \\frac{1}{x}
       \\right)
       +
-      (\\ln(${b}x))
-      (${a*power}x^{${power-1}})
+      (\\ln(${coeff(b)}x))
+      (${coeff(a*power)}x${powerString(power-1)})
       \\]
       </div>
 
@@ -318,10 +371,12 @@ function generateProblem(){
       \\[
       f'(x)
       =
-      ${a}x^{${power-1}}
+      ${coeff(a)}x${powerString(power-1)}
       +
-      ${a*power}x^{${power-1}}
-      \\ln(${b}x)
+      \\frac{${c}}{x}
+      +
+      ${coeff(a*power)}x${powerString(power-1)}
+      \\ln(${coeff(b)}x)
       \\]
       </div>
 
@@ -334,24 +389,28 @@ function generateProblem(){
   // Exponential × ln(x)
   // ==================================================
 
-  else{
+  else if(type === 3){
 
     const a = randInt(1,5);
     const b = randInt(1,5);
 
+    const exponent = expString(a);
+
     questionLatex =
-      `f(x)=(e^{${a}x})(\\ln(${b}x))`;
+      `f(x)=
+      (e^{${exponent}})
+      (\\ln(${coeff(b)}x))`;
 
     solutionLatex = `
 
       <div class="step">
       Let
       \\[
-      u=e^{${a}x}
+      u=e^{${exponent}}
       \\]
       and
       \\[
-      v=\\ln(${b}x)
+      v=\\ln(${coeff(b)}x)
       \\]
       </div>
 
@@ -359,7 +418,7 @@ function generateProblem(){
       \\[
       \\frac{du}{dx}
       =
-      ${a}e^{${a}x}
+      ${a === 1 ? "" : a}e^{${exponent}}
       \\]
       </div>
 
@@ -393,13 +452,13 @@ function generateProblem(){
       \\[
       f'(x)
       =
-      (e^{${a}x})
+      (e^{${exponent}})
       \\left(
       \\frac{1}{x}
       \\right)
       +
-      (\\ln(${b}x))
-      (${a}e^{${a}x})
+      (\\ln(${coeff(b)}x))
+      (${a === 1 ? "" : a}e^{${exponent}})
       \\]
       </div>
 
@@ -409,10 +468,102 @@ function generateProblem(){
       \\[
       f'(x)
       =
-      \\frac{e^{${a}x}}{x}
+      \\frac{e^{${exponent}}}{x}
       +
-      ${a}e^{${a}x}
-      \\ln(${b}x)
+      ${a === 1 ? "" : a}e^{${exponent}}
+      \\ln(${coeff(b)}x)
+      \\]
+      </div>
+
+      </div>
+    `;
+  }
+
+  // ==================================================
+  // TYPE 4
+  // Exponential × Exponential
+  // ==================================================
+
+  else{
+
+    const a = randInt(1,5);
+    const b = randInt(1,5);
+
+    const exp1 = expString(a);
+    const exp2 = expString(b);
+
+    questionLatex =
+      `f(x)=
+      (e^{${exp1}})
+      (e^{${exp2}})`;
+
+    solutionLatex = `
+
+      <div class="step">
+      Let
+      \\[
+      u=e^{${exp1}}
+      \\]
+      and
+      \\[
+      v=e^{${exp2}}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{du}{dx}
+      =
+      ${a === 1 ? "" : a}e^{${exp1}}
+      \\]
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{dv}{dx}
+      =
+      ${b === 1 ? "" : b}e^{${exp2}}
+      \\]
+      </div>
+
+      <div class="step">
+      Apply the product rule:
+      </div>
+
+      <div class="math">
+      \\[
+      \\frac{d}{dx}(uv)
+      =
+      u\\frac{dv}{dx}
+      +
+      v\\frac{du}{dx}
+      \\]
+      </div>
+
+      <div class="answer">
+
+      Step 1:
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      (e^{${exp1}})
+      (${b === 1 ? "" : b}e^{${exp2}})
+      +
+      (e^{${exp2}})
+      (${a === 1 ? "" : a}e^{${exp1}})
+      \\]
+      </div>
+
+      Step 2: Simplify
+
+      <div class="math">
+      \\[
+      f'(x)
+      =
+      ${a+b === 1 ? "" : a+b}
+      e^{${a+b}x}
       \\]
       </div>
 
