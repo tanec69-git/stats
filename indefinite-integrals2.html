@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Integration Practice App</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['\\[','\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script defer
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:30px;
+      background:#f4f7fb;
+      font-family:Arial, sans-serif;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:1000px;
+      max-width:100%;
+      background:white;
+      padding:30px;
+      border-radius:20px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    h1{
+      text-align:center;
+      color:#1d4ed8;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#666;
+      margin-bottom:30px;
+    }
+
+    .question-box{
+      background:#eef4ff;
+      border-left:8px solid #2563eb;
+      border-radius:15px;
+      padding:25px;
+      text-align:center;
+      font-size:30px;
+      min-height:90px;
+      margin-bottom:25px;
+    }
+
+    .buttons{
+      display:flex;
+      justify-content:center;
+      gap:15px;
+      flex-wrap:wrap;
+      margin-bottom:25px;
+    }
+
+    button{
+      padding:14px 24px;
+      border:none;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .generate-btn{
+      background:#2563eb;
+      color:white;
+    }
+
+    .generate-btn:hover{
+      background:#1d4ed8;
+    }
+
+    .solution-btn{
+      background:#16a34a;
+      color:white;
+    }
+
+    .solution-btn:hover{
+      background:#15803d;
+    }
+
+    .solution-area{
+      background:#fafafa;
+      border:2px solid #ddd;
+      border-radius:16px;
+      padding:25px;
+      min-height:150px;
+    }
+
+    .step{
+      margin-bottom:35px;
+      line-height:2;
+      font-size:24px;
+    }
+
+    .step-title{
+      color:#1d4ed8;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .final-answer{
+      background:#fef9c3;
+      border-left:8px solid #eab308;
+      padding:20px;
+      border-radius:14px;
+      font-size:26px;
+      margin-top:20px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Integration Practice App</h1>
+
+  <div class="subtitle">
+    Practice integrating exponential and logarithmic functions
+  </div>
+
+  <div class="question-box" id="questionBox">
+    Press Generate Question
+  </div>
+
+  <div class="buttons">
+
+    <button class="generate-btn" onclick="generateQuestion()">
+      Generate Question
+    </button>
+
+    <button class="solution-btn" onclick="showSolution()">
+      Show Solution
+    </button>
+
+  </div>
+
+  <div class="solution-area" id="solutionArea">
+    Solution steps will appear here.
+  </div>
+
+</div>
+
+<script>
+
+let currentQuestion = null;
+
+function randomInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function generateQuestion(){
+
+  const a = randomInt(2,9);
+  const b = randomInt(2,12);
+
+  const type = randomInt(1,3);
+
+  let question = "";
+  let expression = "";
+
+  // TYPE 1
+  // ae^x + b/x
+
+  if(type === 1){
+
+    expression =
+      `${a}e^x + \\frac{${b}}{x}`;
+
+    question =
+      `\\int \\left(${expression}\\right)dx`;
+  }
+
+  // TYPE 2
+  // ae^x - b/x
+
+  else if(type === 2){
+
+    expression =
+      `${a}e^x - \\frac{${b}}{x}`;
+
+    question =
+      `\\int \\left(${expression}\\right)dx`;
+  }
+
+  // TYPE 3
+  // ae^x + b/x + c
+
+  else{
+
+    const c = randomInt(2,9);
+
+    expression =
+      `${a}e^x + \\frac{${b}}{x} + ${c}`;
+
+    question =
+      `\\int \\left(${expression}\\right)dx`;
+
+    currentQuestion = {
+      a,
+      b,
+      c,
+      type
+    };
+  }
+
+  if(type !== 3){
+
+    currentQuestion = {
+      a,
+      b,
+      type
+    };
+  }
+
+  document.getElementById("questionBox").innerHTML =
+    `\\(${question}\\)`;
+
+  document.getElementById("solutionArea").innerHTML =
+    "Solution steps will appear here.";
+
+  MathJax.typesetPromise();
+}
+
+function showSolution(){
+
+  if(!currentQuestion){
+    return;
+  }
+
+  const a = currentQuestion.a;
+  const b = currentQuestion.b;
+  const type = currentQuestion.type;
+
+  let html = "";
+
+  // STEP 1
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 1: Split the integral
+      </div>
+  `;
+
+  if(type === 1){
+
+    html += `
+      \\[
+      \\int \\left(
+      ${a}e^x + \\frac{${b}}{x}
+      \\right)dx
+      \\]
+
+      \\[
+      =
+      \\int ${a}e^x\\,dx
+      +
+      ${b}\\int \\frac{1}{x}\\,dx
+      \\]
+    `;
+  }
+
+  else if(type === 2){
+
+    html += `
+      \\[
+      \\int \\left(
+      ${a}e^x - \\frac{${b}}{x}
+      \\right)dx
+      \\]
+
+      \\[
+      =
+      \\int ${a}e^x\\,dx
+      -
+      ${b}\\int \\frac{1}{x}\\,dx
+      \\]
+    `;
+  }
+
+  else{
+
+    const c = currentQuestion.c;
+
+    html += `
+      \\[
+      \\int \\left(
+      ${a}e^x + \\frac{${b}}{x} + ${c}
+      \\right)dx
+      \\]
+
+      \\[
+      =
+      \\int ${a}e^x\\,dx
+      +
+      ${b}\\int \\frac{1}{x}\\,dx
+      +
+      \\int ${c}\\,dx
+      \\]
+    `;
+  }
+
+  html += `
+    </div>
+  `;
+
+  // STEP 2
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 2: Apply the integration rules
+      </div>
+
+      \\[
+      \\int e^x\\,dx = e^x
+      \\]
+
+      \\[
+      \\int \\frac{1}{x}\\,dx = \\ln x
+      \\]
+
+    </div>
+  `;
+
+  // STEP 3
+  html += `
+    <div class="step">
+
+      <div class="step-title">
+        Step 3: Integrate each term
+      </div>
+  `;
+
+  if(type === 1){
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      +
+      ${b}\\ln x
+      +
+      c
+      \\]
+    `;
+  }
+
+  else if(type === 2){
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      -
+      ${b}\\ln x
+      +
+      c
+      \\]
+    `;
+  }
+
+  else{
+
+    const c = currentQuestion.c;
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      +
+      ${b}\\ln x
+      +
+      ${c}x
+      +
+      c
+      \\]
+    `;
+  }
+
+  html += `
+    </div>
+  `;
+
+  // FINAL ANSWER
+
+  html += `
+    <div class="final-answer">
+
+      <strong>Final Answer</strong>
+  `;
+
+  if(type === 1){
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      +
+      ${b}\\ln x
+      +
+      c
+      \\]
+    `;
+  }
+
+  else if(type === 2){
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      -
+      ${b}\\ln x
+      +
+      c
+      \\]
+    `;
+  }
+
+  else{
+
+    const c = currentQuestion.c;
+
+    html += `
+      \\[
+      =
+      ${a}e^x
+      +
+      ${b}\\ln x
+      +
+      ${c}x
+      +
+      c
+      \\]
+    `;
+  }
+
+  html += `
+    </div>
+  `;
+
+  document.getElementById("solutionArea").innerHTML = html;
+
+  MathJax.typesetPromise();
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
