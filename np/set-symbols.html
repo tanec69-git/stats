@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Set Symbols Practice App</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']]
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:30px;
+      color:#222;
+    }
+
+    .container{
+      max-width:900px;
+      margin:auto;
+      background:white;
+      padding:30px;
+      border-radius:14px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .symbols{
+      font-size:1.3rem;
+      margin-bottom:25px;
+      line-height:1.8;
+    }
+
+    .question-box{
+      background:#f9fafc;
+      border-left:5px solid #1976d2;
+      padding:20px;
+      border-radius:10px;
+      margin-bottom:20px;
+      font-size:1.3rem;
+      line-height:2;
+    }
+
+    .answer-box{
+      display:none;
+      background:#eef7ee;
+      border-left:5px solid #43a047;
+      padding:20px;
+      border-radius:10px;
+      margin-top:20px;
+      line-height:2;
+      font-size:1.15rem;
+    }
+
+    button{
+      border:none;
+      padding:14px 22px;
+      border-radius:10px;
+      font-size:1rem;
+      cursor:pointer;
+      margin-right:12px;
+      color:white;
+    }
+
+    .generate-btn{
+      background:#1976d2;
+    }
+
+    .toggle-btn{
+      background:#43a047;
+    }
+
+    .step{
+      margin-bottom:12px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Set Symbols Practice Generator</h1>
+
+  <div class="symbols">
+    Use the most appropriate symbol:
+    <br>
+    \( \in,\ \notin,\ \subset,\ \not\subset,\ \subseteq \)
+  </div>
+
+  <div id="questionArea" class="question-box"></div>
+
+  <button class="generate-btn" onclick="generateQuestion()">
+    Generate Question
+  </button>
+
+  <button class="toggle-btn" onclick="toggleAnswer()">
+    Show Answer
+  </button>
+
+  <div id="answerArea" class="answer-box"></div>
+
+</div>
+
+<script>
+
+let answerVisible = false;
+
+function randomInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(array){
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function generateNumberSet(size){
+
+  const arr = [];
+
+  while(arr.length < size){
+
+    const n = randomInt(1,20);
+
+    if(!arr.includes(n)){
+      arr.push(n);
+    }
+  }
+
+  return arr.sort((a,b)=>a-b);
+}
+
+function generateLetterSet(size){
+
+  const letters = "abcdefghijklmnopqrstuvwxyz".split("");
+
+  return shuffle(letters).slice(0,size);
+}
+
+function setString(arr){
+
+  return "\\{ " + arr.join(", ") + " \\}";
+}
+
+function generateQuestion(){
+
+  answerVisible = false;
+
+  document.querySelector(".toggle-btn").innerText = "Show Answer";
+
+  document.getElementById("answerArea").style.display = "none";
+
+  const X = generateNumberSet(5);
+  const Y = generateLetterSet(4);
+
+  const questionTypes = [
+
+    "element-in",
+    "element-notin",
+    "subset",
+    "not-subset",
+    "subseteq"
+
+  ];
+
+  const type = questionTypes[randomInt(0, questionTypes.length - 1)];
+
+  let questionHTML = "";
+  let answerHTML = "";
+
+  // -----------------------------------
+  // ELEMENT IN
+  // -----------------------------------
+
+  if(type === "element-in"){
+
+    const elem = Y[randomInt(0, Y.length - 1)];
+
+    questionHTML = `
+      If
+      \\( Y = ${setString(Y)} \\),
+      fill in the blank:
+      <br><br>
+
+      \\[
+      ${elem}
+      \\underline{\\hspace{2cm}}
+      Y
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      The set
+      \\(
+      Y = ${setString(Y)}
+      \\)
+      contains the element
+      \\(
+      ${elem}
+      \\).
+      </div>
+
+      <div class="step">
+      Therefore,
+      \\(
+      ${elem}
+      \\)
+      is an element of
+      \\(
+      Y
+      \\).
+      </div>
+
+      <div class="step">
+      Hence, the correct symbol is:
+      </div>
+
+      \\[
+      ${elem} \\in Y
+      \\]
+    `;
+  }
+
+  // -----------------------------------
+  // ELEMENT NOT IN
+  // -----------------------------------
+
+  if(type === "element-notin"){
+
+    const elem = randomInt(21,30);
+
+    questionHTML = `
+      If
+      \\( X = ${setString(X)} \\),
+      fill in the blank:
+      <br><br>
+
+      \\[
+      ${elem}
+      \\underline{\\hspace{2cm}}
+      X
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      The set
+      \\(
+      X = ${setString(X)}
+      \\)
+      does not contain
+      \\(
+      ${elem}
+      \\).
+      </div>
+
+      <div class="step">
+      Therefore,
+      \\(
+      ${elem}
+      \\)
+      is not an element of
+      \\(
+      X
+      \\).
+      </div>
+
+      <div class="step">
+      Hence, the correct symbol is:
+      </div>
+
+      \\[
+      ${elem} \\notin X
+      \\]
+    `;
+  }
+
+  // -----------------------------------
+  // SUBSET
+  // -----------------------------------
+
+  if(type === "subset"){
+
+    const subset = shuffle(X).slice(0,2);
+
+    questionHTML = `
+      If
+      \\( X = ${setString(X)} \\),
+      fill in the blank:
+      <br><br>
+
+      \\[
+      ${setString(subset)}
+      \\underline{\\hspace{2cm}}
+      X
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      Every element in
+      \\(
+      ${setString(subset)}
+      \\)
+      is found in
+      \\(
+      X
+      \\).
+      </div>
+
+      <div class="step">
+      Also,
+      \\(
+      ${setString(subset)}
+      \\)
+      is not equal to
+      \\(
+      X
+      \\),
+      so it is a proper subset.
+      </div>
+
+      <div class="step">
+      Hence, the correct symbol is:
+      </div>
+
+      \\[
+      ${setString(subset)} \\subset X
+      \\]
+    `;
+  }
+
+  // -----------------------------------
+  // NOT SUBSET
+  // -----------------------------------
+
+  if(type === "not-subset"){
+
+    const badSet = [X[0], 99];
+
+    questionHTML = `
+      If
+      \\( X = ${setString(X)} \\),
+      fill in the blank:
+      <br><br>
+
+      \\[
+      ${setString(badSet)}
+      \\underline{\\hspace{2cm}}
+      X
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      The element
+      \\(
+      99
+      \\)
+      is not found in
+      \\(
+      X
+      \\).
+      </div>
+
+      <div class="step">
+      Therefore,
+      not every element of
+      \\(
+      ${setString(badSet)}
+      \\)
+      belongs to
+      \\(
+      X
+      \\).
+      </div>
+
+      <div class="step">
+      Hence,
+      \\(
+      ${setString(badSet)}
+      \\)
+      is not a subset of
+      \\(
+      X
+      \\).
+      </div>
+
+      \\[
+      ${setString(badSet)} \\not\\subset X
+      \\]
+    `;
+  }
+
+  // -----------------------------------
+  // SUBSETEQ
+  // -----------------------------------
+
+  if(type === "subseteq"){
+
+    const shuffled = shuffle(Y);
+
+    questionHTML = `
+      If
+      \\( Y = ${setString(Y)} \\),
+      fill in the blank:
+      <br><br>
+
+      \\[
+      ${setString(shuffled)}
+      \\underline{\\hspace{2cm}}
+      Y
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      Both sets contain exactly the same elements.
+      </div>
+
+      <div class="step">
+      A set is always a subset of itself.
+      </div>
+
+      <div class="step">
+      Therefore, the correct symbol is:
+      </div>
+
+      \\[
+      ${setString(shuffled)} \\subseteq Y
+      \\]
+    `;
+  }
+
+  document.getElementById("questionArea").innerHTML = questionHTML;
+
+  document.getElementById("answerArea").innerHTML = answerHTML;
+
+  MathJax.typesetPromise();
+}
+
+function toggleAnswer(){
+
+  const answerBox = document.getElementById("answerArea");
+
+  const button = document.querySelector(".toggle-btn");
+
+  answerVisible = !answerVisible;
+
+  if(answerVisible){
+
+    answerBox.style.display = "block";
+
+    button.innerText = "Hide Answer";
+
+  }else{
+
+    answerBox.style.display = "none";
+
+    button.innerText = "Show Answer";
+  }
+
+  MathJax.typesetPromise();
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
