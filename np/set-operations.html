@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Sets Operations Practice Generator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']]
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:30px;
+      color:#222;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+      background:white;
+      padding:35px;
+      border-radius:14px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:30px;
+    }
+
+    .question-box{
+      font-size:1.3rem;
+      line-height:2.2;
+      background:#f9fafc;
+      padding:25px;
+      border-left:5px solid #1976d2;
+      border-radius:10px;
+    }
+
+    .answer-box{
+      display:none;
+      margin-top:25px;
+      padding:25px;
+      background:#eef7ee;
+      border-left:5px solid #43a047;
+      border-radius:10px;
+      line-height:2;
+      font-size:1.1rem;
+    }
+
+    button{
+      border:none;
+      padding:14px 22px;
+      border-radius:10px;
+      color:white;
+      font-size:1rem;
+      cursor:pointer;
+      margin-top:25px;
+      margin-right:12px;
+    }
+
+    .generate-btn{
+      background:#1976d2;
+    }
+
+    .toggle-btn{
+      background:#43a047;
+    }
+
+    .step{
+      margin-bottom:14px;
+    }
+
+    .answer{
+      margin-top:12px;
+      font-weight:bold;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Sets Operations Practice Generator</h1>
+
+  <div id="questionArea" class="question-box"></div>
+
+  <button class="generate-btn" onclick="generateQuestion()">
+    Generate Question
+  </button>
+
+  <button class="toggle-btn" onclick="toggleAnswer()">
+    Show Answer
+  </button>
+
+  <div id="answerArea" class="answer-box"></div>
+
+</div>
+
+<script>
+
+let answerVisible = false;
+
+function randomInt(min,max){
+  return Math.floor(Math.random() * (max-min+1)) + min;
+}
+
+function shuffle(arr){
+  return [...arr].sort(()=>Math.random()-0.5);
+}
+
+function setString(arr){
+  return "\\{ " + arr.join(", ") + " \\}";
+}
+
+function unique(arr){
+  return [...new Set(arr)].sort((a,b)=>a-b);
+}
+
+function intersection(a,b){
+  return a.filter(x => b.includes(x));
+}
+
+function union(a,b){
+  return unique([...a,...b]);
+}
+
+function complement(universal, setA){
+  return universal.filter(x => !setA.includes(x));
+}
+
+function difference(a,b){
+  return a.filter(x => !b.includes(x));
+}
+
+function generateQuestion(){
+
+  answerVisible = false;
+
+  document.querySelector(".toggle-btn").innerText = "Show Answer";
+
+  document.getElementById("answerArea").style.display = "none";
+
+  // -----------------------------------
+  // UNIVERSAL SET
+  // -----------------------------------
+
+  const lower = randomInt(-8,-3);
+  const upper = randomInt(4,9);
+
+  const universal = [];
+
+  for(let i=lower;i<=upper;i++){
+    universal.push(i);
+  }
+
+  // -----------------------------------
+  // SET A
+  // -----------------------------------
+
+  const A = shuffle(universal)
+    .slice(0,5)
+    .sort((a,b)=>a-b);
+
+  // -----------------------------------
+  // SET B
+  // -----------------------------------
+
+  const limit = randomInt(10,35);
+
+  const B = universal.filter(x => x*x < limit);
+
+  // -----------------------------------
+  // SET C
+  // -----------------------------------
+
+  const divisorOptions = [2,3,4];
+
+  const divisor =
+    divisorOptions[randomInt(0, divisorOptions.length-1)];
+
+  const C = universal.filter(x => x % divisor === 0);
+
+  // -----------------------------------
+  // QUESTION TYPES
+  // -----------------------------------
+
+  const questionTypes = [
+
+    "complement",
+    "union",
+    "intersection",
+    "difference"
+
+  ];
+
+  const type =
+    questionTypes[randomInt(0,questionTypes.length-1)];
+
+  let questionHTML = "";
+  let answerHTML = "";
+
+  // -----------------------------------
+  // QUESTION HEADER
+  // -----------------------------------
+
+  questionHTML += `
+    Given
+
+    \\[
+    \\varepsilon =
+    \\{
+    x :
+    ${lower}
+    \\le x \\le
+    ${upper},
+    \\;
+    x \\in \\mathbb{Z}
+    \\}
+    \\]
+
+    and it contains three sets
+    \\(
+    A, B, C
+    \\):
+
+    <br><br>
+
+    \\[
+    A =
+    ${setString(A)}
+    \\]
+
+    \\[
+    B =
+    \\{
+    x :
+    x^2 < ${limit}
+    \\}
+    \\]
+
+    \\[
+    C =
+    \\{
+    x :
+    x
+    \\text{ is divisible by }
+    ${divisor}
+    \\}
+    \\]
+
+    <br>
+
+    List the elements in the following set:
+
+    <br><br>
+  `;
+
+  // -----------------------------------
+  // COMPLEMENT
+  // -----------------------------------
+
+  if(type === "complement"){
+
+    const answer = complement(universal,C);
+
+    questionHTML += `
+      \\[
+      C'
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      Set
+      \\(
+      C
+      \\)
+      contains all integers divisible by
+      \\(
+      ${divisor}
+      \\).
+      </div>
+
+      <div class="step">
+      Therefore,
+
+      \\[
+      C =
+      ${setString(C)}
+      \\]
+      </div>
+
+      <div class="step">
+      The complement
+      \\(
+      C'
+      \\)
+      contains all elements in
+      \\(
+      \\varepsilon
+      \\)
+      that are NOT in
+      \\(
+      C
+      \\).
+      </div>
+
+      <div class="answer">
+
+      \\[
+      C'
+      =
+      ${setString(answer)}
+      \\]
+
+      </div>
+    `;
+  }
+
+  // -----------------------------------
+  // UNION
+  // -----------------------------------
+
+  if(type === "union"){
+
+    const answer = union(A,B);
+
+    questionHTML += `
+      \\[
+      A \\cup B
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      First determine set
+      \\(
+      B
+      \\).
+      </div>
+
+      <div class="step">
+      Since
+
+      \\[
+      x^2 < ${limit}
+      \\]
+
+      the integers that satisfy this condition are:
+      </div>
+
+      <div class="step">
+
+      \\[
+      B =
+      ${setString(B)}
+      \\]
+
+      </div>
+
+      <div class="step">
+      The union of two sets contains all elements from both sets without repetition.
+      </div>
+
+      <div class="answer">
+
+      \\[
+      A \\cup B
+      =
+      ${setString(answer)}
+      \\]
+
+      </div>
+    `;
+  }
+
+  // -----------------------------------
+  // INTERSECTION
+  // -----------------------------------
+
+  if(type === "intersection"){
+
+    const answer = intersection(A,C);
+
+    questionHTML += `
+      \\[
+      A \\cap C
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      Set
+      \\(
+      C
+      \\)
+      contains all integers divisible by
+      \\(
+      ${divisor}
+      \\).
+      </div>
+
+      <div class="step">
+
+      \\[
+      C =
+      ${setString(C)}
+      \\]
+
+      </div>
+
+      <div class="step">
+      The intersection contains elements common to both sets.
+      </div>
+
+      <div class="answer">
+
+      \\[
+      A \\cap C
+      =
+      ${setString(answer)}
+      \\]
+
+      </div>
+    `;
+  }
+
+  // -----------------------------------
+  // DIFFERENCE
+  // -----------------------------------
+
+  if(type === "difference"){
+
+    const answer = difference(B,A);
+
+    questionHTML += `
+      \\[
+      B - A
+      \\]
+    `;
+
+    answerHTML = `
+      <h3>Solution</h3>
+
+      <div class="step">
+      First determine set
+      \\(
+      B
+      \\).
+      </div>
+
+      <div class="step">
+      Since
+
+      \\[
+      x^2 < ${limit}
+      \\]
+
+      the integers that satisfy this condition are:
+      </div>
+
+      <div class="step">
+
+      \\[
+      B =
+      ${setString(B)}
+      \\]
+
+      </div>
+
+      <div class="step">
+      \\(
+      B - A
+      \\)
+      contains elements in
+      \\(
+      B
+      \\)
+      that are not in
+      \\(
+      A
+      \\).
+      </div>
+
+      <div class="answer">
+
+      \\[
+      B - A
+      =
+      ${setString(answer)}
+      \\]
+
+      </div>
+    `;
+  }
+
+  document.getElementById("questionArea").innerHTML =
+    questionHTML;
+
+  document.getElementById("answerArea").innerHTML =
+    answerHTML;
+
+  MathJax.typesetPromise();
+}
+
+function toggleAnswer(){
+
+  const answerBox =
+    document.getElementById("answerArea");
+
+  const button =
+    document.querySelector(".toggle-btn");
+
+  answerVisible = !answerVisible;
+
+  if(answerVisible){
+
+    answerBox.style.display = "block";
+
+    button.innerText = "Hide Answer";
+
+  }else{
+
+    answerBox.style.display = "none";
+
+    button.innerText = "Show Answer";
+  }
+
+  MathJax.typesetPromise();
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
