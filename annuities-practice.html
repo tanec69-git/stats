@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annuities Question Generator</title>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f4f4;
+        padding:20px;
+    }
+
+    .container{
+        max-width:900px;
+        margin:auto;
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1{
+        text-align:center;
+    }
+
+    button{
+        padding:12px 20px;
+        margin:10px 5px;
+        border:none;
+        border-radius:8px;
+        background:#007BFF;
+        color:white;
+        font-size:16px;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#0056b3;
+    }
+
+    .section{
+        margin-top:25px;
+        padding:20px;
+        background:#fafafa;
+        border-radius:10px;
+        border:1px solid #ddd;
+    }
+
+    .answer{
+        margin-top:20px;
+        background:#eef7ee;
+        padding:15px;
+        border-radius:10px;
+        display:none;
+    }
+
+    .formula{
+        background:#f0f8ff;
+        padding:12px;
+        border-radius:8px;
+        margin:15px 0;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Annuities Question Generator</h1>
+
+    <button onclick="generateQuestion()">Generate Question</button>
+    <button onclick="toggleAnswer()">Show / Hide Answer</button>
+
+    <div class="section">
+        <h2>Question</h2>
+        <div id="question"></div>
+    </div>
+
+    <div class="answer" id="answerBox">
+        <h2>Solution</h2>
+        <div id="answer"></div>
+    </div>
+
+</div>
+
+<script>
+
+let currentAnswer = "";
+
+function randomInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateQuestion(){
+
+    const type = Math.random() < 0.5 ? "PV" : "FV";
+
+    const payment = randomInt(1,10) * 500;
+    const years = randomInt(5,20);
+    const rate = randomInt(2,8);
+    const m = 12;
+
+    let questionText = "";
+    let answerText = "";
+
+    if(type === "PV"){
+
+        questionText = `
+        Mr. Tan plans to set up a fund to withdraw 
+        $${payment.toLocaleString()} each month for the next 
+        ${years} years. 
+
+        Given the fund earns interest at a rate of 
+        ${rate}% per year compounded continuously, 
+        how much does he need to set up the fund? 
+        Provide your answer to the nearest dollar.
+        `;
+
+        const r = rate / 100;
+
+        const pv = (m * payment / r) * (1 - Math.exp(-r * years));
+
+        answerText = `
+        <div class="formula">
+        \\[
+        PV = \\frac{mP}{r}\\left(1-e^{-rT}\\right)
+        \\]
+        </div>
+
+        Given:
+        \\[
+        P = ${payment}
+        \\]
+        \\[
+        m = 12
+        \\]
+        \\[
+        r = ${r}
+        \\]
+        \\[
+        T = ${years}
+        \\]
+
+        Substitute into the formula:
+
+        \\[
+        PV =
+        \\frac{12(${payment})}{${r}}
+        \\left(1-e^{-${r}(${years})}\\right)
+        \\]
+
+        \\[
+        PV \\approx ${pv.toFixed(0).toLocaleString()}
+        \\]
+
+        Therefore,
+
+        \\[
+        \\boxed{\\$${pv.toFixed(0).toLocaleString()}}
+        \\]
+        `;
+    }
+
+    else{
+
+        questionText = `
+        Ms. Lim plans to deposit 
+        $${payment.toLocaleString()} at the end of each month into an investment fund for the next 
+        ${years} years.
+
+        If the fund earns interest at a rate of 
+        ${rate}% per year compounded continuously, 
+        how much will be in the fund at the end of 
+        ${years} years? 
+
+        Provide your answer to the nearest dollar.
+        `;
+
+        const r = rate / 100;
+
+        const fv = (m * payment / r) * (Math.exp(r * years) - 1);
+
+        answerText = `
+        <div class="formula">
+        \\[
+        A = \\frac{mP}{r}\\left(e^{rT}-1\\right)
+        \\]
+        </div>
+
+        Given:
+        \\[
+        P = ${payment}
+        \\]
+        \\[
+        m = 12
+        \\]
+        \\[
+        r = ${r}
+        \\]
+        \\[
+        T = ${years}
+        \\]
+
+        Substitute into the formula:
+
+        \\[
+        A =
+        \\frac{12(${payment})}{${r}}
+        \\left(e^{${r}(${years})}-1\\right)
+        \\]
+
+        \\[
+        A \\approx ${fv.toFixed(0).toLocaleString()}
+        \\]
+
+        Therefore,
+
+        \\[
+        \\boxed{\\$${fv.toFixed(0).toLocaleString()}}
+        \\]
+        `;
+    }
+
+    document.getElementById("question").innerHTML = questionText;
+    document.getElementById("answer").innerHTML = answerText;
+
+    document.getElementById("answerBox").style.display = "none";
+
+    MathJax.typesetPromise();
+}
+
+function toggleAnswer(){
+
+    const box = document.getElementById("answerBox");
+
+    if(box.style.display === "none"){
+        box.style.display = "block";
+    }
+    else{
+        box.style.display = "none";
+    }
+
+    MathJax.typesetPromise();
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
