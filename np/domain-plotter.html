@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Domain Plotter</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f3f4f6;
+    margin:0;
+    padding:30px;
+    color:#111827;
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+}
+
+h1{
+    font-size:54px;
+    margin-bottom:10px;
+    color:#2563eb;
+}
+
+.subtitle{
+    font-size:24px;
+    color:#4b5563;
+    margin-bottom:25px;
+}
+
+.buttonRow{
+    display:flex;
+    gap:18px;
+    margin-bottom:25px;
+    flex-wrap:wrap;
+}
+
+button{
+    padding:14px 24px;
+    border:none;
+    border-radius:12px;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.primary{
+    background:#2563eb;
+    color:white;
+}
+
+.primary:hover{
+    background:#1d4ed8;
+}
+
+.secondary{
+    background:white;
+    border:2px solid #d1d5db;
+}
+
+.card{
+    background:white;
+    border-radius:18px;
+    padding:28px;
+    margin-bottom:28px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sectionTitle{
+    color:#2563eb;
+    font-size:36px;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+
+.questionText{
+    font-size:28px;
+    margin-bottom:25px;
+}
+
+canvas{
+    width:100%;
+    background:white;
+}
+
+.answerCard{
+    background:#f8fbff;
+    border:2px solid #dbeafe;
+}
+
+.answerFlex{
+    display:flex;
+    justify-content:space-between;
+    gap:30px;
+    flex-wrap:wrap;
+}
+
+.explanation{
+    flex:1;
+    min-width:400px;
+}
+
+.mathText{
+    font-size:28px;
+    line-height:2;
+}
+
+.domainBox{
+    width:360px;
+    background:white;
+    border-radius:16px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+.domainTitle{
+    color:#2563eb;
+    font-size:30px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.domainNotation{
+    font-size:34px;
+}
+
+.tip{
+    background:#eff6ff;
+    border:2px solid #bfdbfe;
+    border-radius:14px;
+    padding:18px;
+    font-size:24px;
+    color:#1d4ed8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Domain Plotter</h1>
+
+    <div class="subtitle">
+        Generate questions and plot the domain of functions.
+    </div>
+
+    <div class="buttonRow">
+
+        <button class="primary" onclick="generateQuestion()">
+            New Question
+        </button>
+
+        <button class="secondary" onclick="showAnswer()">
+            Show Answer
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <div class="sectionTitle">Question</div>
+
+        <div class="questionText">
+            Determine and plot the domain of the following function.
+        </div>
+
+        <div id="equation"
+             style="font-size:44px; text-align:center; margin-bottom:30px;">
+        </div>
+
+        <canvas id="canvas" width="1300" height="300"></canvas>
+
+    </div>
+
+    <div class="card answerCard"
+         id="answerSection"
+         style="display:none;">
+
+        <div class="sectionTitle">Answer</div>
+
+        <div class="answerFlex">
+
+            <div class="explanation">
+
+                <div id="solution"
+                     class="mathText">
+                </div>
+
+            </div>
+
+            <div class="domainBox">
+
+                <div class="domainTitle">
+                    Domain (Interval Notation)
+                </div>
+
+                <div id="interval"
+                     class="domainNotation">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="tip">
+        Tips:
+        Square roots require the expression inside the root to be ≥ 0.
+        Denominators cannot equal 0.
+    </div>
+
+</div>
+
+<script>
+
+let currentQuestion = null;
+
+function randomInt(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function factorString(root){
+
+    if(root > 0){
+        return `(x-${root})`;
+    }
+
+    if(root < 0){
+        return `(x+${Math.abs(root)})`;
+    }
+
+    return `x`;
+}
+
+function expressionString(a){
+
+    if(a > 0){
+        return `x+${a}`;
+    }
+
+    if(a < 0){
+        return `x${a}`;
+    }
+
+    return `x`;
+}
+
+function generateQuestion(){
+
+    const types = ["sqrt","rational"];
+
+    const type = types[randomInt(0,types.length-1)];
+
+    let equation = "";
+    let graphType = "";
+    let interval = "";
+    let explanation = "";
+
+    let criticalPoints = [];
+
+    // SQRT CASE
+
+    if(type === "sqrt"){
+
+        let a = 0;
+
+        while(a === 0){
+            a = randomInt(-6,6);
+        }
+
+        const boundary = -a;
+
+        criticalPoints = [boundary];
+
+        graphType = "closedRight";
+
+        equation =
+        `f(x)=\\sqrt{${expressionString(a)}}`;
+
+        interval =
+        `[${boundary},\\infty)`;
+
+        explanation =
+        `
+        The expression inside the square root must be greater than or equal to zero.
+
+        \\[
+        ${expressionString(a)} \\ge 0
+        \\]
+
+        \\[
+        x \\ge ${boundary}
+        \\]
+
+        Therefore, the domain is all real numbers greater than or equal to ${boundary}.
+        `;
+    }
+
+    // RATIONAL CASE
+
+    else{
+
+        const numberOfFactors = randomInt(1,2);
+
+        let root1 = randomInt(-6,6);
+        let root2 = randomInt(-6,6);
+
+        while(root1 === root2){
+            root2 = randomInt(-6,6);
+        }
+
+        // ONE FACTOR
+
+        if(numberOfFactors === 1){
+
+            criticalPoints = [root1];
+
+            equation =
+            `f(x)=\\frac{1}{${factorString(root1)}}`;
+
+            interval =
+            `(-\\infty,${root1})\\cup(${root1},\\infty)`;
+
+            explanation =
+            `
+            The denominator cannot equal zero.
+
+            \\[
+            ${factorString(root1)} \\ne 0
+            \\]
+
+            \\[
+            x \\ne ${root1}
+            \\]
+
+            Therefore, all real numbers are allowed except ${root1}.
+            `;
+        }
+
+        // TWO FACTORS
+
+        else{
+
+            let smaller = Math.min(root1,root2);
+            let larger = Math.max(root1,root2);
+
+            criticalPoints = [smaller,larger];
+
+            equation =
+            `f(x)=\\frac{1}{${factorString(smaller)}${factorString(larger)}}`;
+
+            interval =
+            `(-\\infty,${smaller})\\cup(${smaller},${larger})\\cup(${larger},\\infty)`;
+
+            explanation =
+            `
+            The denominator cannot equal zero.
+
+            \\[
+            ${factorString(smaller)}${factorString(larger)} \\ne 0
+            \\]
+
+            Solve each factor:
+
+            \\[
+            ${factorString(smaller)} = 0
+            \\]
+
+            \\[
+            x=${smaller}
+            \\]
+
+            \\[
+            ${factorString(larger)} = 0
+            \\]
+
+            \\[
+            x=${larger}
+            \\]
+
+            Therefore, all real numbers are allowed except ${smaller} and ${larger}.
+            `;
+        }
+
+        graphType = "hole";
+    }
+
+    currentQuestion = {
+        equation,
+        graphType,
+        interval,
+        explanation,
+        criticalPoints
+    };
+
+    document.getElementById("equation").innerHTML =
+        `\\[${equation}\\]`;
+
+    MathJax.typeset();
+
+    document.getElementById("answerSection").style.display = "none";
+
+    drawNumberLine(false);
+}
+
+function showAnswer(){
+
+    if(!currentQuestion) return;
+
+    document.getElementById("answerSection").style.display = "block";
+
+    document.getElementById("solution").innerHTML =
+        currentQuestion.explanation;
+
+    document.getElementById("interval").innerHTML =
+        `\\[${currentQuestion.interval}\\]`;
+
+    MathJax.typeset();
+
+    drawNumberLine(true);
+}
+
+function drawNumberLine(showDomain){
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const width = canvas.width;
+
+    const blackY = 180;
+    const blueY = 135;
+
+    const startX = 90;
+    const endX = width - 90;
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "black";
+
+    // BLACK LINE
+
+    ctx.beginPath();
+    ctx.moveTo(startX,blackY);
+    ctx.lineTo(endX,blackY);
+    ctx.stroke();
+
+    // BLACK ARROWS
+
+    ctx.beginPath();
+
+    ctx.moveTo(startX,blackY);
+    ctx.lineTo(startX+18,blackY-12);
+
+    ctx.moveTo(startX,blackY);
+    ctx.lineTo(startX+18,blackY+12);
+
+    ctx.moveTo(endX,blackY);
+    ctx.lineTo(endX-18,blackY-12);
+
+    ctx.moveTo(endX,blackY);
+    ctx.lineTo(endX-18,blackY+12);
+
+    ctx.stroke();
+
+    // INFINITY LABELS
+
+    ctx.font = "34px Arial";
+    ctx.fillStyle = "black";
+
+    ctx.fillText("−∞",20,blackY+10);
+
+    ctx.fillText("∞",width-50,blackY+10);
+
+    const scale = 80;
+
+    // TICKS
+
+    for(let i=-7;i<=7;i++){
+
+        const x = width/2 + i*scale;
+
+        ctx.beginPath();
+        ctx.moveTo(x,blackY-10);
+        ctx.lineTo(x,blackY+10);
+        ctx.stroke();
+
+        // LABEL ONLY CRITICAL POINTS
+
+        if(currentQuestion.criticalPoints.includes(i)){
+
+            ctx.font = "34px Arial";
+            ctx.fillText(i,x-12,blackY+55);
+        }
+    }
+
+    if(!showDomain) return;
+
+    ctx.strokeStyle = "#1d4ed8";
+    ctx.fillStyle = "#1d4ed8";
+    ctx.lineWidth = 5;
+
+    // SQRT CASE
+
+    if(currentQuestion.graphType === "closedRight"){
+
+        const cp =
+        width/2 + currentQuestion.criticalPoints[0]*scale;
+
+        ctx.beginPath();
+        ctx.moveTo(cp,blueY);
+        ctx.lineTo(endX-25,blueY);
+        ctx.stroke();
+
+        // RIGHT ARROW
+
+        ctx.beginPath();
+
+        ctx.moveTo(endX-25,blueY);
+        ctx.lineTo(endX-43,blueY-12);
+
+        ctx.moveTo(endX-25,blueY);
+        ctx.lineTo(endX-43,blueY+12);
+
+        ctx.stroke();
+
+        // CLOSED DOT
+
+        ctx.beginPath();
+        ctx.arc(cp,blueY,13,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    // RATIONAL CASE
+
+    else{
+
+        const cps = currentQuestion.criticalPoints;
+
+        const x1 = width/2 + cps[0]*scale;
+
+        // ONE HOLE
+
+        if(cps.length === 1){
+
+            // LEFT SEGMENT
+
+            ctx.beginPath();
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(x1-16,blueY);
+            ctx.stroke();
+
+            // RIGHT SEGMENT
+
+            ctx.beginPath();
+            ctx.moveTo(x1+16,blueY);
+            ctx.lineTo(endX-25,blueY);
+            ctx.stroke();
+
+            // LEFT ARROW
+
+            ctx.beginPath();
+
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(startX+43,blueY-12);
+
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(startX+43,blueY+12);
+
+            ctx.stroke();
+
+            // RIGHT ARROW
+
+            ctx.beginPath();
+
+            ctx.moveTo(endX-25,blueY);
+            ctx.lineTo(endX-43,blueY-12);
+
+            ctx.moveTo(endX-25,blueY);
+            ctx.lineTo(endX-43,blueY+12);
+
+            ctx.stroke();
+
+            // OPEN DOT
+
+            ctx.fillStyle = "white";
+
+            ctx.beginPath();
+            ctx.arc(x1,blueY,14,0,Math.PI*2);
+            ctx.fill();
+
+            ctx.strokeStyle = "#1d4ed8";
+            ctx.stroke();
+        }
+
+        // TWO HOLES
+
+        else{
+
+            const x2 = width/2 + cps[1]*scale;
+
+            // LEFT SEGMENT
+
+            ctx.beginPath();
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(x1-16,blueY);
+            ctx.stroke();
+
+            // MIDDLE SEGMENT
+
+            ctx.beginPath();
+            ctx.moveTo(x1+16,blueY);
+            ctx.lineTo(x2-16,blueY);
+            ctx.stroke();
+
+            // RIGHT SEGMENT
+
+            ctx.beginPath();
+            ctx.moveTo(x2+16,blueY);
+            ctx.lineTo(endX-25,blueY);
+            ctx.stroke();
+
+            // LEFT ARROW
+
+            ctx.beginPath();
+
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(startX+43,blueY-12);
+
+            ctx.moveTo(startX+25,blueY);
+            ctx.lineTo(startX+43,blueY+12);
+
+            ctx.stroke();
+
+            // RIGHT ARROW
+
+            ctx.beginPath();
+
+            ctx.moveTo(endX-25,blueY);
+            ctx.lineTo(endX-43,blueY-12);
+
+            ctx.moveTo(endX-25,blueY);
+            ctx.lineTo(endX-43,blueY+12);
+
+            ctx.stroke();
+
+            // OPEN DOT 1
+
+            ctx.fillStyle = "white";
+
+            ctx.beginPath();
+            ctx.arc(x1,blueY,14,0,Math.PI*2);
+            ctx.fill();
+
+            ctx.strokeStyle = "#1d4ed8";
+            ctx.stroke();
+
+            // OPEN DOT 2
+
+            ctx.beginPath();
+            ctx.arc(x2,blueY,14,0,Math.PI*2);
+            ctx.fill();
+
+            ctx.stroke();
+        }
+    }
+
+}
+
+generateQuestion();
+
+</script>
+
+</body>
+</html>
