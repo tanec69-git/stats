@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Venn Diagram Set Notation Generator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)']]
+      }
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:30px;
+      color:#222;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      padding:30px;
+      border-radius:14px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .question-box{
+      font-size:1.3rem;
+      line-height:2;
+    }
+
+    svg{
+      width:100%;
+      max-width:900px;
+      display:block;
+      margin:auto;
+    }
+
+    button{
+      border:none;
+      padding:14px 22px;
+      border-radius:10px;
+      color:white;
+      font-size:1rem;
+      cursor:pointer;
+      margin-top:25px;
+      margin-right:12px;
+    }
+
+    .generate-btn{
+      background:#1976d2;
+    }
+
+    .toggle-btn{
+      background:#43a047;
+    }
+
+    .answer-box{
+      display:none;
+      margin-top:25px;
+      padding:25px;
+      background:#eef7ee;
+      border-left:5px solid #43a047;
+      border-radius:10px;
+      font-size:1.2rem;
+      line-height:2;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Venn Diagram Set Notation Generator</h1>
+
+  <div class="question-box">
+
+    Use set notation to identify the shaded region in the following Venn diagram:
+
+    <br><br>
+
+    <div id="diagramArea"></div>
+
+  </div>
+
+  <button class="generate-btn" onclick="generateDiagram()">
+    Generate Question
+  </button>
+
+  <button class="toggle-btn" onclick="toggleAnswer()">
+    Show Answer
+  </button>
+
+  <div id="answerArea" class="answer-box"></div>
+
+</div>
+
+<script>
+
+let answerVisible = false;
+
+function toggleAnswer(){
+
+  const box =
+    document.getElementById("answerArea");
+
+  const btn =
+    document.querySelector(".toggle-btn");
+
+  answerVisible = !answerVisible;
+
+  if(answerVisible){
+
+    box.style.display = "block";
+
+    btn.innerText = "Hide Answer";
+
+  }else{
+
+    box.style.display = "none";
+
+    btn.innerText = "Show Answer";
+  }
+
+  MathJax.typesetPromise();
+}
+
+function generateDiagram(){
+
+  answerVisible = false;
+
+  document.querySelector(".toggle-btn").innerText =
+    "Show Answer";
+
+  document.getElementById("answerArea").style.display =
+    "none";
+
+  const types = [
+
+    "A_complement_intersection_B_union_C",
+    "C_only",
+    "A_complement_intersection_B",
+    "A_union_C",
+    "outside_all"
+
+  ];
+
+  const type =
+    types[Math.floor(Math.random() * types.length)];
+
+  let svg = "";
+
+  let answer = "";
+
+  // -----------------------------------
+  // SVG START
+  // -----------------------------------
+
+  svg += `
+
+  <svg viewBox="0 0 900 500">
+
+  `;
+
+  // -----------------------------------
+  // UNIVERSAL SET
+  // -----------------------------------
+
+  svg += `
+
+    <rect
+      x="60"
+      y="40"
+      width="780"
+      height="360"
+      fill="white"
+      stroke="black"
+      stroke-width="4"
+    />
+
+  `;
+
+  // -----------------------------------
+  // (A' ∩ B) ∪ C
+  // -----------------------------------
+
+  if(type === "A_complement_intersection_B_union_C"){
+
+    svg += `
+
+      <!-- B shaded -->
+      <circle
+        cx="320"
+        cy="220"
+        r="120"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- A moved slightly right -->
+      <circle
+        cx="275"
+        cy="220"
+        r="70"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- C shaded -->
+      <circle
+        cx="650"
+        cy="220"
+        r="85"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+    `;
+
+    answer = "(A' \\cap B) \\cup C";
+  }
+
+  // -----------------------------------
+  // C ONLY
+  // -----------------------------------
+
+  if(type === "C_only"){
+
+    svg += `
+
+      <!-- B -->
+      <circle
+        cx="320"
+        cy="220"
+        r="120"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- A -->
+      <circle
+        cx="275"
+        cy="220"
+        r="70"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- C shaded -->
+      <circle
+        cx="650"
+        cy="220"
+        r="85"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+    `;
+
+    answer = "C";
+  }
+
+  // -----------------------------------
+  // A' ∩ B
+  // -----------------------------------
+
+  if(type === "A_complement_intersection_B"){
+
+    svg += `
+
+      <!-- B shaded -->
+      <circle
+        cx="320"
+        cy="220"
+        r="120"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- A removes centre -->
+      <circle
+        cx="275"
+        cy="220"
+        r="70"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- C -->
+      <circle
+        cx="650"
+        cy="220"
+        r="85"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+    `;
+
+    answer = "A' \\cap B";
+  }
+
+  // -----------------------------------
+  // A ∪ C
+  // -----------------------------------
+
+  if(type === "A_union_C"){
+
+    svg += `
+
+      <!-- B -->
+      <circle
+        cx="320"
+        cy="220"
+        r="120"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- A shaded -->
+      <circle
+        cx="275"
+        cy="220"
+        r="70"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- C shaded -->
+      <circle
+        cx="650"
+        cy="220"
+        r="85"
+        fill="#169bd5"
+        stroke="black"
+        stroke-width="4"
+      />
+
+    `;
+
+    answer = "A \\cup C";
+  }
+
+  // -----------------------------------
+  // (B ∪ C)'
+  // -----------------------------------
+
+  if(type === "outside_all"){
+
+    svg += `
+
+      <!-- Entire background shaded -->
+      <rect
+        x="60"
+        y="40"
+        width="780"
+        height="360"
+        fill="#169bd5"
+      />
+
+      <!-- B removed -->
+      <circle
+        cx="320"
+        cy="220"
+        r="120"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- A removed -->
+      <circle
+        cx="275"
+        cy="220"
+        r="70"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- C removed -->
+      <circle
+        cx="650"
+        cy="220"
+        r="85"
+        fill="white"
+        stroke="black"
+        stroke-width="4"
+      />
+
+      <!-- Redraw border -->
+      <rect
+        x="60"
+        y="40"
+        width="780"
+        height="360"
+        fill="none"
+        stroke="black"
+        stroke-width="4"
+      />
+
+    `;
+
+    answer = "(B \\cup C)'";
+  }
+
+  // -----------------------------------
+  // LABELS
+  // -----------------------------------
+
+  svg += `
+
+    <text
+      x="20"
+      y="70"
+      font-size="44"
+      font-weight="bold">
+      U
+    </text>
+
+    <text
+      x="260"
+      y="230"
+      font-size="36"
+      font-weight="bold">
+      A
+    </text>
+
+    <text
+      x="400"
+      y="290"
+      font-size="36"
+      font-weight="bold">
+      B
+    </text>
+
+    <text
+      x="635"
+      y="230"
+      font-size="36"
+      font-weight="bold">
+      C
+    </text>
+
+  </svg>
+
+  `;
+
+  document.getElementById("diagramArea").innerHTML =
+    svg;
+
+  // -----------------------------------
+  // ANSWER
+  // -----------------------------------
+
+  document.getElementById("answerArea").innerHTML = `
+
+    <h3>Solution</h3>
+
+    <p>
+    The shaded region represents:
+    </p>
+
+    <div>
+
+      \\[
+      ${answer}
+      \\]
+
+    </div>
+
+  `;
+
+  MathJax.typesetPromise();
+}
+
+generateDiagram();
+
+</script>
+
+</body>
+</html>
