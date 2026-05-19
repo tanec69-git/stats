@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level of Measurement Practice App</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1f4e79;
+    }
+
+    .instruction-box {
+      margin-top: 20px;
+      background: #eef4ff;
+      padding: 18px;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+
+    .tip-box {
+      margin-top: 20px;
+      background: #fff8dc;
+      padding: 18px;
+      border-left: 6px solid #f39c12;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+
+    .question-box {
+      margin-top: 25px;
+      padding: 20px;
+      background: #eef4ff;
+      border-left: 6px solid #1f4e79;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      line-height: 1.8;
+    }
+
+    .variable-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #1f4e79;
+      margin-top: 10px;
+    }
+
+    .options {
+      margin-top: 25px;
+      display: grid;
+      gap: 15px;
+    }
+
+    .option-btn {
+      padding: 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #1f4e79;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .option-btn:hover {
+      background: #163957;
+    }
+
+    .feedback {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.8;
+    }
+
+    .correct {
+      background: #e7f8ea;
+      border-left: 6px solid #2e8b57;
+    }
+
+    .incorrect {
+      background: #ffeaea;
+      border-left: 6px solid #c0392b;
+    }
+
+    .answer-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .next-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .next-btn:hover {
+      background: #1f8a4c;
+    }
+
+    .example {
+      margin-top: 12px;
+      font-style: italic;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #999;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #dfefff;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Level of Measurement Practice App</h1>
+
+  <div class="instruction-box">
+    <strong>Classify the variable into one of the following:</strong>
+
+    <ul>
+      <li><strong>Nominal</strong></li>
+      <li><strong>Ordinal</strong></li>
+      <li><strong>Interval</strong></li>
+      <li><strong>Ratio</strong></li>
+    </ul>
+  </div>
+
+  <div class="tip-box">
+    <strong>Helpful Tips:</strong><br><br>
+
+    • <strong>Nominal</strong> → names, labels, identifiers only.<br><br>
+
+    • <strong>Ordinal</strong> → order matters.<br><br>
+
+    • <strong>Interval</strong> → equal intervals but no true zero.<br><br>
+
+    • <strong>Ratio</strong> → has a true zero and can multiply/divide meaningfully.
+  </div>
+
+  <table>
+    <tr>
+      <th>Employee Name</th>
+      <th>Staff Code</th>
+      <th>Gender</th>
+      <th>Performance Rating</th>
+      <th>Salary</th>
+      <th>Age Group</th>
+      <th>Years of Experience</th>
+    </tr>
+
+    <tr>
+      <td>Salimah</td>
+      <td>18215</td>
+      <td>Female</td>
+      <td>3</td>
+      <td>$2,423.65</td>
+      <td>2</td>
+      <td>14</td>
+    </tr>
+
+    <tr>
+      <td>Soon An</td>
+      <td>24466</td>
+      <td>Male</td>
+      <td>2</td>
+      <td>$2,942.55</td>
+      <td>1</td>
+      <td>6</td>
+    </tr>
+
+    <tr>
+      <td>Chandra</td>
+      <td>07543</td>
+      <td>Male</td>
+      <td>2</td>
+      <td>$3,557.93</td>
+      <td>3</td>
+      <td>23</td>
+    </tr>
+  </table>
+
+  <div class="question-box">
+
+    <strong>Identify the level of measurement for:</strong>
+
+    <div class="variable-name" id="variableBox"></div>
+
+  </div>
+
+  <div class="options">
+
+    <button class="option-btn"
+      onclick="checkAnswer('Nominal')">
+      Nominal
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Ordinal')">
+      Ordinal
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Interval')">
+      Interval
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Ratio')">
+      Ratio
+    </button>
+
+  </div>
+
+  <div id="feedback" class="feedback"></div>
+
+  <div class="controls">
+    <button class="next-btn" onclick="nextQuestion()">
+      Generate New Question
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+const questionBank = [
+
+  {
+    variable: "Employee Name",
+    answer: "Nominal",
+    explanation:
+      "Employee names are labels or identifiers only. They do not represent quantities or rankings.",
+    example:
+      "Example: Salimah, Soon An"
+  },
+
+  {
+    variable: "Staff Code",
+    answer: "Nominal",
+    explanation:
+      "Staff codes are identifiers. Although numbers are used, they do not represent measurable quantities.",
+    example:
+      "Example: 18215"
+  },
+
+  {
+    variable: "Gender",
+    answer: "Nominal",
+    explanation:
+      "Gender consists of categories or labels with no ranking.",
+    example:
+      "Example: Male, Female"
+  },
+
+  {
+    variable: "Performance Rating",
+    answer: "Ordinal",
+    explanation:
+      "Performance ratings have a meaningful order, but the differences between ratings are not necessarily equal.",
+    example:
+      "Example: 1 = Excellent, 5 = Poor"
+  },
+
+  {
+    variable: "Salary",
+    answer: "Ratio",
+    explanation:
+      "Salary has a true zero and meaningful multiplication or division can be performed.",
+    example:
+      "Example: $3000 is twice $1500"
+  },
+
+  {
+    variable: "Age Group",
+    answer: "Ordinal",
+    explanation:
+      "Age groups have a clear order from younger to older categories.",
+    example:
+      "Example: Below 25, 25 to 50, Above 50"
+  },
+
+  {
+    variable: "Years of Experience",
+    answer: "Ratio",
+    explanation:
+      "Years of experience has a true zero and ratios are meaningful.",
+    example:
+      "Example: 10 years is twice 5 years"
+  },
+
+  {
+    variable: "Temperature in Celsius",
+    answer: "Interval",
+    explanation:
+      "Celsius temperature has equal intervals but no true zero.",
+    example:
+      "Example: 20°C is not twice as hot as 10°C"
+  },
+
+  {
+    variable: "Ranking in a competition",
+    answer: "Ordinal",
+    explanation:
+      "Rankings show order, but the differences between positions are not equal.",
+    example:
+      "Example: 1st, 2nd, 3rd"
+  },
+
+  {
+    variable: "Student ID Number",
+    answer: "Nominal",
+    explanation:
+      "Student ID numbers are labels or identifiers only.",
+    example:
+      "Example: S10245"
+  }
+
+];
+
+let currentQuestion;
+
+function loadQuestion() {
+
+  const randomIndex =
+    Math.floor(Math.random() * questionBank.length);
+
+  currentQuestion = questionBank[randomIndex];
+
+  document.getElementById("variableBox").innerHTML =
+    currentQuestion.variable;
+
+  const feedback =
+    document.getElementById("feedback");
+
+  feedback.style.display = "none";
+  feedback.innerHTML = "";
+}
+
+function checkAnswer(selectedAnswer) {
+
+  const feedback =
+    document.getElementById("feedback");
+
+  if (selectedAnswer === currentQuestion.answer) {
+
+    feedback.className = "feedback correct";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ✅ Correct!
+      </div>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <br><br>
+
+      <strong>Explanation:</strong><br>
+      ${currentQuestion.explanation}
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+
+  } else {
+
+    feedback.className = "feedback incorrect";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ❌ Incorrect
+      </div>
+
+      <strong>Your Answer:</strong><br>
+      ${selectedAnswer}
+
+      <br><br>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <br><br>
+
+      <strong>Explanation:</strong><br>
+      ${currentQuestion.explanation}
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+  }
+
+  feedback.style.display = "block";
+}
+
+function nextQuestion() {
+  loadQuestion();
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
