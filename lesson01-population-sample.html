@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Population vs Sample Practice App</title>
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1f4e79;
+    }
+
+    .instruction-box {
+      margin-top: 20px;
+      background: #eef4ff;
+      padding: 18px;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+
+    .tip-box {
+      margin-top: 20px;
+      background: #fff8dc;
+      padding: 18px;
+      border-left: 6px solid #f39c12;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+
+    .question-box {
+      margin-top: 30px;
+      padding: 25px;
+      background: #eef4ff;
+      border-left: 6px solid #1f4e79;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      line-height: 1.8;
+    }
+
+    .options {
+      margin-top: 25px;
+      display: grid;
+      gap: 15px;
+    }
+
+    .option-btn {
+      padding: 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #1f4e79;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .option-btn:hover {
+      background: #163957;
+    }
+
+    .feedback {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.9;
+    }
+
+    .correct {
+      background: #e7f8ea;
+      border-left: 6px solid #2e8b57;
+    }
+
+    .incorrect {
+      background: #ffeaea;
+      border-left: 6px solid #c0392b;
+    }
+
+    .answer-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .next-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .next-btn:hover {
+      background: #1f8a4c;
+    }
+
+    .example {
+      margin-top: 12px;
+      font-style: italic;
+      color: #333;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Population vs Sample Practice App</h1>
+
+  <div class="instruction-box">
+
+    <strong>Determine whether the statement refers to:</strong>
+
+    <ul>
+      <li><strong>Population</strong></li>
+      <li><strong>Sample</strong></li>
+    </ul>
+
+  </div>
+
+  <div class="tip-box">
+
+    <strong>Helpful Tips:</strong><br><br>
+
+    • <strong>Population</strong> → includes ALL members of the group being studied.<br><br>
+
+    • <strong>Sample</strong> → only PART of the group is selected.<br><br>
+
+    • Keywords like <strong>all</strong>, <strong>every</strong>, or <strong>entire group</strong> usually indicate a population.<br><br>
+
+    • Specific numbers such as <strong>20 students</strong> or <strong>50 employees</strong> usually indicate a sample.
+
+  </div>
+
+  <div class="question-box" id="questionBox"></div>
+
+  <div class="options">
+
+    <button class="option-btn"
+      onclick="checkAnswer('Population')">
+      Population
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Sample')">
+      Sample
+    </button>
+
+  </div>
+
+  <div id="feedback" class="feedback"></div>
+
+  <div class="controls">
+
+    <button class="next-btn"
+      onclick="nextQuestion()">
+      Generate New Question
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+const questionBank = [
+
+  {
+    question:
+      "An auditor selected 30 employee leave records from staff working at ABC Bank for checking.",
+
+    answer:
+      "Sample",
+
+    explanation:
+      "Only 30 employee leave records were selected from all employees in the bank. Since only part of the entire group was chosen, this is a sample.",
+
+    example:
+      "A sample represents only a portion of the population."
+  },
+
+  {
+    question:
+      "Results of all students who sat for the examination were evaluated.",
+
+    answer:
+      "Population",
+
+    explanation:
+      "The word 'all' shows that every student who sat for the examination was included. Therefore, the entire population was studied.",
+
+    example:
+      "A population includes every member of the group being studied."
+  },
+
+  {
+    question:
+      "A survey was conducted on 50 customers entering a supermarket.",
+
+    answer:
+      "Sample",
+
+    explanation:
+      "Only 50 customers were surveyed, not every customer entering the supermarket.",
+
+    example:
+      "A selected group from a larger group is called a sample."
+  },
+
+  {
+    question:
+      "The company recorded the salaries of every employee working in the organisation.",
+
+    answer:
+      "Population",
+
+    explanation:
+      "The word 'every' means all employees were included in the study.",
+
+    example:
+      "Using the entire group means it is a population."
+  },
+
+  {
+    question:
+      "Researchers interviewed 25 university students about online learning.",
+
+    answer:
+      "Sample",
+
+    explanation:
+      "Only 25 students were interviewed rather than all university students.",
+
+    example:
+      "A smaller selected group is a sample."
+  },
+
+  {
+    question:
+      "All households in the town were asked about their electricity usage.",
+
+    answer:
+      "Population",
+
+    explanation:
+      "Since all households were included, the entire population was studied.",
+
+    example:
+      "The entire target group forms the population."
+  },
+
+  {
+    question:
+      "A teacher randomly selected 10 assignments for detailed checking.",
+
+    answer:
+      "Sample",
+
+    explanation:
+      "Only 10 assignments were selected instead of all assignments.",
+
+    example:
+      "Part of a larger group is called a sample."
+  },
+
+  {
+    question:
+      "The government collected data from every registered voter in the country.",
+
+    answer:
+      "Population",
+
+    explanation:
+      "Every registered voter was included in the data collection.",
+
+    example:
+      "Including all members means it is a population."
+  },
+
+  {
+    question:
+      "Twenty patients were chosen to test the new medicine.",
+
+    answer:
+      "Sample",
+
+    explanation:
+      "Only twenty patients were selected, so this is only part of the full population.",
+
+    example:
+      "A sample contains fewer members than the population."
+  },
+
+  {
+    question:
+      "The school principal reviewed the attendance records of all students in the school.",
+
+    answer:
+      "Population",
+
+    explanation:
+      "All students were included in the review, making this a population.",
+
+    example:
+      "A population refers to the complete set of individuals."
+  }
+
+];
+
+let currentQuestion;
+
+function loadQuestion() {
+
+  const randomIndex =
+    Math.floor(Math.random() * questionBank.length);
+
+  currentQuestion = questionBank[randomIndex];
+
+  document.getElementById("questionBox").innerHTML = `
+    <strong>Determine whether the following refers to a population or sample:</strong>
+    <br><br>
+    ${currentQuestion.question}
+  `;
+
+  const feedback =
+    document.getElementById("feedback");
+
+  feedback.style.display = "none";
+  feedback.innerHTML = "";
+}
+
+function checkAnswer(selectedAnswer) {
+
+  const feedback =
+    document.getElementById("feedback");
+
+  if (selectedAnswer === currentQuestion.answer) {
+
+    feedback.className = "feedback correct";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ✅ Correct!
+      </div>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <br><br>
+
+      <strong>Explanation:</strong><br>
+      ${currentQuestion.explanation}
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+
+  } else {
+
+    feedback.className = "feedback incorrect";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ❌ Incorrect
+      </div>
+
+      <strong>Your Answer:</strong><br>
+      ${selectedAnswer}
+
+      <br><br>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <br><br>
+
+      <strong>Explanation:</strong><br>
+      ${currentQuestion.explanation}
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+  }
+
+  feedback.style.display = "block";
+}
+
+function nextQuestion() {
+  loadQuestion();
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
