@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variable Types Practice App</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1f4e79;
+    }
+
+    .instructions {
+      margin-top: 20px;
+      line-height: 1.8;
+      background: #eef4ff;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .question-box {
+      margin-top: 25px;
+      padding: 20px;
+      background: #eef4ff;
+      border-left: 6px solid #1f4e79;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+
+    .options {
+      margin-top: 25px;
+      display: grid;
+      gap: 15px;
+    }
+
+    .option-btn {
+      padding: 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #1f4e79;
+      color: white;
+      transition: 0.2s;
+    }
+
+    .option-btn:hover {
+      background: #163957;
+    }
+
+    .feedback {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      line-height: 1.8;
+    }
+
+    .correct {
+      background: #e7f8ea;
+      border-left: 6px solid #2e8b57;
+    }
+
+    .incorrect {
+      background: #ffeaea;
+      border-left: 6px solid #c0392b;
+    }
+
+    .answer-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .next-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .next-btn:hover {
+      background: #1f8a4c;
+    }
+
+    .explanation {
+      margin-top: 15px;
+    }
+
+    .example {
+      margin-top: 12px;
+      font-style: italic;
+      color: #333;
+    }
+
+    .tip-box {
+      margin-top: 25px;
+      background: #fff8dc;
+      padding: 15px;
+      border-left: 6px solid #f39c12;
+      border-radius: 10px;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Variable Types Practice App</h1>
+
+  <div class="instructions">
+    <strong>Classify each variable as one of the following:</strong>
+
+    <ul>
+      <li><strong>Qualitative</strong></li>
+      <li><strong>Quantitative (Discrete)</strong></li>
+      <li><strong>Quantitative (Continuous)</strong></li>
+    </ul>
+  </div>
+
+  <div class="tip-box">
+    <strong>Helpful Tips:</strong><br><br>
+
+    • <strong>Qualitative</strong> → categories, labels, names, colours, codes, identifiers.<br><br>
+
+    • <strong>Quantitative (Discrete)</strong> → counted values, usually whole numbers.<br><br>
+
+    • <strong>Quantitative (Continuous)</strong> → measured values that can contain decimals.
+  </div>
+
+  <div class="question-box" id="questionBox"></div>
+
+  <div class="options">
+
+    <button class="option-btn"
+      onclick="checkAnswer('Qualitative')">
+      Qualitative
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Quantitative (Discrete)')">
+      Quantitative (Discrete)
+    </button>
+
+    <button class="option-btn"
+      onclick="checkAnswer('Quantitative (Continuous)')">
+      Quantitative (Continuous)
+    </button>
+
+  </div>
+
+  <div id="feedback" class="feedback"></div>
+
+  <div class="controls">
+    <button class="next-btn" onclick="nextQuestion()">
+      Generate New Question
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+const questionBank = [
+
+  {
+    question: "The built-in area of a HDB flat.",
+    answer: "Quantitative (Continuous)",
+    explanation:
+      "Area is measured and can contain decimal values. Since measurements can take any value within a range, this variable is continuous.",
+    example:
+      "Example: 120.5 m²"
+  },
+
+  {
+    question: "The colour of a student's backpack.",
+    answer: "Qualitative",
+    explanation:
+      "Colours are categories or labels rather than numerical measurements.",
+    example:
+      "Example: Red, Blue, Black"
+  },
+
+  {
+    question: "The number of customers in a restaurant.",
+    answer: "Quantitative (Discrete)",
+    explanation:
+      "Customers are counted using whole numbers. Fractions or decimals are not possible.",
+    example:
+      "Example: 48 customers"
+  },
+
+  {
+    question: "The temperature of a swimming pool.",
+    answer: "Quantitative (Continuous)",
+    explanation:
+      "Temperature is measured and can contain decimal values.",
+    example:
+      "Example: 27.4°C"
+  },
+
+  {
+    question: "The postal code of a building.",
+    answer: "Qualitative",
+    explanation:
+      "Although postal codes use numbers, they are identifiers or labels and not measurements.",
+    example:
+      "Example: 560123"
+  },
+
+  {
+    question: "The number of books on a shelf.",
+    answer: "Quantitative (Discrete)",
+    explanation:
+      "Books are counted in exact whole numbers.",
+    example:
+      "Example: 35 books"
+  },
+
+  {
+    question: "The height of a basketball player.",
+    answer: "Quantitative (Continuous)",
+    explanation:
+      "Height can be measured very accurately and may include decimal places.",
+    example:
+      "Example: 182.6 cm"
+  },
+
+  {
+    question: "The blood group of a patient.",
+    answer: "Qualitative",
+    explanation:
+      "Blood groups are categories such as A, B, AB, and O.",
+    example:
+      "Example: Blood group O"
+  },
+
+  {
+    question: "The number of goals scored in a football match.",
+    answer: "Quantitative (Discrete)",
+    explanation:
+      "Goals are counted using whole numbers only.",
+    example:
+      "Example: 3 goals"
+  },
+
+  {
+    question: "The weight of a newborn baby.",
+    answer: "Quantitative (Continuous)",
+    explanation:
+      "Weight is measured and can contain decimal values.",
+    example:
+      "Example: 3.28 kg"
+  },
+
+  {
+    question: "The hotline telephone number of a bank.",
+    answer: "Qualitative",
+    explanation:
+      "Telephone numbers act as identifiers rather than measurable quantities.",
+    example:
+      "Example: 1800-555-5555"
+  },
+
+  {
+    question: "The number of siblings a student has.",
+    answer: "Quantitative (Discrete)",
+    explanation:
+      "Siblings are counted in whole numbers.",
+    example:
+      "Example: 2 siblings"
+  },
+
+  {
+    question: "The time taken to finish an examination.",
+    answer: "Quantitative (Continuous)",
+    explanation:
+      "Time can be measured very precisely using decimals or fractions of seconds.",
+    example:
+      "Example: 1.75 hours"
+  },
+
+  {
+    question: "The eye colour of a cat.",
+    answer: "Qualitative",
+    explanation:
+      "Eye colour represents categories rather than numerical values.",
+    example:
+      "Example: Green eyes"
+  }
+
+];
+
+let currentQuestion;
+
+function loadQuestion() {
+
+  const randomIndex =
+    Math.floor(Math.random() * questionBank.length);
+
+  currentQuestion = questionBank[randomIndex];
+
+  document.getElementById("questionBox").innerHTML = `
+    <strong>Classify the following variable:</strong>
+    <br><br>
+    ${currentQuestion.question}
+  `;
+
+  const feedback =
+    document.getElementById("feedback");
+
+  feedback.style.display = "none";
+  feedback.innerHTML = "";
+}
+
+function checkAnswer(selectedAnswer) {
+
+  const feedback =
+    document.getElementById("feedback");
+
+  if (selectedAnswer === currentQuestion.answer) {
+
+    feedback.className = "feedback correct";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ✅ Correct!
+      </div>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <div class="explanation">
+        <strong>Explanation:</strong><br>
+        ${currentQuestion.explanation}
+      </div>
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+
+  } else {
+
+    feedback.className = "feedback incorrect";
+
+    feedback.innerHTML = `
+      <div class="answer-title">
+        ❌ Incorrect
+      </div>
+
+      <strong>Your Answer:</strong><br>
+      ${selectedAnswer}
+      <br><br>
+
+      <strong>Correct Answer:</strong><br>
+      ${currentQuestion.answer}
+
+      <div class="explanation">
+        <strong>Explanation:</strong><br>
+        ${currentQuestion.explanation}
+      </div>
+
+      <div class="example">
+        ${currentQuestion.example}
+      </div>
+    `;
+  }
+
+  feedback.style.display = "block";
+}
+
+function nextQuestion() {
+  loadQuestion();
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
