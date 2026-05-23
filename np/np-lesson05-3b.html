@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mutually Exclusive Events App</title>
+
+  <!-- MathJax -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:20px;
+      text-align:center;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    .question{
+      text-align:left;
+      font-size:22px;
+      line-height:1.8;
+      margin-bottom:30px;
+    }
+
+    .given-box{
+      background:#f8f9fa;
+      border-left:6px solid #0077cc;
+      padding:20px;
+      border-radius:10px;
+      margin-top:20px;
+      margin-bottom:25px;
+    }
+
+    button{
+      margin-top:20px;
+      padding:12px 24px;
+      font-size:18px;
+      border:none;
+      border-radius:8px;
+      background:#0077cc;
+      color:white;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#005fa3;
+    }
+
+    .answers{
+      display:none;
+      margin-top:30px;
+      text-align:left;
+      background:#eef7ff;
+      padding:25px;
+      border-radius:12px;
+      font-size:22px;
+      line-height:2;
+    }
+
+    .section{
+      margin-bottom:45px;
+    }
+
+    .formula{
+      text-align:center;
+      font-size:28px;
+      margin-top:20px;
+      margin-bottom:20px;
+    }
+
+    .final-answer{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      border:2px solid #0077cc;
+      margin-top:25px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Mutually Exclusive Events Visualizer</h1>
+
+  <div class="question">
+
+    Given:
+
+  </div>
+
+  <div class="given-box">
+
+    \[
+    P(X)=0.30
+    \]
+
+    \[
+    P(Y)=0.42
+    \]
+
+    \[
+    P(X \cup Y)=0.72
+    \]
+
+  </div>
+
+  <div class="question">
+
+    Determine whether events \( X \) and \( Y \)
+    are mutually exclusive.
+
+    <br><br>
+
+    Explain your answer.
+
+  </div>
+
+  <button onclick="toggleAnswers()">
+    Show / Hide Solution
+  </button>
+
+  <div class="answers" id="answers">
+
+    <!-- PART 1 -->
+    <div class="section">
+
+      <h2>Step 1: Use the Addition Formula</h2>
+
+      For any two events:
+
+      <div class="formula">
+
+        \[
+        P(X \cup Y)
+        =
+        P(X)+P(Y)-P(X \cap Y)
+        \]
+
+      </div>
+
+      Substitute the given values:
+
+      \[
+      0.72
+      =
+      0.30 + 0.42 - P(X \cap Y)
+      \]
+
+    </div>
+
+    <!-- PART 2 -->
+    <div class="section">
+
+      <h2>Step 2: Simplify</h2>
+
+      First add:
+
+      \[
+      0.30 + 0.42 = 0.72
+      \]
+
+      Hence:
+
+      \[
+      0.72
+      =
+      0.72 - P(X \cap Y)
+      \]
+
+      Rearranging:
+
+      \[
+      P(X \cap Y)=0
+      \]
+
+    </div>
+
+    <!-- PART 3 -->
+    <div class="section">
+
+      <h2>Step 3: Conclusion</h2>
+
+      Two events are mutually exclusive if:
+
+      <div class="formula">
+
+        \[
+        P(X \cap Y)=0
+        \]
+
+      </div>
+
+      Since:
+
+      \[
+      P(X \cap Y)=0
+      \]
+
+      therefore, events \( X \) and \( Y \)
+      are mutually exclusive.
+
+    </div>
+
+    <!-- FINAL ANSWER -->
+    <div class="final-answer">
+
+      <h2>Final Answer</h2>
+
+      \[
+      \boxed{
+      \text{Events } X \text{ and } Y \text{ are mutually exclusive.}
+      }
+      \]
+
+      because:
+
+      \[
+      P(X \cap Y)=0
+      \]
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswers(){
+
+  const answers = document.getElementById("answers");
+
+  if(
+    answers.style.display === "none" ||
+    answers.style.display === ""
+  ){
+    answers.style.display = "block";
+  }
+  else{
+    answers.style.display = "none";
+  }
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+
+}
+
+window.onload = () => {
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+
+};
+
+</script>
+
+</body>
+</html>
