@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Probability Question - Show/Hide Solutions</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      margin:0;
+      padding:30px;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+      background:white;
+      padding:40px;
+      border-radius:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    .question-block{
+      margin-bottom:50px;
+      padding:25px;
+      border:1px solid #ddd;
+      border-radius:12px;
+      background:#fafafa;
+    }
+
+    .question{
+      font-size:1.08rem;
+      margin-bottom:20px;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:10px 18px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:1rem;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+
+    .solution{
+      display:none;
+      margin-top:20px;
+      padding:20px;
+      border-radius:10px;
+      background:#eef4ff;
+      border-left:6px solid #2563eb;
+    }
+
+    .intro{
+      background:#f0f9ff;
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:40px;
+      border-left:6px solid #0284c7;
+    }
+
+    .math{
+      margin:12px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Probability Question</h1>
+
+  <div class="intro">
+    <strong>Given:</strong>
+
+    <div class="math">
+      \[
+      P(A)=0.16
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(D)=0.18
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(D|A)=0.65
+      \]
+    </div>
+
+    where:
+
+    <ul>
+      <li>\(A\): Person is aged 50 years or more</li>
+      <li>\(D\): Person has diabetes</li>
+    </ul>
+  </div>
+
+  <!-- PART A -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(a)</strong> Find the probability that the chosen person is less than 50 years old and has diabetes.
+    </div>
+
+    <button onclick="toggleSolution('solA')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="solA">
+
+      <p><strong>Step 1:</strong> Find \(P(A \cap D)\)</p>
+
+      <div class="math">
+        \[
+        P(A \cap D)=P(D|A)\times P(A)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.65 \times 0.16
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.104
+        \]
+      </div>
+
+      <p><strong>Step 2:</strong> Find the probability that the person is less than 50 and has diabetes.</p>
+
+      <div class="math">
+        \[
+        P(A' \cap D)=P(D)-P(A \cap D)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.18-0.104
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.076
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.076}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PART B -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(b)</strong> Find the probability that the chosen person is aged 50 years or more, given that the person does not have diabetes.
+    </div>
+
+    <button onclick="toggleSolution('solB')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="solB">
+
+      <p><strong>Step 1:</strong> Find \(P(D')\)</p>
+
+      <div class="math">
+        \[
+        P(D')=1-P(D)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =1-0.18
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.82
+        \]
+      </div>
+
+      <p><strong>Step 2:</strong> Find \(P(A \cap D')\)</p>
+
+      <div class="math">
+        \[
+        P(A \cap D')=P(A)-P(A \cap D)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.16-0.104
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.056
+        \]
+      </div>
+
+      <p><strong>Step 3:</strong> Apply conditional probability.</p>
+
+      <div class="math">
+        \[
+        P(A|D')=\frac{P(A \cap D')}{P(D')}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =\frac{0.056}{0.82}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        \approx 0.0683
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.0683}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PART C -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(c)</strong> Find the probability that the chosen person is either aged 50 years or more, or has diabetes or both.
+    </div>
+
+    <button onclick="toggleSolution('solC')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="solC">
+
+      <p><strong>Use the addition rule:</strong></p>
+
+      <div class="math">
+        \[
+        P(A \cup D)=P(A)+P(D)-P(A \cap D)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.16+0.18-0.104
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.236
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.236}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PART D -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(d)</strong> Are \(A\) and \(D\) independent? Explain.
+    </div>
+
+    <button onclick="toggleSolution('solD')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="solD">
+
+      <p>Two events are independent if:</p>
+
+      <div class="math">
+        \[
+        P(D|A)=P(D)
+        \]
+      </div>
+
+      <p>Compare the values:</p>
+
+      <div class="math">
+        \[
+        P(D|A)=0.65
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(D)=0.18
+        \]
+      </div>
+
+      <p>Since:</p>
+
+      <div class="math">
+        \[
+        0.65 \ne 0.18
+        \]
+      </div>
+
+      <p>The events are <strong>not independent</strong>.</p>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{\text{A and D are not independent}}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleSolution(id){
+    const solution = document.getElementById(id);
+
+    if(solution.style.display === "block"){
+      solution.style.display = "none";
+    } else {
+      solution.style.display = "block";
+    }
+  }
+</script>
+
+</body>
+</html>
