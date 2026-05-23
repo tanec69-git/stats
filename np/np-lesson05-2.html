@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apple Probability App</title>
+
+  <!-- MathJax -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:20px;
+      text-align:center;
+    }
+
+    .container{
+      max-width:1150px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    .question{
+      text-align:left;
+      font-size:22px;
+      line-height:1.7;
+      margin-bottom:25px;
+    }
+
+    table{
+      margin:auto;
+      border-collapse:collapse;
+      margin-top:20px;
+      margin-bottom:30px;
+      font-size:24px;
+    }
+
+    th, td{
+      border:2px solid black;
+      padding:12px 28px;
+      text-align:center;
+    }
+
+    button{
+      margin-top:25px;
+      padding:12px 24px;
+      font-size:18px;
+      border:none;
+      border-radius:8px;
+      background:#0077cc;
+      color:white;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#005fa3;
+    }
+
+    .answers{
+      display:none;
+      margin-top:30px;
+      text-align:left;
+      background:#eef7ff;
+      padding:25px;
+      border-radius:12px;
+      font-size:22px;
+      line-height:2;
+    }
+
+    .section{
+      margin-bottom:50px;
+    }
+
+    .formula{
+      text-align:center;
+      margin-top:20px;
+      margin-bottom:20px;
+      font-size:28px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Apple Probability Visualizer</h1>
+
+  <div class="question">
+
+    There are 40 apples in a box.
+
+    Some are New Zealand apples, some are not,
+    some are good and some are rotten.
+
+    <br><br>
+
+    Let:
+
+    <br><br>
+
+    \[
+    N = \text{event that the apple is a New Zealand apple}
+    \]
+
+    \[
+    G = \text{event that the apple is a good apple}
+    \]
+
+    Evaluate the following probabilities.
+
+  </div>
+
+  <!-- Table -->
+  <table>
+
+    <tr>
+      <th></th>
+      <th>New Zealand</th>
+      <th>Other Countries</th>
+    </tr>
+
+    <tr>
+      <th>Good</th>
+      <td>16</td>
+      <td>14</td>
+    </tr>
+
+    <tr>
+      <th>Rotten</th>
+      <td>7</td>
+      <td>3</td>
+    </tr>
+
+  </table>
+
+  <div class="question">
+
+    (i) \( P(N) \)
+    <br><br>
+
+    (ii) \( P(G') \)
+    <br><br>
+
+    (iii) \( P(N \cap G) \)
+    <br><br>
+
+    (iv) \( P(N' \cap G') \)
+    <br><br>
+
+    (v) \( P(G|N) \)
+    <br><br>
+
+    (vi) \( P(N'|G') \)
+
+  </div>
+
+  <button onclick="toggleAnswers()">
+    Show / Hide Solutions
+  </button>
+
+  <div class="answers" id="answers">
+
+    <!-- PART I -->
+    <div class="section">
+
+      <h2>(i) \( P(N) \)</h2>
+
+      Probability that the apple is a New Zealand apple.
+
+      <br><br>
+
+      Number of New Zealand apples:
+
+      \[
+      16 + 7 = 23
+      \]
+
+      Total apples:
+
+      \[
+      40
+      \]
+
+      Therefore:
+
+      \[
+      P(N) = \frac{23}{40}
+      \]
+
+    </div>
+
+    <!-- PART II -->
+    <div class="section">
+
+      <h2>(ii) \( P(G') \)</h2>
+
+      \( G' \) means the apple is not good,
+      which means the apple is rotten.
+
+      <br><br>
+
+      Number of rotten apples:
+
+      \[
+      7 + 3 = 10
+      \]
+
+      Therefore:
+
+      \[
+      P(G') = \frac{10}{40}
+      \]
+
+      \[
+      = \frac{1}{4}
+      \]
+
+    </div>
+
+    <!-- PART III -->
+    <div class="section">
+
+      <h2>(iii) \( P(N \cap G) \)</h2>
+
+      \( N \cap G \) means:
+
+      <br><br>
+
+      New Zealand apple AND good apple.
+
+      <br><br>
+
+      Number of apples satisfying both conditions:
+
+      \[
+      16
+      \]
+
+      Therefore:
+
+      \[
+      P(N \cap G) = \frac{16}{40}
+      \]
+
+      \[
+      = \frac{2}{5}
+      \]
+
+    </div>
+
+    <!-- PART IV -->
+    <div class="section">
+
+      <h2>(iv) \( P(N' \cap G') \)</h2>
+
+      \( N' \cap G' \) means:
+
+      <br><br>
+
+      Not a New Zealand apple AND not good.
+
+      <br><br>
+
+      This corresponds to rotten apples
+      from other countries.
+
+      <br><br>
+
+      Number of such apples:
+
+      \[
+      3
+      \]
+
+      Therefore:
+
+      \[
+      P(N' \cap G') = \frac{3}{40}
+      \]
+
+    </div>
+
+    <!-- PART V -->
+    <div class="section">
+
+      <h2>(v) \( P(G|N) \)</h2>
+
+      Probability that the apple is good
+      given that it is from New Zealand.
+
+      <br><br>
+
+      Formula:
+
+      \[
+      P(G|N)
+      =
+      \frac{P(G \cap N)}{P(N)}
+      \]
+
+      Number of good New Zealand apples:
+
+      \[
+      16
+      \]
+
+      Total New Zealand apples:
+
+      \[
+      23
+      \]
+
+      Therefore:
+
+      \[
+      P(G|N) = \frac{16}{23}
+      \]
+
+    </div>
+
+    <!-- PART VI -->
+    <div class="section">
+
+      <h2>(vi) \( P(N'|G') \)</h2>
+
+      Probability that the apple is not from
+      New Zealand given that it is rotten.
+
+      <br><br>
+
+      Formula:
+
+      \[
+      P(N'|G')
+      =
+      \frac{P(N' \cap G')}{P(G')}
+      \]
+
+      Rotten apples from other countries:
+
+      \[
+      3
+      \]
+
+      Total rotten apples:
+
+      \[
+      10
+      \]
+
+      Therefore:
+
+      \[
+      P(N'|G') = \frac{3}{10}
+      \]
+
+    </div>
+
+    <!-- NEW SECTION -->
+    <div class="section">
+
+      <h2>Verification Using Conditional Probability Formula</h2>
+
+      <h3>(i)</h3>
+
+      <div class="formula">
+
+        \[
+        P(G|N)
+        =
+        \frac{P(N \cap G)}{P(N)}
+        \]
+
+      </div>
+
+      Substitute the values from part (a):
+
+      \[
+      =
+      \frac{\frac{16}{40}}{\frac{23}{40}}
+      \]
+
+      \[
+      =
+      \frac{16}{40}
+      \times
+      \frac{40}{23}
+      \]
+
+      \[
+      =
+      \frac{16}{23}
+      \]
+
+      Hence verified:
+
+      \[
+      P(G|N)=\frac{16}{23}
+      \]
+
+      <br><br>
+
+      <h3>(ii)</h3>
+
+      <div class="formula">
+
+        \[
+        P(N'|G')
+        =
+        \frac{P(N' \cap G')}{P(G')}
+        \]
+
+      </div>
+
+      Substitute the values from part (a):
+
+      \[
+      =
+      \frac{\frac{3}{40}}{\frac{10}{40}}
+      \]
+
+      \[
+      =
+      \frac{3}{40}
+      \times
+      \frac{40}{10}
+      \]
+
+      \[
+      =
+      \frac{3}{10}
+      \]
+
+      Hence verified:
+
+      \[
+      P(N'|G')=\frac{3}{10}
+      \]
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswers(){
+
+  const answers = document.getElementById("answers");
+
+  if(
+    answers.style.display === "none" ||
+    answers.style.display === ""
+  ){
+    answers.style.display = "block";
+  }
+  else{
+    answers.style.display = "none";
+  }
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+}
+
+window.onload = () => {
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+
+};
+
+</script>
+
+</body>
+</html>

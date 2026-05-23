@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Venn Diagram Probability App</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:20px;
+      text-align:center;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      margin-bottom:10px;
+    }
+
+    .question{
+      font-size:24px;
+      line-height:1.7;
+      margin-bottom:20px;
+    }
+
+    svg{
+      background:#fafafa;
+      border:2px solid #ddd;
+      border-radius:12px;
+      margin-top:20px;
+    }
+
+    button{
+      margin-top:25px;
+      padding:12px 24px;
+      font-size:18px;
+      border:none;
+      border-radius:8px;
+      background:#0077cc;
+      color:white;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#005fa3;
+    }
+
+    .answers{
+      display:none;
+      margin-top:30px;
+      text-align:left;
+      font-size:22px;
+      line-height:2;
+      padding:20px;
+      background:#eef7ff;
+      border-radius:12px;
+    }
+
+    .section{
+      margin-bottom:40px;
+    }
+
+    .label{
+      font-size:22px;
+      font-weight:bold;
+    }
+
+    .prob{
+      font-size:20px;
+      font-weight:bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Venn Diagram Probability Visualizer</h1>
+
+  <div class="question">
+    Given \( P(A)=0.25 \) and \( P(B)=0.38 \), where A and B are mutually exclusive, find:
+    <br><br>
+
+    (i) \( P(A') \)
+    <br>
+    (ii) \( P(B') \)
+    <br>
+    (iii) \( P(A \cup B) \)
+    <br>
+    (iv) \( P(A' \cap B') \)
+  </div>
+
+  <!-- Venn Diagram -->
+  <svg width="760" height="420">
+
+    <!-- Universal Set -->
+    <rect x="50" y="40" width="650" height="300"
+          fill="white"
+          stroke="black"
+          stroke-width="3"/>
+
+    <!-- Circle A -->
+    <circle cx="260" cy="190" r="85"
+            fill="rgba(0,123,255,0.35)"
+            stroke="#0056b3"
+            stroke-width="3"/>
+
+    <!-- Circle B -->
+    <circle cx="500" cy="190" r="85"
+            fill="rgba(255,99,132,0.35)"
+            stroke="#cc0033"
+            stroke-width="3"/>
+
+    <!-- Labels -->
+    <text x="245" y="190" class="label">A</text>
+    <text x="485" y="190" class="label">B</text>
+
+    <!-- Probabilities -->
+    <text x="225" y="240" class="prob">0.25</text>
+    <text x="465" y="240" class="prob">0.38</text>
+
+    <!-- Outside region -->
+    <text x="540" y="90" class="prob">
+      Outside = 0.37
+    </text>
+
+    <!-- Universal Set Label -->
+    <text x="60" y="30" class="label">ξ</text>
+
+    <!-- Mutually Exclusive -->
+    <text x="230" y="370"
+          style="font-size:22px;font-weight:bold;">
+      A and B are mutually exclusive
+    </text>
+
+  </svg>
+
+  <button onclick="toggleAnswers()">
+    Show / Hide Solutions
+  </button>
+
+  <div class="answers" id="answers">
+
+    <!-- PART I -->
+    <div class="section">
+
+      <h2>(i) \( P(A') \)</h2>
+
+      Since complement means "not A":
+
+      <br><br>
+
+      \[
+      P(A') = 1 - P(A)
+      \]
+
+      \[
+      = 1 - 0.25
+      \]
+
+      \[
+      = 0.75
+      \]
+
+    </div>
+
+    <!-- PART II -->
+    <div class="section">
+
+      <h2>(ii) \( P(B') \)</h2>
+
+      \[
+      P(B') = 1 - P(B)
+      \]
+
+      \[
+      = 1 - 0.38
+      \]
+
+      \[
+      = 0.62
+      \]
+
+    </div>
+
+    <!-- PART III -->
+    <div class="section">
+
+      <h2>(iii) \( P(A \cup B) \)</h2>
+
+      Since A and B are mutually exclusive:
+
+      \[
+      P(A \cup B) = P(A) + P(B)
+      \]
+
+      \[
+      = 0.25 + 0.38
+      \]
+
+      \[
+      = 0.63
+      \]
+
+    </div>
+
+    <!-- PART IV -->
+    <div class="section">
+
+      <h2>(iv) \( P(A' \cap B') \)</h2>
+
+      \( A' \cap B' \) means neither A nor B.
+
+      <br><br>
+
+      Therefore:
+
+      \[
+      P(A' \cap B') = 1 - P(A \cup B)
+      \]
+
+      \[
+      = 1 - 0.63
+      \]
+
+      \[
+      = 0.37
+      \]
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswers(){
+
+  const answers = document.getElementById("answers");
+
+  if(
+    answers.style.display === "none" ||
+    answers.style.display === ""
+  ){
+    answers.style.display = "block";
+  }
+  else{
+    answers.style.display = "none";
+  }
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+}
+
+window.onload = () => {
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+};
+
+</script>
+
+</body>
+</html>

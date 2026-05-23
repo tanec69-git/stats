@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Independent Events Probability App</title>
+
+  <!-- MathJax -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f6f9;
+      padding:20px;
+      text-align:center;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    .question{
+      text-align:left;
+      font-size:22px;
+      line-height:1.8;
+      margin-bottom:30px;
+    }
+
+    .given-box{
+      background:#f8f9fa;
+      border-left:6px solid #0077cc;
+      padding:20px;
+      border-radius:10px;
+      margin-top:20px;
+      margin-bottom:25px;
+    }
+
+    button{
+      margin-top:20px;
+      padding:12px 24px;
+      font-size:18px;
+      border:none;
+      border-radius:8px;
+      background:#0077cc;
+      color:white;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#005fa3;
+    }
+
+    .answers{
+      display:none;
+      margin-top:30px;
+      text-align:left;
+      background:#eef7ff;
+      padding:25px;
+      border-radius:12px;
+      font-size:22px;
+      line-height:2;
+    }
+
+    .section{
+      margin-bottom:45px;
+    }
+
+    .formula{
+      text-align:center;
+      font-size:28px;
+      margin-top:20px;
+      margin-bottom:20px;
+    }
+
+    .final-answer{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      border:2px solid #0077cc;
+      margin-top:25px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Independent Events Probability Visualizer</h1>
+
+  <div class="question">
+
+    \( A \) denotes the event that a student scores
+    a distinction for his Additional Mathematics paper.
+
+    <br><br>
+
+    \( E \) denotes the event that a student scores
+    a distinction for his Elementary Mathematics paper.
+
+    <br><br>
+
+    We are given:
+
+  </div>
+
+  <div class="given-box">
+
+    \[
+    P(A)=0.25
+    \]
+
+    \[
+    P(E)=0.56
+    \]
+
+    \[
+    P(A \cap E)=0.14
+    \]
+
+    \[
+    P(A|E)=0.25
+    \]
+
+  </div>
+
+  <div class="question">
+
+    Determine whether event \( A \)
+    is independent of event \( E \).
+
+    <br><br>
+
+    Explain your answer.
+
+  </div>
+
+  <button onclick="toggleAnswers()">
+    Show / Hide Solution
+  </button>
+
+  <div class="answers" id="answers">
+
+    <!-- PART 1 -->
+    <div class="section">
+
+      <h2>Method 1: Using Conditional Probability</h2>
+
+      Two events are independent if:
+
+      <div class="formula">
+
+        \[
+        P(A|E)=P(A)
+        \]
+
+      </div>
+
+      From the question:
+
+      \[
+      P(A|E)=0.25
+      \]
+
+      and
+
+      \[
+      P(A)=0.25
+      \]
+
+      Since both values are equal:
+
+      \[
+      P(A|E)=P(A)
+      \]
+
+      Therefore, event \( A \) is independent of event \( E \).
+
+    </div>
+
+    <!-- PART 2 -->
+    <div class="section">
+
+      <h2>Method 2: Using the Multiplication Rule</h2>
+
+      Two events are independent if:
+
+      <div class="formula">
+
+        \[
+        P(A \cap E)=P(A)\times P(E)
+        \]
+
+      </div>
+
+      Substitute the values:
+
+      \[
+      P(A)\times P(E)
+      =
+      0.25 \times 0.56
+      \]
+
+      \[
+      = 0.14
+      \]
+
+      But:
+
+      \[
+      P(A \cap E)=0.14
+      \]
+
+      Therefore:
+
+      \[
+      P(A \cap E)=P(A)\times P(E)
+      \]
+
+      Hence, event \( A \) is independent of event \( E \).
+
+    </div>
+
+    <!-- FINAL ANSWER -->
+    <div class="final-answer">
+
+      <h2>Conclusion</h2>
+
+      \[
+      \boxed{
+      \text{Event } A \text{ is independent of event } E
+      }
+      \]
+
+      because:
+
+      \[
+      P(A|E)=P(A)
+      \]
+
+      and also
+
+      \[
+      P(A \cap E)=P(A)\times P(E)
+      \]
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswers(){
+
+  const answers = document.getElementById("answers");
+
+  if(
+    answers.style.display === "none" ||
+    answers.style.display === ""
+  ){
+    answers.style.display = "block";
+  }
+  else{
+    answers.style.display = "none";
+  }
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+
+}
+
+window.onload = () => {
+
+  if(window.MathJax){
+    MathJax.typeset();
+  }
+
+};
+
+</script>
+
+</body>
+</html>
