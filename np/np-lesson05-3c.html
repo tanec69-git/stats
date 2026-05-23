@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Conditional Probability Practice</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      background:#f3f4f6;
+      margin:0;
+      padding:30px;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+      background:white;
+      padding:40px;
+      border-radius:18px;
+      box-shadow:0 4px 14px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:35px;
+      color:#1e293b;
+    }
+
+    .info-box{
+      background:#eff6ff;
+      border-left:6px solid #2563eb;
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:40px;
+    }
+
+    .question-block{
+      margin-bottom:35px;
+      padding:25px;
+      border-radius:14px;
+      border:1px solid #dbe2ea;
+      background:#fafafa;
+    }
+
+    .question{
+      font-size:1.08rem;
+      margin-bottom:18px;
+    }
+
+    .solution{
+      display:none;
+      margin-top:20px;
+      padding:20px;
+      border-radius:12px;
+      background:#eef4ff;
+      border-left:6px solid #2563eb;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:10px 18px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:1rem;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+
+    .math{
+      margin:12px 0;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Conditional Probability Practice</h1>
+
+  <div class="info-box">
+
+    <p><strong>Given:</strong></p>
+
+    <div class="math">
+      \[
+      P(M)=0.5
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(N)=0.3
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(M \cup N)=0.69
+      \]
+    </div>
+
+  </div>
+
+  <!-- Question i -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(i)</strong> Find \(P(M|N)\)
+    </div>
+
+    <button onclick="toggleSolution('sol1')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol1">
+
+      <p><strong>Step 1:</strong> Find \(P(M \cap N)\)</p>
+
+      <div class="math">
+        \[
+        P(M \cup N)=P(M)+P(N)-P(M \cap N)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        0.69=0.5+0.3-P(M \cap N)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        0.69=0.8-P(M \cap N)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(M \cap N)=0.8-0.69
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(M \cap N)=0.11
+        \]
+      </div>
+
+      <p><strong>Step 2:</strong> Use conditional probability</p>
+
+      <div class="math">
+        \[
+        P(M|N)=\frac{P(M \cap N)}{P(N)}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =\frac{0.11}{0.3}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        \approx 0.3667
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.3667}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Question ii -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(ii)</strong> Explain whether \(M\) and \(N\) are independent.
+    </div>
+
+    <button onclick="toggleSolution('sol2')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol2">
+
+      <p>Two events are independent if:</p>
+
+      <div class="math">
+        \[
+        P(M \cap N)=P(M)\times P(N)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(M)\times P(N)=0.5 \times 0.3
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.15
+        \]
+      </div>
+
+      <p>But:</p>
+
+      <div class="math">
+        \[
+        P(M \cap N)=0.11
+        \]
+      </div>
+
+      <p>Since:</p>
+
+      <div class="math">
+        \[
+        0.11 \ne 0.15
+        \]
+      </div>
+
+      <p>The events are not independent.</p>
+
+      <div class="math">
+        \[
+        \boxed{\text{M and N are not independent}}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Question iii -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(iii)</strong> Explain whether \(M\) and \(N\) are mutually exclusive.
+    </div>
+
+    <button onclick="toggleSolution('sol3')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol3">
+
+      <p>Two events are mutually exclusive if:</p>
+
+      <div class="math">
+        \[
+        P(M \cap N)=0
+        \]
+      </div>
+
+      <p>But:</p>
+
+      <div class="math">
+        \[
+        P(M \cap N)=0.11
+        \]
+      </div>
+
+      <p>Since the intersection is not zero, the events are not mutually exclusive.</p>
+
+      <div class="math">
+        \[
+        \boxed{\text{M and N are not mutually exclusive}}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  function toggleSolution(id){
+
+    const solution = document.getElementById(id);
+
+    if(solution.style.display === "block"){
+      solution.style.display = "none";
+    }
+    else{
+      solution.style.display = "block";
+    }
+
+  }
+
+</script>
+
+</body>
+</html>
