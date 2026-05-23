@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Probability Practice - Show/Hide Solutions</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f2f4f7;
+      margin:0;
+      padding:30px;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      background:white;
+      padding:40px;
+      border-radius:18px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:35px;
+      color:#1e293b;
+    }
+
+    .info-box{
+      background:#eef6ff;
+      border-left:6px solid #2563eb;
+      padding:20px;
+      border-radius:10px;
+      margin-bottom:40px;
+    }
+
+    .question-block{
+      margin-bottom:35px;
+      padding:25px;
+      border:1px solid #dbe2ea;
+      border-radius:14px;
+      background:#fafafa;
+    }
+
+    .question{
+      font-size:1.08rem;
+      margin-bottom:20px;
+    }
+
+    button{
+      background:#2563eb;
+      color:white;
+      border:none;
+      padding:10px 18px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:1rem;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#1d4ed8;
+    }
+
+    .solution{
+      display:none;
+      margin-top:20px;
+      background:#eef4ff;
+      border-left:5px solid #2563eb;
+      padding:20px;
+      border-radius:10px;
+    }
+
+    .math{
+      margin:12px 0;
+    }
+
+    ul{
+      margin-top:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Probability Practice Question</h1>
+
+  <div class="info-box">
+
+    <p><strong>In a city:</strong></p>
+
+    <div class="math">
+      \[
+      P(C)=0.40
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(B)=0.55
+      \]
+    </div>
+
+    <div class="math">
+      \[
+      P(C \cup B)=0.75
+      \]
+    </div>
+
+    <ul>
+      <li>\(C\): Person owns a car</li>
+      <li>\(B\): Person owns a bicycle</li>
+      <li>\(M\): Person owns a motorcycle</li>
+    </ul>
+
+  </div>
+
+  <!-- A(i) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(a)(i)</strong> Find \(P(C \cap B)\)
+    </div>
+
+    <button onclick="toggleSolution('sol1')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol1">
+
+      <p>Use the addition rule:</p>
+
+      <div class="math">
+        \[
+        P(C \cup B)=P(C)+P(B)-P(C \cap B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        0.75=0.40+0.55-P(C \cap B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        0.75=0.95-P(C \cap B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(C \cap B)=0.95-0.75
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(C \cap B)=0.20
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.20}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- A(ii) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(a)(ii)</strong> Find the probability that a person owns neither a car nor a bicycle.
+    </div>
+
+    <button onclick="toggleSolution('sol2')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol2">
+
+      <p>Use the complement rule:</p>
+
+      <div class="math">
+        \[
+        P((C \cup B)')=1-P(C \cup B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =1-0.75
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.25
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.25}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- A(iii) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(a)(iii)</strong> Find \(P(C|B)\)
+    </div>
+
+    <button onclick="toggleSolution('sol3')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol3">
+
+      <p>Use conditional probability:</p>
+
+      <div class="math">
+        \[
+        P(C|B)=\frac{P(C \cap B)}{P(B)}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =\frac{0.20}{0.55}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        \approx 0.3636
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.3636}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- A(iv) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(a)(iv)</strong> Find \(P(B|C')\)
+    </div>
+
+    <button onclick="toggleSolution('sol4')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol4">
+
+      <p><strong>Step 1:</strong> Find \(P(C')\)</p>
+
+      <div class="math">
+        \[
+        P(C')=1-P(C)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =1-0.40
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.60
+        \]
+      </div>
+
+      <p><strong>Step 2:</strong> Find \(P(B \cap C')\)</p>
+
+      <div class="math">
+        \[
+        P(B \cap C')=P(B)-P(C \cap B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.55-0.20
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.35
+        \]
+      </div>
+
+      <p><strong>Step 3:</strong> Apply conditional probability.</p>
+
+      <div class="math">
+        \[
+        P(B|C')=\frac{P(B \cap C')}{P(C')}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =\frac{0.35}{0.60}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        \approx 0.5833
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.5833}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- B -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(b)</strong> Are events \(C\) and \(B\) mutually exclusive? Explain.
+    </div>
+
+    <button onclick="toggleSolution('sol5')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol5">
+
+      <p>Two events are mutually exclusive if:</p>
+
+      <div class="math">
+        \[
+        P(C \cap B)=0
+        \]
+      </div>
+
+      <p>But:</p>
+
+      <div class="math">
+        \[
+        P(C \cap B)=0.20
+        \]
+      </div>
+
+      <p>Since the intersection is not zero, the events are not mutually exclusive.</p>
+
+      <div class="math">
+        \[
+        \boxed{\text{C and B are not mutually exclusive}}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- C -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(c)</strong> Are events \(C\) and \(B\) independent? Show working.
+    </div>
+
+    <button onclick="toggleSolution('sol6')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol6">
+
+      <p>Two events are independent if:</p>
+
+      <div class="math">
+        \[
+        P(C \cap B)=P(C)\times P(B)
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(C)\times P(B)=0.40 \times 0.55
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.22
+        \]
+      </div>
+
+      <p>But:</p>
+
+      <div class="math">
+        \[
+        P(C \cap B)=0.20
+        \]
+      </div>
+
+      <p>Since:</p>
+
+      <div class="math">
+        \[
+        0.20 \ne 0.22
+        \]
+      </div>
+
+      <p>The events are not independent.</p>
+
+      <div class="math">
+        \[
+        \boxed{\text{C and B are not independent}}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- D -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(d)</strong> Suppose 60% of those who own both a car and a bicycle also own a motorcycle \((M)\).
+    </div>
+
+    <button onclick="toggleSolution('sol7')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol7">
+
+      <p>This means:</p>
+
+      <div class="math">
+        \[
+        P(M|C \cap B)=0.60
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- E(i) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(e)(i)</strong> Find \(P(M \cap C \cap B)\)
+    </div>
+
+    <button onclick="toggleSolution('sol8')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol8">
+
+      <p>Use conditional probability:</p>
+
+      <div class="math">
+        \[
+        P(M|C \cap B)=\frac{P(M \cap C \cap B)}{P(C \cap B)}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        0.60=\frac{P(M \cap C \cap B)}{0.20}
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        P(M \cap C \cap B)=0.60 \times 0.20
+        \]
+      </div>
+
+      <div class="math">
+        \[
+        =0.12
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.12}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- E(ii) -->
+  <div class="question-block">
+
+    <div class="question">
+      <strong>(e)(ii)</strong> Find \(P(M|C \cap B)\)
+    </div>
+
+    <button onclick="toggleSolution('sol9')">
+      Show/Hide Solution
+    </button>
+
+    <div class="solution" id="sol9">
+
+      <p>From part (d):</p>
+
+      <div class="math">
+        \[
+        P(M|C \cap B)=0.60
+        \]
+      </div>
+
+      <p><strong>Answer:</strong></p>
+
+      <div class="math">
+        \[
+        \boxed{0.60}
+        \]
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleSolution(id){
+
+    const solution = document.getElementById(id);
+
+    if(solution.style.display === "block"){
+      solution.style.display = "none";
+    }
+    else{
+      solution.style.display = "block";
+    }
+
+  }
+</script>
+
+</body>
+</html>
