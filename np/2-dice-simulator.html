@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2 Dice Histogram Simulator</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 180px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 16px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .info {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    canvas {
+      margin-top: 30px;
+    }
+
+    .formula {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>2 Dice Histogram Simulator</h1>
+
+  <div class="formula">
+    Roll two fair dice and plot the frequency distribution of the total sum:
+    <br><br>
+    \( \text{Total} = \text{Die 1} + \text{Die 2} \)
+  </div>
+
+  <div class="controls">
+    <input type="number" id="rollsInput" min="1" value="1000" />
+    <button onclick="simulateDice()">Simulate</button>
+  </div>
+
+  <div class="info" id="summary"></div>
+
+  <canvas id="histogram"></canvas>
+</div>
+
+<script>
+  let chart;
+
+  function rollDie() {
+    return Math.floor(Math.random() * 6) + 1;
+  }
+
+  function simulateDice() {
+    const numRolls = parseInt(document.getElementById("rollsInput").value);
+
+    const frequencies = {
+      2:0, 3:0, 4:0, 5:0, 6:0,
+      7:0, 8:0, 9:0, 10:0, 11:0, 12:0
+    };
+
+    for (let i = 0; i < numRolls; i++) {
+      const total = rollDie() + rollDie();
+      frequencies[total]++;
+    }
+
+    const labels = Object.keys(frequencies);
+    const data = Object.values(frequencies);
+
+    document.getElementById("summary").innerHTML =
+      `Number of simulations: <strong>${numRolls}</strong>`;
+
+    const ctx = document.getElementById("histogram").getContext("2d");
+
+    if (chart) {
+      chart.destroy();
+    }
+
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Frequency',
+          data: data,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true
+          },
+          title: {
+            display: true,
+            text: 'Histogram of Total from 2 Dice Rolls'
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Total of Two Dice'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Frequency'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  simulateDice();
+</script>
+
+</body>
+</html>
