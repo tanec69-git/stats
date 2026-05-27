@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ticket Price Statistics ✈️📊</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      margin:0;
+      padding:30px;
+      background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    }
+
+    .container{
+      max-width:1200px;
+      margin:auto;
+      background:white;
+      padding:35px;
+      border-radius:20px;
+      box-shadow:0 0 15px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      color:#2d3436;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#555;
+      margin-bottom:25px;
+      font-size:1.1rem;
+    }
+
+    .question{
+      background:#f1f9ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #0984e3;
+      line-height:1.9;
+      font-size:1.15rem;
+    }
+
+    button{
+      margin-top:30px;
+      padding:14px 28px;
+      border:none;
+      border-radius:10px;
+      font-size:1rem;
+      font-weight:bold;
+      cursor:pointer;
+      background:#6c5ce7;
+      color:white;
+    }
+
+    button:hover{
+      background:#574bce;
+    }
+
+    .answer{
+      display:none;
+      margin-top:30px;
+      background:#faf7ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #6c5ce7;
+      line-height:2;
+    }
+
+    .section{
+      margin-bottom:40px;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 8px rgba(0,0,0,0.08);
+    }
+
+    .section h2{
+      color:#d63031;
+      margin-bottom:20px;
+    }
+
+    .math-work{
+      color:red;
+      font-size:1.15rem;
+      line-height:2.8;
+      overflow-x:auto;
+    }
+
+    .divider{
+      height:3px;
+      background:#2d3436;
+      margin:40px 0;
+      border-radius:5px;
+    }
+
+    .final{
+      margin-top:15px;
+      color:#d63031;
+      font-weight:bold;
+      font-size:1.1rem;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>✈️📊 Ticket Price Statistics</h1>
+
+  <div class="subtitle">
+    Using mathematical notation for transformations of data
+  </div>
+
+  <div class="question">
+
+    In June, all SIA plane ticket prices from Singapore to Japan for November and December are released.
+
+    <br><br>
+
+    The mean ticket price for all seats is \$1050
+    with a standard deviation of \$250.
+
+    <br><br>
+
+    (i) If the airline offers a discount of 15% to all tickets,
+    calculate the new mean and new standard deviation.
+
+    <br><br>
+
+    (ii) If the airline increases the listed prices by \$200,
+    calculate the new mean and new standard deviation.
+
+    <br><br>
+
+    (iii) If all ticket prices were doubled,
+    calculate the new mean and new standard deviation.
+
+  </div>
+
+  <button onclick="toggleAnswer()" id="toggleBtn">
+    🧮 Show Answers
+  </button>
+
+  <div class="answer" id="answerBox">
+
+    <!-- PART I -->
+    <div class="section">
+
+      <h2>💸 (i) 15% Discount on All Tickets</h2>
+
+      <div class="math-work">
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Mean, }
+        \mu_x = 1050
+        \]
+
+        \[
+        \therefore
+        \text{ Mean, }
+        \mu_y = 0.85\mu_x
+        \]
+
+        \[
+        = 0.85 \times 1050
+        \]
+
+        \[
+        = \$892.50
+        \]
+
+        <br>
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Std Dev, }
+        \sigma_x = 250
+        \]
+
+        \[
+        \therefore
+        \text{ Std Dev, }
+        \sigma_y = 0.85 \times \sigma_x
+        \]
+
+        \[
+        = 0.85 \times 250
+        \]
+
+        \[
+        = \$212.50
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ New Mean:
+        \[
+        \boxed{\$892.50}
+        \]
+
+        ✅ New Standard Deviation:
+        \[
+        \boxed{\$212.50}
+        \]
+
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PART II -->
+    <div class="section">
+
+      <h2>📈 (ii) Increase All Prices by \$200</h2>
+
+      <div class="math-work">
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Mean, }
+        \mu_x = 1050
+        \]
+
+        \[
+        \therefore
+        \text{ Mean, }
+        \mu_y = 1050 + 200
+        \]
+
+        \[
+        = \$1250
+        \]
+
+        <br>
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Std Dev, }
+        \sigma_x = 250
+        \]
+
+        \[
+        \therefore
+        \text{ Std Dev, }
+        \sigma_y = \sigma_x
+        \text{ (remain unchanged)}
+        \]
+
+        \[
+        = \$250
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ New Mean:
+        \[
+        \boxed{\$1250}
+        \]
+
+        ✅ New Standard Deviation:
+        \[
+        \boxed{\$250}
+        \]
+
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PART III -->
+    <div class="section">
+
+      <h2>✖️2️⃣ (iii) Prices are Doubled</h2>
+
+      <div class="math-work">
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Mean, }
+        \mu_x = 1050
+        \]
+
+        \[
+        \therefore
+        \text{ Mean, }
+        \mu_y = 2\mu_x
+        \]
+
+        \[
+        = 2 \times 1050
+        \]
+
+        \[
+        = \$2100
+        \]
+
+        <br>
+
+        \[
+        \text{Given:}
+        \qquad
+        \text{Std Dev, }
+        \sigma_x = 250
+        \]
+
+        \[
+        \therefore
+        \text{ Std Dev, }
+        \sigma_y = 2\sigma_x
+        \]
+
+        \[
+        = 2 \times 250
+        \]
+
+        \[
+        = \$500
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ New Mean:
+        \[
+        \boxed{\$2100}
+        \]
+
+        ✅ New Standard Deviation:
+        \[
+        \boxed{\$500}
+        \]
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswer(){
+
+    const answerBox = document.getElementById("answerBox");
+    const btn = document.getElementById("toggleBtn");
+
+    if(answerBox.style.display === "none" || answerBox.style.display === ""){
+
+        answerBox.style.display = "block";
+        btn.innerHTML = "🙈 Hide Answers";
+
+    }
+    else{
+
+        answerBox.style.display = "none";
+        btn.innerHTML = "🧮 Show Answers";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

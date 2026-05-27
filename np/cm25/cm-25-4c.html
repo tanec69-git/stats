@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Travel Itinerary Permutations ✈️🌍</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      margin:0;
+      padding:30px;
+      background: linear-gradient(to right, #74ebd5, #9face6);
+    }
+
+    .container{
+      max-width:1150px;
+      margin:auto;
+      background:white;
+      padding:35px;
+      border-radius:20px;
+      box-shadow:0 0 15px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      color:#2d3436;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#555;
+      margin-bottom:25px;
+      font-size:1.1rem;
+    }
+
+    .question{
+      background:#f1f9ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #0984e3;
+      line-height:1.9;
+      font-size:1.15rem;
+    }
+
+    .cities{
+      margin-top:15px;
+      font-size:1.1rem;
+    }
+
+    button{
+      margin-top:30px;
+      padding:14px 28px;
+      border:none;
+      border-radius:10px;
+      font-size:1rem;
+      font-weight:bold;
+      cursor:pointer;
+      background:#6c5ce7;
+      color:white;
+    }
+
+    button:hover{
+      background:#574bce;
+    }
+
+    .answer{
+      display:none;
+      margin-top:30px;
+      background:#faf7ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #6c5ce7;
+      line-height:2;
+    }
+
+    .step{
+      margin-bottom:30px;
+      background:white;
+      padding:22px;
+      border-radius:14px;
+      box-shadow:0 0 8px rgba(0,0,0,0.08);
+    }
+
+    .final{
+      margin-top:15px;
+      color:#d63031;
+      font-weight:bold;
+      font-size:1.1rem;
+    }
+
+    .city-row{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .city{
+      padding:14px 18px;
+      border-radius:12px;
+      color:white;
+      font-weight:bold;
+      font-size:1rem;
+      text-align:center;
+      min-width:140px;
+    }
+
+    .london{
+      background:#0984e3;
+    }
+
+    .paris{
+      background:#e84393;
+    }
+
+    .milan{
+      background:#00b894;
+    }
+
+    .brussels{
+      background:#fdcb6e;
+      color:#2d3436;
+    }
+
+    .amsterdam{
+      background:#6c5ce7;
+    }
+
+    .block{
+      display:inline-block;
+      padding:8px 14px;
+      background:#ffeaa7;
+      border-radius:10px;
+      font-weight:bold;
+      margin:5px;
+      font-size:1rem;
+    }
+
+    .route-box{
+      background:#eef6ff;
+      padding:15px;
+      border-radius:12px;
+      margin-top:15px;
+      text-align:center;
+      font-weight:bold;
+      font-size:1.05rem;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>✈️ Travel Itinerary Permutations 🌍</h1>
+
+  <div class="subtitle">
+    Learn permutations with travel routes and restrictions!
+  </div>
+
+  <div class="question">
+
+    A tourist plans to visit 5 cities:
+
+    <div class="cities">
+      London, Paris, Milan, Brussels and Amsterdam
+    </div>
+
+    <br>
+
+    Each city can be visited only once.
+
+    <br><br>
+
+    How many valid travel itineraries are possible if the trip must:
+
+    <br><br>
+
+    (i) start in London and end in Amsterdam.
+
+    <br><br>
+
+    (ii) start and end in London.
+    Only London can be visited twice.
+
+    <br><br>
+
+    (iii) in addition to part (ii),
+    Paris and Milan must be visited on consecutive days.
+
+  </div>
+
+  <button onclick="toggleAnswer()" id="toggleBtn">
+    🌎 Show Answers
+  </button>
+
+  <div class="answer" id="answerBox">
+
+    <!-- PART I -->
+    <div class="step">
+
+      <h2>📍 (i) Start in London and End in Amsterdam</h2>
+
+      London and Amsterdam are fixed at the beginning and end.
+
+      <div class="route-box">
+
+        London → ? → ? → ? → Amsterdam
+
+      </div>
+
+      <br>
+
+      Remaining cities to arrange:
+
+      <div class="city-row">
+
+        <div class="city paris">
+          Paris
+        </div>
+
+        <div class="city milan">
+          Milan
+        </div>
+
+        <div class="city brussels">
+          Brussels
+        </div>
+
+      </div>
+
+      <br>
+
+      Number of arrangements:
+
+      \[
+      3!
+      \]
+
+      \[
+      = 6
+      \]
+
+      <div class="final">
+
+        ✅ Answer:
+
+        \[
+        \boxed{6}
+        \]
+
+      </div>
+
+    </div>
+
+    <!-- PART II -->
+    <div class="step">
+
+      <h2>🏙️ (ii) Start and End in London</h2>
+
+      London appears at both the start and end.
+
+      <div class="route-box">
+
+        London → ? → ? → ? → ? → London
+
+      </div>
+
+      <br>
+
+      Arrange the 4 middle cities:
+
+      <div class="city-row">
+
+        <div class="city paris">
+          Paris
+        </div>
+
+        <div class="city milan">
+          Milan
+        </div>
+
+        <div class="city brussels">
+          Brussels
+        </div>
+
+        <div class="city amsterdam">
+          Amsterdam
+        </div>
+
+      </div>
+
+      <br>
+
+      Number of arrangements:
+
+      \[
+      4!
+      \]
+
+      \[
+      = 24
+      \]
+
+      <div class="final">
+
+        ✅ Answer:
+
+        \[
+        \boxed{24}
+        \]
+
+      </div>
+
+    </div>
+
+    <!-- PART III -->
+    <div class="step">
+
+      <h2>🔗 (iii) Paris and Milan Consecutive</h2>
+
+      Paris and Milan must stay together.
+
+      <br><br>
+
+      Treat them as ONE block.
+
+      <br><br>
+
+      Possible internal arrangements:
+
+      <div class="block">
+
+        Paris → Milan
+
+      </div>
+
+      <div class="block">
+
+        Milan → Paris
+
+      </div>
+
+      <br><br>
+
+      We now arrange:
+
+      <br>
+
+      • (Paris-Milan block)<br>
+      • Brussels<br>
+      • Amsterdam
+
+      <br><br>
+
+      Number of ways to arrange these 3 objects:
+
+      \[
+      3!
+      \]
+
+      \[
+      = 6
+      \]
+
+      <br>
+
+      Number of ways within the block:
+
+      \[
+      2!
+      \]
+
+      \[
+      = 2
+      \]
+
+      <br>
+
+      Total number of itineraries:
+
+      \[
+      3! \times 2!
+      \]
+
+      \[
+      = 6 \times 2
+      \]
+
+      \[
+      = 12
+      \]
+
+      <div class="final">
+
+        ✅ Answer:
+
+        \[
+        \boxed{12}
+        \]
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswer(){
+
+  const answerBox = document.getElementById("answerBox");
+  const btn = document.getElementById("toggleBtn");
+
+  if(answerBox.style.display === "none" || answerBox.style.display === ""){
+
+      answerBox.style.display = "block";
+      btn.innerHTML = "🙈 Hide Answers";
+
+  }
+  else{
+
+      answerBox.style.display = "none";
+      btn.innerHTML = "🌎 Show Answers";
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>

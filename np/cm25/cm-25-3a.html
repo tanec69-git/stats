@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Frequency Table Statistics 📊</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+
+    body{
+      font-family: Arial, sans-serif;
+      margin:0;
+      padding:30px;
+      background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    }
+
+    .container{
+      max-width:1250px;
+      margin:auto;
+      background:white;
+      padding:35px;
+      border-radius:20px;
+      box-shadow:0 0 15px rgba(0,0,0,0.15);
+    }
+
+    h1{
+      text-align:center;
+      color:#2d3436;
+      margin-bottom:10px;
+    }
+
+    .subtitle{
+      text-align:center;
+      color:#555;
+      margin-bottom:25px;
+      font-size:1.1rem;
+    }
+
+    .question{
+      background:#f1f9ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #0984e3;
+      line-height:1.9;
+      font-size:1.12rem;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+      text-align:center;
+      font-size:1.05rem;
+    }
+
+    th, td{
+      border:2px solid #2d3436;
+      padding:12px;
+    }
+
+    th{
+      background:#dfe6e9;
+    }
+
+    .caption{
+      text-align:center;
+      margin-top:10px;
+      font-weight:bold;
+      color:#2d3436;
+    }
+
+    button{
+      margin-top:30px;
+      padding:14px 28px;
+      border:none;
+      border-radius:10px;
+      font-size:1rem;
+      font-weight:bold;
+      cursor:pointer;
+      background:#6c5ce7;
+      color:white;
+    }
+
+    button:hover{
+      background:#574bce;
+    }
+
+    .answer{
+      display:none;
+      margin-top:30px;
+      background:#faf7ff;
+      padding:25px;
+      border-radius:14px;
+      border-left:6px solid #6c5ce7;
+      line-height:2;
+    }
+
+    .section{
+      margin-bottom:40px;
+      background:white;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 0 8px rgba(0,0,0,0.08);
+    }
+
+    .section h2{
+      color:#d63031;
+    }
+
+    .math{
+      color:red;
+      font-size:1.12rem;
+      line-height:2.8;
+      overflow-x:auto;
+    }
+
+    .final{
+      margin-top:15px;
+      color:#d63031;
+      font-weight:bold;
+      font-size:1.12rem;
+    }
+
+    .divider{
+      height:3px;
+      background:#2d3436;
+      margin:40px 0;
+      border-radius:5px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>📊 Frequency Table Statistics</h1>
+
+  <div class="subtitle">
+    Mean, Mode, Population Variance and Standard Deviation
+  </div>
+
+  <div class="question">
+
+    Data from 50 students are collected from a school to determine the duration of lunchtime spent in a typical school day.
+
+    <br><br>
+
+    The table below shows the survey results.
+
+    <table>
+
+      <tr>
+        <th>Number of minutes spent per student (x)</th>
+        <td>20</td>
+        <td>25</td>
+        <td>30</td>
+        <td>35</td>
+        <td>40</td>
+        <td>45</td>
+      </tr>
+
+      <tr>
+        <th>Frequency (f)</th>
+        <td>5</td>
+        <td>8</td>
+        <td>10</td>
+        <td>15</td>
+        <td>7</td>
+        <td>5</td>
+      </tr>
+
+    </table>
+
+    <div class="caption">
+      Table 3(a): Frequency Table
+    </div>
+
+    <br>
+
+    Compute:
+
+    <br><br>
+
+    (i) the mean and mode
+
+    <br><br>
+
+    (ii) the population variance
+
+    <br><br>
+
+    (iii) the standard deviation
+
+  </div>
+
+  <button onclick="toggleAnswer()" id="toggleBtn">
+    🧮 Show Solutions
+  </button>
+
+  <div class="answer" id="answerBox">
+
+    <!-- COMPLETED TABLE -->
+    <div class="section">
+
+      <h2>📋 Completed Working Table</h2>
+
+      <table>
+
+        <tr>
+          <th>x</th>
+          <th>f</th>
+          <th>fx</th>
+          <th>x²</th>
+          <th>fx²</th>
+        </tr>
+
+        <tr>
+          <td>20</td>
+          <td>5</td>
+          <td>100</td>
+          <td>400</td>
+          <td>2000</td>
+        </tr>
+
+        <tr>
+          <td>25</td>
+          <td>8</td>
+          <td>200</td>
+          <td>625</td>
+          <td>5000</td>
+        </tr>
+
+        <tr>
+          <td>30</td>
+          <td>10</td>
+          <td>300</td>
+          <td>900</td>
+          <td>9000</td>
+        </tr>
+
+        <tr>
+          <td>35</td>
+          <td>15</td>
+          <td>525</td>
+          <td>1225</td>
+          <td>18375</td>
+        </tr>
+
+        <tr>
+          <td>40</td>
+          <td>7</td>
+          <td>280</td>
+          <td>1600</td>
+          <td>11200</td>
+        </tr>
+
+        <tr>
+          <td>45</td>
+          <td>5</td>
+          <td>225</td>
+          <td>2025</td>
+          <td>10125</td>
+        </tr>
+
+        <tr style="font-weight:bold; background:#f1f2f6;">
+          <td>Total</td>
+          <td>50</td>
+          <td>1630</td>
+          <td>6775</td>
+          <td>55700</td>
+        </tr>
+
+      </table>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- MEAN -->
+    <div class="section">
+
+      <h2>📘 Mean</h2>
+
+      <div class="math">
+
+        \[
+        \mu
+        =
+        \frac{\sum fx}{\sum f}
+        \]
+
+        \[
+        =
+        \frac{1630}{50}
+        \]
+
+        \[
+        = 32.6
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ Mean:
+
+        \[
+        \boxed{32.6 \text{ minutes}}
+        \]
+
+      </div>
+
+    </div>
+
+    <!-- MODE -->
+    <div class="section">
+
+      <h2>📙 Mode</h2>
+
+      <div class="math">
+
+        Highest frequency:
+
+        \[
+        15
+        \]
+
+        corresponding to:
+
+        \[
+        x = 35
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ Mode:
+
+        \[
+        \boxed{35 \text{ minutes}}
+        \]
+
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- VARIANCE -->
+    <div class="section">
+
+      <h2>📗 Population Variance</h2>
+
+      <div class="math">
+
+        \[
+        \sigma^2
+        =
+        \frac{\sum fx^2}{\sum f}
+        -
+        \mu^2
+        \]
+
+        \[
+        =
+        \frac{55700}{50}
+        -
+        32.6^2
+        \]
+
+        \[
+        =
+        1114 - 1062.76
+        \]
+
+        \[
+        =
+        \frac{1281}{25}
+        \text{ or }
+        51.24
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ Population Variance:
+
+        \[
+        \boxed{51.24}
+        \]
+
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- STANDARD DEVIATION -->
+    <div class="section">
+
+      <h2>📕 Standard Deviation</h2>
+
+      <div class="math">
+
+        \[
+        \sigma
+        =
+        \sqrt{\sigma^2}
+        \]
+
+        \[
+        =
+        \sqrt{51.24}
+        \]
+
+        \[
+        = 7.16
+        \]
+
+      </div>
+
+      <div class="final">
+
+        ✅ Standard Deviation:
+
+        \[
+        \boxed{7.16 \text{ minutes}}
+        \]
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function toggleAnswer(){
+
+    const answerBox = document.getElementById("answerBox");
+    const btn = document.getElementById("toggleBtn");
+
+    if(answerBox.style.display === "none" || answerBox.style.display === ""){
+
+        answerBox.style.display = "block";
+        btn.innerHTML = "🙈 Hide Solutions";
+
+    }
+    else{
+
+        answerBox.style.display = "none";
+        btn.innerHTML = "🧮 Show Solutions";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

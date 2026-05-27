@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Probability of Selecting Balls</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(','\\)'], ['$', '$']]
+      }
+    };
+  </script>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      margin:0;
+      padding:30px;
+    }
+
+    .container{
+      max-width:900px;
+      margin:auto;
+      background:white;
+      padding:30px;
+      border-radius:12px;
+      box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      color:#333;
+    }
+
+    .question{
+      font-size:1.2rem;
+      margin-top:20px;
+      line-height:1.8;
+    }
+
+    button{
+      margin-top:25px;
+      padding:12px 24px;
+      font-size:1rem;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      background:#007bff;
+      color:white;
+    }
+
+    button:hover{
+      background:#0056b3;
+    }
+
+    .answer{
+      margin-top:30px;
+      padding:20px;
+      background:#f9f9f9;
+      border-left:5px solid #007bff;
+      border-radius:8px;
+      display:none;
+      line-height:2;
+      font-size:1.05rem;
+    }
+
+    .step{
+      margin-bottom:18px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Probability Question</h1>
+
+  <div class="question">
+    A bag contains 7 black balls and 5 blue balls.
+    What is the probability of selecting a random group of
+    4 black balls and 3 blue balls from the bag?
+  </div>
+
+  <button onclick="toggleAnswer()" id="toggleBtn">
+    Show Answer
+  </button>
+
+  <div class="answer" id="answerBox">
+
+    <div class="step">
+      Total number of balls:
+      \[
+      7 + 5 = 12
+      \]
+    </div>
+
+    <div class="step">
+      Number of favourable selections:
+      \[
+      {}^7C_4 \times {}^5C_3
+      \]
+    </div>
+
+    <div class="step">
+      Total possible selections:
+      \[
+      {}^{12}C_7
+      \]
+    </div>
+
+    <div class="step">
+      Probability:
+      \[
+      P=
+      \frac{{}^7C_4 \times {}^5C_3}
+      {{}^{12}C_7}
+      \]
+    </div>
+
+    <div class="step">
+      Calculate:
+      \[
+      =
+      \frac{35 \times 10}{792}
+      \]
+    </div>
+
+    <div class="step">
+      Final Answer:
+      \[
+      \boxed{
+      \frac{175}{396}
+      }
+      \]
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleAnswer() {
+    const answerBox = document.getElementById("answerBox");
+    const btn = document.getElementById("toggleBtn");
+
+    if (answerBox.style.display === "none" || answerBox.style.display === "") {
+      answerBox.style.display = "block";
+      btn.textContent = "Hide Answer";
+    } else {
+      answerBox.style.display = "none";
+      btn.textContent = "Show Answer";
+    }
+  }
+</script>
+
+</body>
+</html>
