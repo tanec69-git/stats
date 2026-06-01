@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinatorics & Permutations Solutions (nCr Notation)</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f0f4f8;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #1a252f;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .question-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #7f8c8d;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .math-block {
+            background: #fcfdfe;
+            padding: 15px;
+            border: 1px dashed #bdc3c7;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #eafaf1;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        .sub-part {
+            margin-left: 20px;
+            padding-left: 15px;
+            border-left: 2px solid #ecf0f1;
+            margin-bottom: 25px;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Combinatorics Problem Solutions</h1>
+
+    <h2>🧑‍🤝‍🧑 Part (a): Committee Selection</h2>
+    <div class="question-box">
+        <strong>Question:</strong> There are 32 Chinese, 9 Malays and 4 Indians in a class. How many ways can a committee of four be selected, if it must comprise of 2 Chinese, a Malay and an Indian?
+    </div>
+    <p>Since the order of selection does not matter for a committee, we use combinations ($^{n}C_{r}$).</p>
+    <ul>
+        <li>Select 2 Chinese from 32: $^{32}C_{2}$</li>
+        <li>Select 1 Malay from 9: $^{9}C_{1}$</li>
+        <li>Select 1 Indian from 4: $^{4}C_{1}$</li>
+    </ul>
+    <div class="math-block">
+        $$ \text{Total ways} = ^{32}C_{2} \times ^{9}C_{1} \times ^{4}C_{1} $$
+        $$ \text{Total ways} = 496 \times 9 \times 4 = \mathbf{17,856} $$
+    </div>
+    <p>Answer: <span class="final-answer">17,856 ways</span></p>
+
+    <h2>📚 Part (b): Book Selection</h2>
+    <div class="question-box">
+        <strong>Question:</strong> On a particular rack of a book shelf, there are four English books, two Chinese books, three Malay books and 5 Tamil books. In how many ways can a person choose five books if:
+        <ol type="i">
+            <li>there is no restriction;</li>
+            <li>there must be exactly three English books;</li>
+            <li>there must be exactly two English books and one Malay book;</li>
+            <li>there must not be any English books;</li>
+            <li>there must be at least one Chinese book; <em>(Note: Labeled as 'iii' again in original text)</em></li>
+        </ol>
+    </div>
+    
+    <p><strong>Total Pool:</strong> 4 English (E) + 2 Chinese (C) + 3 Malay (M) + 5 Tamil (T) = <strong>14 books</strong>.</p>
+
+    <div class="sub-part">
+        <h3>(i) No restriction</h3>
+        <p>Choose any 5 books from the total 14.</p>
+        <div class="math-block">$$ ^{14}C_{5} = \mathbf{2,002} $$</div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(ii) Exactly three English books</h3>
+        <p>Choose 3 from the 4 English books, and the remaining 2 from the 10 non-English books.</p>
+        <div class="math-block">$$ ^{4}C_{3} \times ^{10}C_{2} = 4 \times 45 = \mathbf{180} $$</div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(iii) Exactly two English and one Malay book</h3>
+        <p>We need 5 books total. Choose 2 English, 1 Malay, and the remaining 2 from the 7 other books (Chinese + Tamil).</p>
+        <div class="math-block">$$ ^{4}C_{2} \times ^{3}C_{1} \times ^{7}C_{2} = 6 \times 3 \times 21 = \mathbf{378} $$</div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(iv) No English books</h3>
+        <p>Choose all 5 books from the 10 non-English books.</p>
+        <div class="math-block">$$ ^{10}C_{5} = \mathbf{252} $$</div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(v) At least one Chinese book</h3>
+        <p>We can use the complement method: Total unrestricted ways minus the ways with <em>zero</em> Chinese books.</p>
+        <div class="math-block">
+            $$ \text{Total ways} - \text{Ways with no Chinese books} $$
+            $$ ^{14}C_{5} - ^{12}C_{5} = 2002 - 792 = \mathbf{1,210} $$
+        </div>
+    </div>
+
+    <h2>👨‍👩‍👧‍👦 Part (c): Concert Seating Arrangements</h2>
+    <div class="question-box">
+        <strong>Question:</strong> If there are 2 families, each consist of father, mother, a son and a daughter. They go to watch a concert together. If they are sitting in the same row with 8 seats, how many ways can they be seated if:
+        <ol type="i">
+            <li>there is no restriction;</li>
+            <li>all the males must sit together;</li>
+            <li>all the males and all the females must sit together;</li>
+            <li>the sons must not sit together?</li>
+        </ol>
+    </div>
+
+    <p><strong>Total People:</strong> 8 (4 Males: 2 Fathers, 2 Sons | 4 Females: 2 Mothers, 2 Daughters)</p>
+
+    <div class="sub-part">
+        <h3>(i) No restriction</h3>
+        <p>Arrange 8 people in 8 seats. Order matters here, so we use factorials ($n!$).</p>
+        <div class="math-block">$$ 8! = \mathbf{40,320} $$</div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(ii) All the males must sit together</h3>
+        <p>Treat the 4 males as 1 single block. We now arrange 5 units (4 individual females + 1 male block). Finally, arrange the 4 males within their block.</p>
+        <div class="math-block">
+            $$ 5! \times 4! = 120 \times 24 = \mathbf{2,880} $$
+        </div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(iii) All males together AND all females together</h3>
+        <p>Treat males as 1 block and females as 1 block. Arrange the 2 blocks, arrange the males within their block, and arrange the females within their block.</p>
+        <div class="math-block">
+            $$ 2! \times 4! \times 4! = 2 \times 24 \times 24 = \mathbf{1,152} $$
+        </div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(iv) The sons must not sit together</h3>
+        <p><strong>Method 1: Complement</strong><br>
+        Find total ways minus the ways where the 2 sons sit together. If sons are a block, there are 7 units to arrange.</p>
+        <div class="math-block">
+            $$ 8! - (7! \times 2!) = 40320 - (5040 \times 2) = 40320 - 10080 = \mathbf{30,240} $$
+        </div>
+        
+        <p><strong>Method 2: Slotting (Insertion Method)</strong><br>
+        Arrange the 6 other family members first ($6!$). This creates 7 potential slots (including ends) for the 2 sons to sit separately ($^{7}P_{2}$).</p>
+        <div class="math-block">
+            $$ 6! \times ^{7}P_{2} = 720 \times (7 \times 6) = 720 \times 42 = \mathbf{30,240} $$
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

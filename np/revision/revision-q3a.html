@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computing Mathematics: Functions and Relations</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          }
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #2c3e50;
+        }
+        h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .problem-statement {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .solution {
+            background-color: #f4fdf4;
+            padding: 15px;
+            border-left: 4px solid #2ecc71;
+            margin-top: 10px;
+        }
+        .solution-step {
+            margin-bottom: 8px;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+        }
+        svg {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            display: block;
+            margin: 15px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Revision Exercise 1: Relations & Functions</h2>
+    
+    <div class="problem-statement">
+        <h3>Question 3 (a)</h3>
+        <p>A relation defined from $\mathbb{Z}$ to $\mathbb{Z}$ as:</p>
+        <p>
+            $g(x) = \begin{cases} 
+            x - 1 & \text{if } x \ge 0, x \in \mathbb{Z} \\
+            x & \text{if } x < 0, x \in \mathbb{Z} 
+            \end{cases}$
+        </p>
+    </div>
+
+    <div class="question-block">
+        <h4>(i) Find $g(-3), g(2), g(10), g(0), gg(5)$</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> Check the condition for $x$ before applying the respective rule.</div>
+            <ul style="margin-top: 0;">
+                <li>For $g(-3)$: Since $-3 < 0$, apply $g(x) = x \Rightarrow g(-3) = -3$</li>
+                <li>For $g(2)$: Since $2 \ge 0$, apply $g(x) = x - 1 \Rightarrow g(2) = 2 - 1 = 1$</li>
+                <li>For $g(10)$: Since $10 \ge 0$, apply $g(x) = x - 1 \Rightarrow g(10) = 10 - 1 = 9$</li>
+                <li>For $g(0)$: Since $0 \ge 0$, apply $g(x) = x - 1 \Rightarrow g(0) = 0 - 1 = -1$</li>
+                <li>For $gg(5)$: First find $g(5)$. Since $5 \ge 0$, $g(5) = 5 - 1 = 4$. Then find $g(4)$. Since $4 \ge 0$, $g(4) = 4 - 1 = 3$.</li>
+            </ul>
+            <div class="final-answer">
+                Answer: $g(-3) = -3, \quad g(2) = 1, \quad g(10) = 9, \quad g(0) = -1, \quad gg(5) = 3$
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(ii) State the domain of g.</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> The problem explicitly states the relation is defined "from $\mathbb{Z}$ to $\mathbb{Z}$". Furthermore, the piecewise conditions ($x \ge 0$ and $x < 0$) cover all possible integers.</div>
+            <div class="final-answer">Answer: The domain is the set of all integers, $\mathbb{Z}$.</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(iii) Sketch the graph of $g(x)$.</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> Because the domain is restricted to integers ($\mathbb{Z}$), the graph consists of <strong>discrete points</strong>, not a continuous line.</div>
+            <div class="solution-step">Calculate a few coordinates to plot:</div>
+            <ul>
+                <li>$x < 0$: $(-3, -3), (-2, -2), (-1, -1)$</li>
+                <li>$x \ge 0$: $(0, -1), (1, 0), (2, 1), (3, 2)$</li>
+            </ul>
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="300" height="300">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="400" height="400" fill="url(#grid)" />
+                
+                <line x1="0" y1="200" x2="400" y2="200" stroke="black" stroke-width="2" /> <line x1="200" y1="0" x2="200" y2="400" stroke="black" stroke-width="2" /> <text x="380" y="190" font-family="Arial" font-size="12" fill="black">x</text>
+                <text x="210" y="20" font-family="Arial" font-size="12" fill="black">g(x)</text>
+                
+                <text x="185" y="215" font-family="Arial" font-size="10" fill="black">0</text>
+                
+                <circle cx="120" cy="280" r="4" fill="#3498db" /> <circle cx="140" cy="260" r="4" fill="#3498db" /> <circle cx="160" cy="240" r="4" fill="#3498db" /> <circle cx="180" cy="220" r="4" fill="#e74c3c" /> <circle cx="200" cy="220" r="4" fill="#e74c3c" /> <circle cx="220" cy="200" r="4" fill="#3498db" /> <circle cx="240" cy="180" r="4" fill="#3498db" /> <circle cx="260" cy="160" r="4" fill="#3498db" /> <circle cx="280" cy="140" r="4" fill="#3498db" /> <text x="100" y="310" font-family="Arial" font-size="14" fill="#3498db">...</text>
+                <text x="290" y="130" font-family="Arial" font-size="14" fill="#3498db">...</text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(iv) State the range of g.</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> Look at the outputs mapped by the function.</div>
+            <div class="solution-step">For $x < 0$, the outputs are $\{-1, -2, -3, \dots\}$</div>
+            <div class="solution-step">For $x \ge 0$, the outputs are $\{-1, 0, 1, 2, 3, \dots\}$</div>
+            <div class="solution-step">Combining these two sets covers every integer exactly once, except for $-1$, which is produced twice. </div>
+            <div class="final-answer">Answer: The range is the set of all integers, $\mathbb{Z}$.</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(v) Is the above relation a one-to-one or many-to-one function? Explain.</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> A function is many-to-one if two or more distinct inputs map to the exact same output.</div>
+            <div class="solution-step">Looking at the evaluations from our graph/calculations:</div>
+            <ul>
+                <li>Evaluate at $x = -1$: Since $-1 < 0$, $g(-1) = -1$</li>
+                <li>Evaluate at $x = 0$: Since $0 \ge 0$, $g(0) = 0 - 1 = -1$</li>
+            </ul>
+            <div class="solution-step">Since $g(-1) = g(0) = -1$, multiple inputs share the same output.</div>
+            <div class="final-answer">Answer: It is a many-to-one function.</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

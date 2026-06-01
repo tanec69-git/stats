@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computing Mathematics: Composite Functions</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          }
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #2c3e50;
+        }
+        h4 {
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        .problem-statement {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .solution {
+            background-color: #f4fdf4;
+            padding: 15px;
+            border-left: 4px solid #2ecc71;
+            margin-top: 10px;
+        }
+        .solution-step {
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+        /* Updated Final Answer Styling */
+        .final-answer {
+            font-weight: bold;
+            color: #c0392b; /* High-contrast crimson red */
+            font-size: 1.25em; /* Larger font size */
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Revision Exercise 1: Relations & Functions</h2>
+    
+    <div class="problem-statement">
+        <h3>Question 3 (b)</h3>
+        <p>Determine the functions $fg$ and $gf$ for the following:</p>
+        <ul>
+            <li>$f(x) = \frac{3}{2-x} , \quad x \ne 2$</li>
+            <li>$g(x) = x - 1$</li>
+        </ul>
+    </div>
+
+    <div class="question-block">
+        <h4>1. Find the composite function $fg$</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> $fg(x)$ means $f(g(x))$. Substitute the entire function $g(x)$ into $f(x)$ wherever there is an $x$.</div>
+            
+            <div class="solution-step">
+                $$fg(x) = f(x - 1)$$
+            </div>
+            
+            <div class="solution-step">Substitute $(x - 1)$ into the denominator of $f(x)$:</div>
+            
+            <div class="solution-step">
+                $$fg(x) = \frac{3}{2 - (x - 1)}$$
+            </div>
+            
+            <div class="solution-step">Expand the bracket and simplify the denominator:</div>
+            
+            <div class="solution-step">
+                $$fg(x) = \frac{3}{2 - x + 1}$$
+            </div>
+            
+            <div class="solution-step">
+                $$fg(x) = \frac{3}{3 - x}$$
+            </div>
+
+            <div class="solution-step"><strong>Determine the Domain:</strong> For $f(g(x))$ to be valid, the inner function's output must not equal $2$ (since $x \ne 2$ is the restriction for $f$). Therefore, $g(x) \ne 2 \implies x - 1 \ne 2 \implies x \ne 3$.</div>
+            
+            <div class="final-answer">
+                Answer: $fg(x) = \frac{3}{3 - x}, \quad x \ne 3$
+            </div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>2. Find the composite function $gf$</h4>
+        <div class="solution">
+            <div class="solution-step"><strong>Logic:</strong> $gf(x)$ means $g(f(x))$. Substitute the entire function $f(x)$ into $g(x)$ wherever there is an $x$.</div>
+            
+            <div class="solution-step">
+                $$gf(x) = g\left(\frac{3}{2 - x}\right)$$
+            </div>
+            
+            <div class="solution-step">Substitute $\frac{3}{2 - x}$ into $g(x)$:</div>
+            
+            <div class="solution-step">
+                $$gf(x) = \left(\frac{3}{2 - x}\right) - 1$$
+            </div>
+            
+            <div class="solution-step">To combine these terms, convert $1$ into a fraction with a common denominator of $(2 - x)$:</div>
+            
+            <div class="solution-step">
+                $$gf(x) = \frac{3}{2 - x} - \frac{2 - x}{2 - x}$$
+            </div>
+            
+            <div class="solution-step">Combine the numerators over the common denominator. Be careful to distribute the negative sign:</div>
+            
+            <div class="solution-step">
+                $$gf(x) = \frac{3 - (2 - x)}{2 - x}$$
+            </div>
+            
+            <div class="solution-step">
+                $$gf(x) = \frac{3 - 2 + x}{2 - x}$$
+            </div>
+
+            <div class="solution-step">
+                $$gf(x) = \frac{x + 1}{2 - x}$$
+            </div>
+
+            <div class="solution-step"><strong>Determine the Domain:</strong> For $g(f(x))$ to be evaluated, the input $x$ must first pass through $f(x)$. The original restriction for $f(x)$ is $x \ne 2$. The outer function $g(x)$ has no further domain restrictions. Therefore, the restriction remains $x \ne 2$.</div>
+            
+            <div class="final-answer">
+                Answer: $gf(x) = \frac{x + 1}{2 - x}, \quad x \ne 2$
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

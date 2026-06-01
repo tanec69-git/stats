@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Distribution Solution</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .question-box {
+            background-color: #eef2f5;
+            padding: 20px;
+            border-left: 5px solid #2c3e50;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.05em;
+        }
+        th, td {
+            border: 1px solid #dcdde1;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+        .highlight-row {
+            background-color: #e1f5fe !important;
+            font-weight: bold;
+        }
+        .conclusion {
+            background-color: #e8f8f5;
+            padding: 20px;
+            border-left: 5px solid #1abc9c;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .math-block {
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Expressway Speed Statistics</h1>
+
+    <div class="question-box">
+        <strong>6.</strong> The table below gives the frequency distribution of the speeds (in km/h) of 150 cars travelling on the outermost lane of a stretch of an expressway, as surveyed by the Traffic Police Department.<br><br>
+        
+        <table>
+            <tr>
+                <th>Speed (km/h)</th>
+                <td>60</td><td>70</td><td>80</td><td>90</td><td>100</td><td>110</td><td>120</td>
+            </tr>
+            <tr>
+                <th>Frequency</th>
+                <td>9</td><td>18</td><td>27</td><td>36</td><td>41</td><td>10</td><td>9</td>
+            </tr>
+        </table>
+        
+        <p>From the above table,<br>
+        (a) find the mean, mode, median, standard deviation, of the speeds.<br>
+        (b) Comment on the skewness of the distribution.</p>
+    </div>
+
+    <h2>Step 1: Expanded Frequency Table</h2>
+    <p>We extend the given table to include \(fx\), \(x^2\), and \(fx^2\) to prepare for our statistical calculations. The summation of the \(x^2\) column is also shown below.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Speed<br>\(x\)</th>
+                <th>Frequency, \(f\)<br>(No of cars)</th>
+                <th>\(fx\)</th>
+                <th>\(x^2\)</th>
+                <th>\(fx^2\)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>60</td><td>9</td><td>540</td><td>3,600</td><td>32,400</td></tr>
+            <tr><td>70</td><td>18</td><td>1,260</td><td>4,900</td><td>88,200</td></tr>
+            <tr><td>80</td><td>27</td><td>2,160</td><td>6,400</td><td>172,800</td></tr>
+            <tr><td>90</td><td>36</td><td>3,240</td><td>8,100</td><td>291,600</td></tr>
+            <tr><td>100</td><td>41</td><td>4,100</td><td>10,000</td><td>410,000</td></tr>
+            <tr><td>110</td><td>10</td><td>1,100</td><td>12,100</td><td>121,000</td></tr>
+            <tr><td>120</td><td>9</td><td>1,080</td><td>14,400</td><td>129,600</td></tr>
+            <tr class="highlight-row">
+                <td>Totals</td>
+                <td>\(\sum f = 150\)</td>
+                <td>\(\sum fx = 13,480\)</td>
+                <td>\(\sum x^2 = 59,500\)</td>
+                <td>\(\sum fx^2 = 1,245,600\)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Part (a): Statistical Measures</h2>
+
+    <h3>1. Mean (\(\bar{x}\))</h3>
+    <div class="math-block">
+        $$ \bar{x} = \frac{\sum fx}{\sum f} = \frac{13480}{150} $$
+        $$ \bar{x} \approx 89.87 \text{ km/h} $$
+    </div>
+
+    <h3>2. Mode</h3>
+    <p>The mode corresponds to the data value with the highest frequency. The highest frequency is <strong>41</strong>, which occurs at a speed of 100 km/h.</p>
+    <div class="math-block">
+        $$ \text{Mode} = 100 \text{ km/h} $$
+    </div>
+
+    <h3>3. Median</h3>
+    <p>With a total frequency of \(n = 150\), the median position is the average of the 75th and 76th values. Calculating cumulative frequencies:</p>
+    <ul>
+        <li>\(\le 60\) km/h: 9 cars</li>
+        <li>\(\le 70\) km/h: 9 + 18 = 27 cars</li>
+        <li>\(\le 80\) km/h: 27 + 27 = 54 cars</li>
+        <li>\(\le 90\) km/h: 54 + 36 = <strong>90 cars</strong></li>
+    </ul>
+    <p>Both the 75th and 76th values fall within the 90 km/h group.</p>
+    <div class="math-block">
+        $$ \text{Median} = 90 \text{ km/h} $$
+    </div>
+
+    <h3>4. Standard Deviation (\(\sigma\))</h3>
+    <p>Using the standard deviation formula for grouped data:</p>
+    <div class="math-block">
+        $$ \sigma = \sqrt{ \frac{\sum fx^2}{\sum f} - \left(\frac{\sum fx}{\sum f}\right)^2 } $$
+        $$ \sigma = \sqrt{ \frac{1245600}{150} - \left(\frac{13480}{150}\right)^2 } $$
+        $$ \sigma = \sqrt{ 8304 - (89.8667)^2 } $$
+        $$ \sigma = \sqrt{ 8304 - 8076.0178 } $$
+        $$ \sigma = \sqrt{ 227.9822 } \approx 15.10 \text{ km/h} $$
+    </div>
+
+    <h2>Part (b): Distribution Skewness</h2>
+    <p>To evaluate skewness, we compare the relative positions of the Mean, Median, and Mode.</p>
+    <ul>
+        <li><strong>Mean:</strong> 89.87 km/h</li>
+        <li><strong>Median:</strong> 90.00 km/h</li>
+        <li><strong>Mode:</strong> 100.00 km/h</li>
+    </ul>
+    
+    <div class="conclusion">
+        <strong>Observation:</strong> Mean < Median < Mode (89.87 < 90 < 100)<br><br>
+        <strong>Conclusion:</strong> Because the mean is less than the median and the mode, the tail of the distribution extends towards the lower values. Therefore, the distribution is <strong>negatively skewed</strong> (skewed to the left).
+    </div>
+
+</div>
+
+</body>
+</html>

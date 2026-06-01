@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-Circle Venn Diagram Solutions</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f0f4f8;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #1a252f;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #ebf5fb;
+            padding-bottom: 8px;
+        }
+        .question-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #34495e;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .math-block {
+            background: #fcfdfe;
+            padding: 15px;
+            border: 1px dashed #bdc3c7;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #eafaf1;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .prelim-box {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            background-color: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏊‍♂️🎾⚽ Sports Venn Diagram Solutions</h1>
+
+    <div class="question-box">
+        <strong>1. (d)</strong> 600 students were asked to state which of the following sports they liked: swimming (S), tennis (T), and football (F).<br><br>
+        200 said swimming,<br>
+        250 said tennis, and<br>
+        300 said football.<br>
+        60 said they liked swimming and football, but not tennis.<br>
+        40 said like all three.<br>
+        55 liked swimming and tennis; and<br>
+        35 liked tennis and football but not swimming.<br><br>
+        (i) Complete a Venn diagram showing the actual numbers in each of the components.<br>
+        (ii) How many students like at least one of the sports?<br>
+        (iii) How many students like none of the sports?<br>
+        (iv) Find the number of students who like only one sport.<br>
+        (v) Find the number of students who like Tennis but not Football.
+    </div>
+
+    <div class="prelim-box">
+        <strong>🔍 Step-by-Step Regional Deductions</strong><br>
+        Before answering the specific parts, let's calculate the exact number of students in each of the 8 distinct, non-overlapping regions of the Venn diagram.<br><br>
+        
+        <ul>
+            <li><strong>Total Universal Set ($\varepsilon$):</strong> 600</li>
+            <li><strong>All three ($S \cap T \cap F$):</strong> 40 (Given)</li>
+            <li><strong>S & F only:</strong> 60 (Given: "swimming and football, but not tennis")</li>
+            <li><strong>T & F only:</strong> 35 (Given: "tennis and football but not swimming")</li>
+            <li><strong>S & T only:</strong> We are given that 55 liked swimming and tennis <em>in total</em>. This includes the 40 who like all three. <br>
+                $\rightarrow 55 - 40 = \mathbf{15}$
+            </li>
+            <li><strong>Swimming only (S only):</strong> Total S is 200. Subtract the overlaps.<br>
+                $\rightarrow 200 - (15 + 40 + 60) = 200 - 115 = \mathbf{85}$
+            </li>
+            <li><strong>Tennis only (T only):</strong> Total T is 250. Subtract the overlaps.<br>
+                $\rightarrow 250 - (15 + 40 + 35) = 250 - 90 = \mathbf{160}$
+            </li>
+            <li><strong>Football only (F only):</strong> Total F is 300. Subtract the overlaps.<br>
+                $\rightarrow 300 - (60 + 40 + 35) = 300 - 135 = \mathbf{165}$
+            </li>
+            <li><strong>None of the sports:</strong> Total students minus all the people inside the circles.<br>
+                $\rightarrow \text{Total inside circles} = 85 + 160 + 165 + 15 + 60 + 35 + 40 = 560$<br>
+                $\rightarrow \text{None} = 600 - 560 = \mathbf{40}$
+            </li>
+        </ul>
+    </div>
+
+    <h2>(i) Completed Venn Diagram</h2>
+    <div class="svg-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 400" width="100%" max-width="500px" height="auto">
+            <rect x="5" y="5" width="440" height="390" fill="white" stroke="#333" stroke-width="2"></rect>
+            
+            <circle cx="170" cy="160" r="120" fill="#a0c4ff" fill-opacity="0.4" stroke="#4a90e2" stroke-width="2"></circle> 
+            <circle cx="280" cy="160" r="120" fill="#fdffb6" fill-opacity="0.4" stroke="#f1c40f" stroke-width="2"></circle> 
+            <circle cx="225" cy="260" r="120" fill="#caffbf" fill-opacity="0.4" stroke="#2ecc71" stroke-width="2"></circle> 
+            
+            <text x="60" y="60" font-family="Arial" font-size="22" font-weight="bold" fill="#2c3e50">S</text>
+            <text x="375" y="60" font-family="Arial" font-size="22" font-weight="bold" fill="#2c3e50">T</text>
+            <text x="225" y="390" font-family="Arial" font-size="22" font-weight="bold" fill="#2c3e50" text-anchor="middle">F</text>
+            <text x="20" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#2c3e50">ε = 600</text>
+            
+            <text x="110" y="140" font-family="Arial" font-size="20" fill="#333" text-anchor="middle">85</text> <text x="340" y="140" font-family="Arial" font-size="20" fill="#333" text-anchor="middle">160</text> <text x="225" y="330" font-family="Arial" font-size="20" fill="#333" text-anchor="middle">165</text> <text x="225" y="115" font-family="Arial" font-size="18" fill="#333" text-anchor="middle">15</text> <text x="145" y="240" font-family="Arial" font-size="18" fill="#333" text-anchor="middle">60</text> <text x="305" y="240" font-family="Arial" font-size="18" fill="#333" text-anchor="middle">35</text> <text x="225" y="190" font-family="Arial" font-size="20" font-weight="bold" fill="#333" text-anchor="middle">40</text> <text x="40" y="375" font-family="Arial" font-size="20" fill="#333">40</text> </svg>
+    </div>
+
+    <h2>(ii) How many students like at least one of the sports?</h2>
+    <p>This asks for the union of all three sets ($S \cup T \cup F$), which is the sum of everyone inside the circles.</p>
+    <div class="math-block">
+        $$ 85 + 160 + 165 + 15 + 60 + 35 + 40 = \mathbf{560} $$
+    </div>
+    <p>Answer: <span class="final-answer">560 students</span></p>
+
+    <h2>(iii) How many students like none of the sports?</h2>
+    <p>This is the number of students remaining outside all the circles (calculated in the preliminary step).</p>
+    <div class="math-block">
+        $$ \varepsilon - (S \cup T \cup F) = 600 - 560 = \mathbf{40} $$
+    </div>
+    <p>Answer: <span class="final-answer">40 students</span></p>
+
+    <h2>(iv) Number of students who like only one sport</h2>
+    <p>We add together the outermost regions of each circle: those who like <em>only</em> Swimming, <em>only</em> Tennis, and <em>only</em> Football.</p>
+    <div class="math-block">
+        $$ \text{Only S} + \text{Only T} + \text{Only F} = 85 + 160 + 165 = \mathbf{410} $$
+    </div>
+    <p>Answer: <span class="final-answer">410 students</span></p>
+
+    <h2>(v) Number of students who like Tennis but not Football</h2>
+    <p>We need everyone who is inside the Tennis circle ($T$) but outside the Football circle ($F'$). This consists of those who like "Tennis only" plus those who like "Swimming and Tennis only".</p>
+    <div class="math-block">
+        $$ n(T \cap F') = \text{Only T} + (\text{S & T only}) $$
+        $$ n(T \cap F') = 160 + 15 = \mathbf{175} $$
+    </div>
+    <p>Answer: <span class="final-answer">175 students</span></p>
+
+</div>
+
+</body>
+</html>

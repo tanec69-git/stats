@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Theory: Greatest and Least Values</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          }
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 35px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+        .problem-statement {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .solution-block {
+            background-color: #fcfdfe;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .math-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px dashed #bdc3c7;
+            border-radius: 8px;
+        }
+        svg {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📈 Set Theory Extremes Solution</h1>
+    
+    <div class="problem-statement">
+        <strong>Question (c):</strong><br>
+        If $n(A) = 15$ and $n(B) = 10$, what are the greatest and the least values of $n(A \cup B)$?<br>
+        Use Venn diagrams to illustrate the cases in which $n(A \cup B)$ has these extreme values.
+    </div>
+
+    <p>The general formula for the union of two sets is:<br>
+    $$n(A \cup B) = n(A) + n(B) - n(A \cap B)$$</p>
+    <p>Since $n(A) = 15$ and $n(B) = 10$ are fixed, the value of $n(A \cup B)$ depends entirely on the intersection $n(A \cap B)$.</p>
+
+    <div class="solution-block">
+        <h2>1. The Greatest Value of $n(A \cup B)$</h2>
+        <p>To maximize $n(A \cup B)$, we must minimize the intersection $n(A \cap B)$. The smallest possible overlap is $0$. This occurs when sets A and B are <strong>mutually exclusive</strong> (disjoint sets).</p>
+        
+        <div class="math-block">
+            $$n(A \cap B) = 0$$
+            $$n(A \cup B) = 15 + 10 - 0 = \mathbf{25}$$
+        </div>
+        <p><strong>Greatest Value: <span class="highlight">25</span></strong></p>
+
+        <div class="diagram-container">
+            <p><em>Venn Diagram Illustration: Disjoint Sets</em></p>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140" width="360" height="210">
+                <rect x="5" y="5" width="230" height="130" fill="white" stroke="black" stroke-width="1.5"></rect>
+                <text x="12" y="20" font-family="Arial" font-size="12" fill="black">ε</text>
+                
+                <circle cx="70" cy="70" r="45" fill="#e8f4f8" stroke="#3498db" stroke-width="2"></circle>
+                <text x="70" y="45" font-family="Arial" font-size="14" font-weight="bold" fill="#2980b9" text-anchor="middle">A</text>
+                <text x="70" y="75" font-family="Arial" font-size="16" fill="black" text-anchor="middle">15</text>
+
+                <circle cx="170" cy="70" r="45" fill="#fdf3e8" stroke="#e67e22" stroke-width="2"></circle>
+                <text x="170" y="45" font-family="Arial" font-size="14" font-weight="bold" fill="#d35400" text-anchor="middle">B</text>
+                <text x="170" y="75" font-family="Arial" font-size="16" fill="black" text-anchor="middle">10</text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="solution-block">
+        <h2>2. The Least Value of $n(A \cup B)$</h2>
+        <p>To minimize $n(A \cup B)$, we must maximize the intersection $n(A \cap B)$. The largest possible overlap occurs when the smaller set is entirely contained within the larger set. Since $n(B) < n(A)$, Set B is a <strong>proper subset</strong> of Set A ($B \subset A$).</p>
+        
+        <div class="math-block">
+            $$n(A \cap B) = n(B) = 10$$
+            $$n(A \cup B) = 15 + 10 - 10 = \mathbf{15}$$
+        </div>
+        <p><strong>Least Value: <span class="highlight">15</span></strong></p>
+
+        <div class="diagram-container">
+            <p><em>Venn Diagram Illustration: Proper Subset ($B \subset A$)</em></p>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140" width="360" height="210">
+                <rect x="5" y="5" width="230" height="130" fill="white" stroke="black" stroke-width="1.5"></rect>
+                <text x="12" y="20" font-family="Arial" font-size="12" fill="black">ε</text>
+                
+                <circle cx="120" cy="70" r="60" fill="#e8f4f8" stroke="#3498db" stroke-width="2"></circle>
+                <text x="120" y="28" font-family="Arial" font-size="14" font-weight="bold" fill="#2980b9" text-anchor="middle">A</text>
+                
+                <text x="120" y="48" font-family="Arial" font-size="14" fill="black" text-anchor="middle">5</text>
+
+                <circle cx="120" cy="85" r="35" fill="#fdf3e8" stroke="#e67e22" stroke-width="2"></circle>
+                <text x="120" y="70" font-family="Arial" font-size="12" font-weight="bold" fill="#d35400" text-anchor="middle">B</text>
+                <text x="120" y="95" font-family="Arial" font-size="16" fill="black" text-anchor="middle">10</text>
+            </svg>
+            <p style="font-size: 0.9em; color: #7f8c8d; margin-top: 10px;"><em>Notice that inside Set A, there are $10$ items belonging to B, and $5$ items belonging exclusively to A, totaling $15$.</em></p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

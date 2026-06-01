@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merlion Airways Bonus Payout Solution</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 35px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 1.05em;
+        }
+        th, td {
+            border: 1px solid #dcdde1;
+            padding: 12px 15px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+        .highlight-row {
+            background-color: #e1f5fe !important;
+            font-weight: bold;
+        }
+        .math-block {
+            background: #fdfdfd;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .logic-box {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Merlion Airways Projected Bonus Solution</h1>
+
+    <h2>Part (a): Fill in the blanks in Table 4</h2>
+    <p>To complete the table, we calculate $fx$ (frequency $\times$ mid-point), $x^2$ (square of the mid-point), and $fx^2$ (frequency $\times$ squared mid-point) for each row. Then, we sum the $f$, $fx$, and $fx^2$ columns.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Bonus Payouts<br>(Thousands in S$)</th>
+                <th>Frequency, $f$<br>(Number of Employees)</th>
+                <th>Mid-point, $x$</th>
+                <th>$fx$</th>
+                <th>$x^2$</th>
+                <th>$fx^2$</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$0 < x \le 4$</td><td>35</td><td>2</td><td>70</td><td>4</td><td>140</td></tr>
+            <tr><td>$4 < x \le 8$</td><td>63</td><td>6</td><td>378</td><td>36</td><td>2,268</td></tr>
+            <tr><td>$8 < x \le 12$</td><td>48</td><td>10</td><td>480</td><td>100</td><td>4,800</td></tr>
+            <tr><td>$12 < x \le 16$</td><td>38</td><td>14</td><td>532</td><td>196</td><td>7,448</td></tr>
+            <tr><td>$16 < x \le 20$</td><td>22</td><td>18</td><td>396</td><td>324</td><td>7,128</td></tr>
+            <tr><td>$20 < x \le 24$</td><td>14</td><td>22</td><td>308</td><td>484</td><td>6,776</td></tr>
+            <tr class="highlight-row">
+                <td>Total</td>
+                <td>$\sum f = 220$</td>
+                <td>-</td>
+                <td>$\sum fx = 2,164$</td>
+                <td>-</td>
+                <td>$\sum fx^2 = 28,560$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Part (b): Mean and Standard Deviation (in S$)</h2>
+    <p>First, we calculate the statistical measures in <strong>thousands of S$</strong>, and then multiply by 1,000 to find the exact values in S$.</p>
+
+    <h3>1. Mean ($\bar{x}$)</h3>
+    <div class="math-block">
+        $$\bar{x} = \frac{\sum fx}{\sum f} = \frac{2164}{220} \approx 9.83636 \text{ (in thousands)}$$
+        <br>
+        <strong>Mean in S$:</strong> $ 9.83636 \times 1000 = \mathbf{\$9,836.36} $
+    </div>
+
+    <h3>2. Standard Deviation ($\sigma$)</h3>
+    <div class="math-block">
+        $$\sigma = \sqrt{ \frac{\sum fx^2}{\sum f} - \left(\frac{\sum fx}{\sum f}\right)^2 }$$
+        $$\sigma = \sqrt{ \frac{28560}{220} - \left(\frac{2164}{220}\right)^2 }$$
+        $$\sigma = \sqrt{ 129.81818 - 96.75405 }$$
+        $$\sigma = \sqrt{ 33.06413 } \approx 5.75014 \text{ (in thousands)}$$
+        <br>
+        <strong>Standard Deviation in S$:</strong> $ 5.75014 \times 1000 = \mathbf{\$5,750.14} $
+    </div>
+
+    <h2>Part (c): Evaluating Options A & B Without Further Calculation</h2>
+    <div class="logic-box">
+        <strong>Statistical Rules for Linear Transformations:</strong><br>
+        If a dataset $X$ is transformed by the equation $Y = aX + b$:<br>
+        1. <strong>New Mean</strong> = $a(\text{Old Mean}) + b$<br>
+        2. <strong>New Standard Deviation</strong> = $|a| \times (\text{Old Standard Deviation})$ <br>
+        <em>Note: Adding a constant ($b$) shifts the data but does not change the spread (standard deviation).</em>
+    </div>
+
+    <h3>(i) Option A: Increase every bonus by 25%</h3>
+    <p>Increasing the bonus by 25% means multiplying the original payouts by $1.25$ ($Y = 1.25X$).</p>
+    <ul>
+        <li><strong>New Mean:</strong> $ 1.25 \times \$9,836.36 = \mathbf{\$12,295.45} $</li>
+        <li><strong>New Standard Deviation:</strong> $ 1.25 \times \$5,750.14 = \mathbf{\$7,187.68} $</li>
+    </ul>
+
+    <h3>(ii) Option B: Pay every employee S$500 in addition</h3>
+    <p>Adding a flat S$500 means adding a constant to the original payouts ($Y = X + 500$).</p>
+    <ul>
+        <li><strong>New Mean:</strong> $ \$9,836.36 + \$500 = \mathbf{\$10,336.36} $</li>
+        <li><strong>New Standard Deviation:</strong> Remains unchanged at $\mathbf{\$5,750.14}$ (a constant addition does not affect data dispersion).</li>
+    </ul>
+
+</div>
+
+</body>
+</html>

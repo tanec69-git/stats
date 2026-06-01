@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computing Mathematics: Set Notation and Cardinality</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script>
+        window.MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          }
+        };
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .problem-statement {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .question-block {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .solution {
+            background-color: #f4fdf4;
+            padding: 15px;
+            border-left: 4px solid #2ecc71;
+            margin-top: 10px;
+        }
+        .solution-step {
+            margin-bottom: 10px;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Revision Exercise 1: Sets and Relations</h2>
+    
+    <div class="problem-statement">
+        <h3>Question 2</h3>
+        <p>Given that:</p>
+        <ul>
+            <li>$\epsilon = \{x : -3 < x < 13, x \in \mathbb{Z}\}$</li>
+            <li>$A = \{x : 5 < x \le 12, x \in \mathbb{Z}\}$</li>
+            <li>$B = \{x : -3 < x < 8, x \in \mathbb{Z}\}$</li>
+            <li>$C = \{2x : -1 < x < 5, x \in \mathbb{Z}\}$</li>
+        </ul>
+    </div>
+
+    <div class="question-block">
+        <div class="solution">
+            <p><strong>Preliminary Setup: List all elements for clarity before solving.</strong></p>
+            <ul>
+                <li><strong>Universal Set ($\epsilon$):</strong> Integers strictly between -3 and 13.<br>
+                    $\epsilon = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\}$</li>
+                <li><strong>Set A:</strong> Integers strictly greater than 5 and less than or equal to 12.<br>
+                    $A = \{6, 7, 8, 9, 10, 11, 12\}$</li>
+                <li><strong>Set B:</strong> Integers strictly between -3 and 8.<br>
+                    $B = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7\}$</li>
+                <li><strong>Set C:</strong> Double the value of $x$, where $x$ is an integer strictly between -1 and 5 (so $x \in \{0, 1, 2, 3, 4\}$).<br>
+                    $C = \{0, 2, 4, 6, 8\}$</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>(a) Express in similar set-builder notation the following sets:</h3>
+
+    <div class="question-block">
+        <h4>(i) $A \cap B$</h4>
+        <div class="solution">
+            <div class="solution-step">Find the intersection (elements present in both Set A and Set B).</div>
+            <div class="solution-step">$A = \{6, 7, 8, 9, 10, 11, 12\}$</div>
+            <div class="solution-step">$B = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7\}$</div>
+            <div class="solution-step">The overlapping elements are $6$ and $7$. Expressing this range in set-builder notation:</div>
+            <div class="final-answer">Answer: $\{x : 5 < x < 8, x \in \mathbb{Z}\}$</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(ii) $A \cup B$</h4>
+        <div class="solution">
+            <div class="solution-step">Find the union (combine all elements from Set A and Set B without repetition).</div>
+            <div class="solution-step">Combining $A$ and $B$ gives us all integers from $-2$ through $12$.</div>
+            <div class="solution-step">$A \cup B = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\}$</div>
+            <div class="final-answer">Answer: $\{x : -3 < x < 13, x \in \mathbb{Z}\}$</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(iii) $A^{\prime} \cap B^{\prime}$</h4>
+        <div class="solution">
+            <div class="solution-step">By De Morgan's Law, $A^{\prime} \cap B^{\prime} = (A \cup B)^{\prime}$.</div>
+            <div class="solution-step">This means we need to find all elements in the Universal set $\epsilon$ that are NOT in $A \cup B$.</div>
+            <div class="solution-step">From part (ii), $A \cup B$ contains exactly the same elements as the Universal set $\epsilon$. Therefore, the complement is empty.</div>
+            <div class="final-answer">Answer: $\emptyset$</div>
+        </div>
+    </div>
+
+    <hr style="border: 0; height: 1px; background: #eee; margin: 30px 0;">
+    <h3>(b) Find the cardinality (number of elements) for the following:</h3>
+
+    <div class="question-block">
+        <h4>(i) $n(A \cap C)$</h4>
+        <div class="solution">
+            <div class="solution-step">Find the intersection of Set A and Set C.</div>
+            <div class="solution-step">$A = \{6, 7, 8, 9, 10, 11, 12\}$</div>
+            <div class="solution-step">$C = \{0, 2, 4, 6, 8\}$</div>
+            <div class="solution-step">$A \cap C = \{6, 8\}$</div>
+            <div class="final-answer">Answer: $n(A \cap C) = 2$</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(ii) $n(B \cup C)^{\prime}$</h4>
+        <div class="solution">
+            <div class="solution-step">First, find the union of B and C.</div>
+            <div class="solution-step">$B \cup C = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7\} \cup \{0, 2, 4, 6, 8\}$</div>
+            <div class="solution-step">$B \cup C = \{-2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8\}$</div>
+            <div class="solution-step">Next, find the complement by removing these elements from $\epsilon$.</div>
+            <div class="solution-step">$(B \cup C)^{\prime} = \{9, 10, 11, 12\}$</div>
+            <div class="final-answer">Answer: $n(B \cup C)^{\prime} = 4$</div>
+        </div>
+    </div>
+
+    <div class="question-block">
+        <h4>(iii) $n(A^{\prime})$</h4>
+        <div class="solution">
+            <div class="solution-step">Find the complement of A by removing elements of A from $\epsilon$.</div>
+            <div class="solution-step">$A = \{6, 7, 8, 9, 10, 11, 12\}$</div>
+            <div class="solution-step">$A^{\prime} = \{-2, -1, 0, 1, 2, 3, 4, 5\}$</div>
+            <div class="final-answer">Answer: $n(A^{\prime}) = 8$</div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

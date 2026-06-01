@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Formation & Permutations Solution</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f0f4f8;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: #1a252f;
+            border-bottom: 3px solid #e67e22;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #d35400;
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #fdf3e8;
+            padding-bottom: 8px;
+        }
+        .question-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #e67e22;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .math-block {
+            background: #fcfdfe;
+            padding: 15px;
+            border: 1px dashed #bdc3c7;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #eafaf1;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .prelim-box {
+            background-color: #fff9f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 5px solid #f39c12;
+            font-size: 0.95em;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .slot-diagram {
+            font-family: monospace;
+            font-size: 1.2em;
+            text-align: center;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔢 Permutations & Number Formation</h1>
+
+    <div class="question-box">
+        <strong>11.</strong> How many four-digit numbers can be formed from the 9 digits : 1, 2, 3, 4, 5, 6, 7, 8, 9 such that<br><br>
+        (a) there are no repetition of the digits<br>
+        (b) they are lesser than 4000<br>
+        (c) they are even numbers greater than 7000?
+    </div>
+
+    <div class="prelim-box">
+        <strong>📝 Fundamental Assumption:</strong><br>
+        When a problem asks to form numbers "from the given digits" and part (a) explicitly states "no repetition", it is standard practice to assume that we only possess <strong>one of each digit</strong> for the entire problem. Therefore, the "no repetition" rule applies to parts (b) and (c) as well. Order matters when forming numbers, so we use Permutations ($^{n}P_{r}$).
+    </div>
+
+    <h2>🅰️ Part (a): No repetition of the digits</h2>
+    <p>We need to fill 4 positions (Thousands, Hundreds, Tens, Units) using the 9 available digits.</p>
+    <div class="slot-diagram">_ _ _ _</div>
+    <div class="math-block">
+        $$ \text{Total ways} = ^{9}P_{4} = 9 \times 8 \times 7 \times 6 = \mathbf{3,024} $$
+    </div>
+    <p>Answer: <span class="final-answer">3,024 numbers</span></p>
+
+    <h2>🅱️ Part (b): Lesser than 4000</h2>
+    <p>For a 4-digit number to be less than 4000, the <strong>Thousands digit</strong> must be 1, 2, or 3. (3 possible choices).</p>
+    <ul>
+        <li><strong>Thousands slot:</strong> 3 choices.</li>
+        <li><strong>Remaining 3 slots:</strong> We have 8 digits left to fill 3 positions ($^{8}P_{3}$).</li>
+    </ul>
+    <div class="math-block">
+        $$ \text{Ways} = 3 \times (^{8}P_{3}) = 3 \times (8 \times 7 \times 6) $$
+        $$ \text{Ways} = 3 \times 336 = \mathbf{1,008} $$
+    </div>
+    <p>Answer: <span class="final-answer">1,008 numbers</span></p>
+
+    <h2>🅲 Part (c): Even numbers greater than 7000</h2>
+    <p>This part has two conflicting restrictions:</p>
+    <ul>
+        <li><strong>Greater than 7000:</strong> Thousands digit must be $\in \{7, 8, 9\}$</li>
+        <li><strong>Even number:</strong> Units digit must be $\in \{2, 4, 6, 8\}$</li>
+    </ul>
+    <p>Because the digit <span class="highlight">8</span> is in both requirement sets, we must split the problem into two mutually exclusive cases to avoid counting the '8' twice.</p>
+
+    <h3>Case 1: The number starts with 8</h3>
+    <ul>
+        <li><strong>Thousands slot:</strong> Must be 8 (1 choice).</li>
+        <li><strong>Units slot:</strong> Must be even. Since 8 is already used, we can only use $\{2, 4, 6\}$ (3 choices).</li>
+        <li><strong>Remaining 2 slots:</strong> 7 digits left to fill 2 positions ($^{7}P_{2}$).</li>
+    </ul>
+    <div class="math-block">
+        $$ \text{Ways for Case 1} = 1 \times 3 \times (^{7}P_{2}) = 1 \times 3 \times (7 \times 6) = 3 \times 42 = 126 $$
+    </div>
+
+    <h3>Case 2: The number starts with 7 or 9</h3>
+    <ul>
+        <li><strong>Thousands slot:</strong> Must be 7 or 9 (2 choices).</li>
+        <li><strong>Units slot:</strong> Must be even. Since we didn't use 8 at the front, we have all even digits available $\{2, 4, 6, 8\}$ (4 choices).</li>
+        <li><strong>Remaining 2 slots:</strong> 7 digits left to fill 2 positions ($^{7}P_{2}$).</li>
+    </ul>
+    <div class="math-block">
+        $$ \text{Ways for Case 2} = 2 \times 4 \times (^{7}P_{2}) = 8 \times (7 \times 6) = 8 \times 42 = 336 $$
+    </div>
+
+    <h3>Total Ways</h3>
+    <p>Add the possibilities from both cases together:</p>
+    <div class="math-block">
+        $$ \text{Total Ways} = \text{Case 1} + \text{Case 2} $$
+        $$ \text{Total Ways} = 126 + 336 = \mathbf{462} $$
+    </div>
+    <p>Answer: <span class="final-answer">462 numbers</span></p>
+
+</div>
+
+</body>
+</html>

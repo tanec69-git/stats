@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Solutions: Inverse Functions</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            padding: 30px; 
+            max-width: 800px; 
+            margin: auto; 
+            color: #333;
+        }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        h3 { color: #0056b3; }
+        .solution-block { 
+            background: #fdfdfd; 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+            border: 1px solid #ddd; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        .step { 
+            font-weight: bold; 
+            margin-top: 15px; 
+            color: #444;
+        }
+        .math-line {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Solutions for Question 4(b)</h2>
+
+    <div class="solution-block">
+        <h3>Part (b)(i)</h3>
+        <p><strong>Problem:</strong> Find \( f^{-1}(x) \) for \( f(x) = 2x + 3 \).</p>
+
+        <p><strong>Step-by-step Solution:</strong></p>
+        
+        <div class="step">Step 1: Replace \( f(x) \) with \( y \).</div>
+        <p class="math-line">$$ y = 2x + 3 $$</p>
+        
+        <div class="step">Step 2: Swap \( x \) and \( y \) to find the inverse.</div>
+        <p class="math-line">$$ x = 2y + 3 $$</p>
+        
+        <div class="step">Step 3: Solve for \( y \).</div>
+        <p>Subtract 3 from both sides:</p>
+        <p class="math-line">$$ x - 3 = 2y $$</p>
+        <p>Divide by 2:</p>
+        <p class="math-line">$$ y = \frac{x - 3}{2} $$</p>
+        
+        <div class="step">Step 4: Replace \( y \) with \( f^{-1}(x) \).</div>
+        <p class="math-line">$$ f^{-1}(x) = \frac{x - 3}{2} $$</p>
+    </div>
+
+    <div class="solution-block">
+        <h3>Part (b)(ii)</h3>
+        <p><strong>Problem:</strong> Find \( f^{-1}(x) \) for \( f(x) = \frac{3x + 1}{2 - x} \), \( x \neq 2 \).</p>
+
+        <p><strong>Step-by-step Solution:</strong></p>
+        
+        <div class="step">Step 1: Replace \( f(x) \) with \( y \).</div>
+        <p class="math-line">$$ y = \frac{3x + 1}{2 - x} $$</p>
+        
+        <div class="step">Step 2: Swap \( x \) and \( y \).</div>
+        <p class="math-line">$$ x = \frac{3y + 1}{2 - y} $$</p>
+        
+        <div class="step">Step 3: Solve for \( y \).</div>
+        <p>Multiply both sides by the denominator \( (2 - y) \) to remove the fraction:</p>
+        <p class="math-line">$$ x(2 - y) = 3y + 1 $$</p>
+        <p>Distribute the \( x \):</p>
+        <p class="math-line">$$ 2x - xy = 3y + 1 $$</p>
+        <p>Group all terms containing \( y \) on one side of the equation, and everything else on the other side. Let's move \( -xy \) to the right and \( 1 \) to the left:</p>
+        <p class="math-line">$$ 2x - 1 = 3y + xy $$</p>
+        <p>Factor out \( y \) on the right side:</p>
+        <p class="math-line">$$ 2x - 1 = y(3 + x) $$</p>
+        <p>Divide by \( (3 + x) \) to isolate \( y \):</p>
+        <p class="math-line">$$ y = \frac{2x - 1}{x + 3} $$</p>
+        
+        <div class="step">Step 4: Replace \( y \) with \( f^{-1}(x) \) and note the new restriction.</div>
+        <p>Since the denominator cannot be zero, \( x + 3 \neq 0 \implies x \neq -3 \).</p>
+        <p class="math-line">$$ f^{-1}(x) = \frac{2x - 1}{x + 3}, \quad x \neq -3 $$</p>
+    </div>
+
+</body>
+</html>

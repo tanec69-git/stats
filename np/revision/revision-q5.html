@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Solutions: Statistical Data Manipulation</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            padding: 30px; 
+            max-width: 850px; 
+            margin: auto; 
+            color: #333;
+        }
+        h2 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+        h3 { color: #0056b3; margin-top: 0;}
+        .solution-block { 
+            background: #fdfdfd; 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+            border: 1px solid #ddd; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        .problem-statement {
+            background: #f4f7f6;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-left: 4px solid #0056b3;
+        }
+        .step { 
+            font-weight: bold; 
+            margin-top: 15px; 
+            color: #444;
+        }
+        .math-line {
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h2>Solutions for Question 5</h2>
+
+    <div class="problem-statement">
+        Population set $X = \{ 83, 85, 86, 90, 91, 93 \}$
+    </div>
+
+    <div class="solution-block">
+        <h3>Part (a): Mean, Median, and Standard Deviation</h3>
+        
+        <div class="step">1. Show that the mean is 88:</div>
+        <p>The population mean $\mu$ is the sum of all values divided by the number of values ($N = 6$).</p>
+        <p class="math-line">$$ \mu = \frac{83 + 85 + 86 + 90 + 91 + 93}{6} = \frac{528}{6} = 88 $$</p>
+        
+        <div class="step">2. Find the median:</div>
+        <p>The set is already arranged in ascending order. Since there are an even number of values ($6$), the median is the average of the two middle values ($3$rd and $4$th values: $86$ and $90$).</p>
+        <p class="math-line">$$ \text{Median} = \frac{86 + 90}{2} = \frac{176}{2} = 88 $$</p>
+        
+        <div class="step">3. Find the standard deviation:</div>
+        <p>Since this is a population set, we use the population variance formula $\sigma^2 = \frac{\sum (x - \mu)^2}{N}$. First, let's find the squared deviations from the mean (88):</p>
+        <ul>
+            <li>$(83 - 88)^2 = (-5)^2 = 25$</li>
+            <li>$(85 - 88)^2 = (-3)^2 = 9$</li>
+            <li>$(86 - 88)^2 = (-2)^2 = 4$</li>
+            <li>$(90 - 88)^2 = (2)^2 = 4$</li>
+            <li>$(91 - 88)^2 = (3)^2 = 9$</li>
+            <li>$(93 - 88)^2 = (5)^2 = 25$</li>
+        </ul>
+        <p>Sum of squared deviations $= 25 + 9 + 4 + 4 + 9 + 25 = 76$</p>
+        <p class="math-line">$$ \text{Variance } (\sigma^2) = \frac{76}{6} = \frac{38}{3} \approx 12.67 $$</p>
+        <p class="math-line">$$ \text{Standard Deviation } (\sigma) = \sqrt{\frac{38}{3}} \approx 3.56 \text{ (to 3 s.f.)} $$</p>
+    </div>
+
+    <div class="solution-block">
+        <h3>Part (b): Moderated Results (Without using summation formulae)</h3>
+        <p>When applying a linear transformation $Y = aX + b$ to a dataset, the new statistics follow these rules:</p>
+        <ul>
+            <li>$\text{New Mean } (\mu_Y) = a(\mu_X) + b$</li>
+            <li>$\text{New Variance } (\sigma_Y^2) = a^2(\sigma_X^2)$</li>
+            <li>$\text{New Standard Deviation } (\sigma_Y) = |a|(\sigma_X)$</li>
+        </ul>
+
+        <div class="step">Option A: Add 3 marks ($Y = X + 3$)</div>
+        <p>Here, $a = 1$ and $b = 3$. Adding a constant shifts the mean but does not change the spread of the data.</p>
+        <ul>
+            <li><strong>New Mean:</strong> $88 + 3 = 91$</li>
+            <li><strong>New Variance:</strong> remains unchanged at $\frac{38}{3} \approx 12.67$</li>
+            <li><strong>New SD:</strong> remains unchanged at $\sqrt{\frac{38}{3}} \approx 3.56$</li>
+        </ul>
+
+        <div class="step">Option B: Increase each mark by 3% ($Y = 1.03X$)</div>
+        <p>Here, $a = 1.03$ and $b = 0$. Multiplying by a constant scales all statistics.</p>
+        <ul>
+            <li><strong>New Mean:</strong> $1.03 \times 88 = 90.64$</li>
+            <li><strong>New Variance:</strong> $1.03^2 \times \frac{38}{3} \approx 1.0609 \times 12.667 \approx 13.44$</li>
+            <li><strong>New SD:</strong> $1.03 \times \sqrt{\frac{38}{3}} \approx 1.03 \times 3.559 \approx 3.67$</li>
+        </ul>
+    </div>
+
+    <div class="solution-block">
+        <h3>Part (c): Creating a Custom Dataset</h3>
+        <p><strong>Goal:</strong> Find a new set $W$ where the mean remains exactly $88$, but the standard deviation is increased by 5% ($\sigma_W = 1.05\sigma_X$).</p>
+        
+        <p><strong>Reasoning:</strong> To stretch the standard deviation by a factor of $1.05$ without moving the center (mean), we must stretch the <em>distance</em> of each individual mark from the mean by 1.05. We can write this relationship as:</p>
+        <p class="math-line">$$ w_i - \mu = 1.05(x_i - \mu) $$</p>
+        <p>Since $\mu = 88$:</p>
+        <p class="math-line">$$ w_i - 88 = 1.05(x_i - 88) $$</p>
+        <p class="math-line">$$ w_i = 1.05(x_i - 88) + 88 $$</p>
+        
+        <p>Now, we apply this formula to each of the original 6 marks in set $X$:</p>
+        <table>
+            <tr>
+                <th>Original Mark ($x_i$)</th>
+                <th>Deviation ($x_i - 88$)</th>
+                <th>New Deviation $1.05(x_i - 88)$</th>
+                <th>New Mark ($w_i$)</th>
+            </tr>
+            <tr>
+                <td>83</td>
+                <td>-5</td>
+                <td>-5.25</td>
+                <td>88 - 5.25 = <strong>82.75</strong></td>
+            </tr>
+            <tr>
+                <td>85</td>
+                <td>-3</td>
+                <td>-3.15</td>
+                <td>88 - 3.15 = <strong>84.85</strong></td>
+            </tr>
+            <tr>
+                <td>86</td>
+                <td>-2</td>
+                <td>-2.10</td>
+                <td>88 - 2.10 = <strong>85.9</strong></td>
+            </tr>
+            <tr>
+                <td>90</td>
+                <td>2</td>
+                <td>2.10</td>
+                <td>88 + 2.10 = <strong>90.1</strong></td>
+            </tr>
+            <tr>
+                <td>91</td>
+                <td>3</td>
+                <td>3.15</td>
+                <td>88 + 3.15 = <strong>91.15</strong></td>
+            </tr>
+            <tr>
+                <td>93</td>
+                <td>5</td>
+                <td>5.25</td>
+                <td>88 + 5.25 = <strong>93.25</strong></td>
+            </tr>
+        </table>
+        
+        <p><strong>Final Answer:</strong></p>
+        <p>The 6 marks are: <strong>{82.75, 84.85, 85.9, 90.1, 91.15, 93.25}</strong></p>
+    </div>
+
+</body>
+</html>

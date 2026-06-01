@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permutations & Combinations Solutions</title>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        h1 {
+            text-align: center;
+            color: #1a252f;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #c0392b;
+            margin-top: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #fcebea;
+            padding-bottom: 8px;
+        }
+        .question-box {
+            background-color: #f8f9fa;
+            border-left: 5px solid #bdc3c7;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .math-block {
+            background: #fcfdfe;
+            padding: 15px;
+            border: 1px dashed #bdc3c7;
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 1.1em;
+        }
+        .final-answer {
+            font-weight: bold;
+            color: #27ae60;
+            background-color: #eafaf1;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .sub-part {
+            margin-left: 20px;
+            padding-left: 15px;
+            border-left: 2px solid #ecf0f1;
+            margin-bottom: 25px;
+        }
+        .highlight {
+            font-weight: 600;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧮 Permutations & Combinations Solutions</h1>
+
+    <h2>🔠 Part (a): Word Arrangements</h2>
+    <div class="question-box">
+        <strong>Question:</strong> Find the number of different arrangements that can be formed using all the letters in each of the following words:<br>
+        (i) COMBINE &nbsp;&nbsp;&nbsp;&nbsp; (ii) COMBINATION
+    </div>
+
+    <div class="sub-part">
+        <h3>(i) COMBINE</h3>
+        <p>The word <span class="highlight">COMBINE</span> has 7 distinct letters.</p>
+        <div class="math-block">
+            $$ 7! = 7 \times 6 \times 5 \times 4 \times 3 \times 2 \times 1 = \mathbf{5,040} $$
+        </div>
+        <p>Answer: <span class="final-answer">5,040 arrangements</span></p>
+    </div>
+
+    <div class="sub-part">
+        <h3>(ii) COMBINATION</h3>
+        <p>The word <span class="highlight">COMBINATION</span> has 11 letters in total. However, some letters repeat:</p>
+        <ul>
+            <li>O repeats 2 times</li>
+            <li>I repeats 2 times</li>
+            <li>N repeats 2 times</li>
+        </ul>
+        <p>We divide the total factorial by the factorials of the repeating letters to avoid overcounting.</p>
+        <div class="math-block">
+            $$ \frac{11!}{2! \times 2! \times 2!} = \frac{39,916,800}{8} = \mathbf{4,989,600} $$
+        </div>
+        <p>Answer: <span class="final-answer">4,989,600 arrangements</span></p>
+    </div>
+
+    <h2>🚫 Part (b): Separating Vowels</h2>
+    <div class="question-box">
+        <strong>Question:</strong> Find the number of arrangements of the letters in the word FORBID, if the vowels must be separated?<br>
+        <em>(Vowels: A E I O U. Consonants: the other letters in the alphabet)</em>
+    </div>
+    <p>The word <span class="highlight">FORBID</span> has 6 letters: 2 vowels (O, I) and 4 consonants (F, R, B, D).</p>
+    <p><strong>Method (Slotting):</strong> First, arrange the 4 consonants. This creates slots before, between, and after them where the vowels can be placed.</p>
+    <div class="math-block">
+        $$ \text{Consonant Arrangements} = 4! = 24 $$
+        <p style="text-align:center; font-family:monospace;">_ C _ C _ C _ C _</p>
+        $$ \text{There are 5 slots for the 2 vowels to be placed: } ^{5}P_{2} = 5 \times 4 = 20 $$
+        $$ \text{Total ways} = 4! \times ^{5}P_{2} = 24 \times 20 = \mathbf{480} $$
+    </div>
+    <p>Answer: <span class="final-answer">480 arrangements</span></p>
+
+    <h2>🔢 Part (c): 5-Letter Arrangements from "RANDOMIZE"</h2>
+    <div class="question-box">
+        <strong>Question:</strong> How many 5-letter arrangements can be formed using the letters in the word "RANDOMIZE" if:<br>
+        (i) repetition of letters is allowed?<br>
+        (ii) no repetition of letters is allowed;<br>
+        (iii) the first letter must be "R" and the last letter must be "A" or "E", without repetition of letters?
+    </div>
+    <p>The word <span class="highlight">RANDOMIZE</span> has 9 distinct letters.</p>
+
+    <div class="sub-part">
+        <h3>(i) Repetition is allowed</h3>
+        <p>Each of the 5 positions can be filled by any of the 9 letters.</p>
+        <div class="math-block">
+            $$ 9 \times 9 \times 9 \times 9 \times 9 = 9^5 = \mathbf{59,049} $$
+        </div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(ii) No repetition is allowed</h3>
+        <p>Choose and arrange 5 letters out of 9.</p>
+        <div class="math-block">
+            $$ ^{9}P_{5} = 9 \times 8 \times 7 \times 6 \times 5 = \mathbf{15,120} $$
+        </div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(iii) Specific First and Last Letters (No repetition)</h3>
+        <ul>
+            <li>Position 1: Must be "R" (1 way)</li>
+            <li>Position 5: Must be "A" or "E" (2 ways)</li>
+            <li>Positions 2, 3, 4: Must be chosen from the remaining 7 letters ($9 - 2 \text{ already used} = 7$)</li>
+        </ul>
+        <div class="math-block">
+            $$ 1 \times (^{7}P_{3}) \times 2 = 1 \times (7 \times 6 \times 5) \times 2 = 210 \times 2 = \mathbf{420} $$
+        </div>
+    </div>
+
+    <h2>👩‍💻 Part (d): Forming a Competition Team</h2>
+    <div class="question-box">
+        <strong>Question:</strong> There were 12 boys and 8 girls in a class. If a team of 3 students is to be formed to take part in an IT Competition. How many different teams can be formed if:<br>
+        (i) the team can only consist of boys;<br>
+        (ii) the team must include both boys and girls.
+    </div>
+    <p>Since the order of people in a team doesn't matter, we use combinations ($^{n}C_{r}$).</p>
+
+    <div class="sub-part">
+        <h3>(i) The team can only consist of boys</h3>
+        <p>We select 3 boys from the pool of 12 boys.</p>
+        <div class="math-block">
+            $$ ^{12}C_{3} = \frac{12 \times 11 \times 10}{3 \times 2 \times 1} = \mathbf{220} $$
+        </div>
+    </div>
+
+    <div class="sub-part">
+        <h3>(ii) The team must include both boys and girls</h3>
+        <p>A team of 3 containing both genders can either be (2 Boys & 1 Girl) OR (1 Boy & 2 Girls).</p>
+        <div class="math-block">
+            $$ \text{Ways} = (\text{2 Boys, 1 Girl}) + (\text{1 Boy, 2 Girls}) $$
+            $$ \text{Ways} = (^{12}C_{2} \times ^{8}C_{1}) + (^{12}C_{1} \times ^{8}C_{2}) $$
+            $$ \text{Ways} = (66 \times 8) + (12 \times 28) $$
+            $$ \text{Ways} = 528 + 336 = \mathbf{864} $$
+        </div>
+        <p><em>(Alternative Method: Total Teams - Only Boys - Only Girls = $^{20}C_{3} - ^{12}C_{3} - ^{8}C_{3} = 1140 - 220 - 56 = 864$)</em></p>
+    </div>
+
+</div>
+
+</body>
+</html>
