@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinatorics: 4-Digit Numbers Practice</title>
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #d32f2f;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --box-bg: #ffebee;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 650px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: var(--primary); text-align: center; }
+        .problem-box {
+            font-size: 1.15rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: var(--box-bg);
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            line-height: 1.6;
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .math-step { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #c8e6c9; }
+        .math-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .slot {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #fff;
+            border: 1px solid #1b5e20;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 0 2px;
+        }
+        .btn-container { text-align: center; }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #b71c1c; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: Permutations & Constraints</h2>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <div class="btn-container">
+        <button onclick="revealAnswer()" id="reveal-btn">Show Step-by-Step Answer</button>
+        <button onclick="generateProblem()" class="secondary">Generate New Example</button>
+    </div>
+
+    <div class="answer-box" id="answer-section">
+        <div class="math-step" id="ans-a"></div>
+        <div class="math-step" id="ans-b"></div>
+        <div class="math-step" id="ans-c"></div>
+    </div>
+</div>
+
+<script>
+    function generateProblem() {
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 1. Generate parameters
+        const N = Math.floor(Math.random() * 4) + 6; // 6 to 9 digits total
+        const digitsList = Array.from({length: N}, (_, i) => i + 1).join(', ');
+        
+        const limitB_MSD = Math.floor(Math.random() * (N - 3)) + 3; // First digit threshold for part B
+        const limitB = limitB_MSD * 1000;
+
+        const limitC_MSD = Math.floor(Math.random() * 3) + (N - 3); // First digit threshold for part C
+        const limitC = limitC_MSD * 1000;
+        const isEven = Math.random() > 0.5;
+        const parityStr = isEven ? "even" : "odd";
+
+        // 2. Update Problem Statement
+        document.getElementById('problem-statement').innerHTML = `
+            How many four-digit numbers can be formed from the ${N} digits: ${digitsList} such that:
+            <br><br>
+            (a) there is no repetition of the digits<br>
+            (b) they are less than ${limitB} (assuming no repetition)<br>
+            (c) they are ${parityStr} numbers greater than ${limitC} (assuming no repetition)?
+        `;
+
+        // 3. Solve Part A (Simple Permutation)
+        let totalA = N * (N-1) * (N-2) * (N-3);
+        document.getElementById('ans-a').innerHTML = `
+            <strong>(a) No repetition:</strong><br>
+            Any of the ${N} digits can be used, decreasing by 1 each slot.<br>
+            <span class="slot">${N}</span> × <span class="slot">${N-1}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> = <strong>${totalA}</strong> numbers.
+        `;
+
+        // 4. Solve Part B (Less than limit)
+        let choicesB_MSD = limitB_MSD - 1; // Digits 1 to (limitB_MSD - 1)
+        let totalB = choicesB_MSD * (N-1) * (N-2) * (N-3);
+        document.getElementById('ans-b').innerHTML = `
+            <strong>(b) Less than ${limitB}:</strong><br>
+            The first digit must be from {1 to ${limitB_MSD - 1}} (Total ${choicesB_MSD} choices). The remaining 3 slots take any of the remaining ${N-1} digits.<br>
+            <span class="slot">${choicesB_MSD}</span> × <span class="slot">${N-1}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> = <strong>${totalB}</strong> numbers.
+        `;
+
+        // 5. Solve Part C (Overlapping Constraints Logic)
+        let allDigits = Array.from({length: N}, (_, i) => i + 1);
+        let msd_choices = allDigits.filter(d => d >= limitC_MSD);
+        let lsd_choices = allDigits.filter(d => isEven ? d % 2 === 0 : d % 2 !== 0);
+        
+        let overlap = msd_choices.filter(d => lsd_choices.includes(d));
+        let msd_exclusive = msd_choices.filter(d => !lsd_choices.includes(d));
+        
+        let partCHtml = `<strong>(c) ${parityStr.charAt(0).toUpperCase() + parityStr.slice(1)} and > ${limitC}:</strong><br>`;
+        partCHtml += `First digit choices: {${msd_choices.join(',')}}. Last digit choices: {${lsd_choices.join(',')}}.<br>`;
+
+        if (overlap.length > 0 && msd_exclusive.length > 0) {
+            partCHtml += `<em>Because the digit(s) {${overlap.join(',')}} satisfy both conditions, we must split into two cases:</em><br><br>`;
+            
+            // Case 1
+            let c1_total = msd_exclusive.length * (N-2) * (N-3) * lsd_choices.length;
+            partCHtml += `<strong>Case 1:</strong> First digit is from {${msd_exclusive.join(',')}}<br>
+            <span class="slot">${msd_exclusive.length}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> × <span class="slot">${lsd_choices.length}</span> = ${c1_total}<br><br>`;
+            
+            // Case 2
+            let c2_total = overlap.length * (N-2) * (N-3) * (lsd_choices.length - 1);
+            partCHtml += `<strong>Case 2:</strong> First digit is from {${overlap.join(',')}} (which uses up one ${parityStr} digit for the end)<br>
+            <span class="slot">${overlap.length}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> × <span class="slot">${lsd_choices.length - 1}</span> = ${c2_total}<br><br>`;
+            
+            partCHtml += `<strong>Total:</strong> ${c1_total} + ${c2_total} = <strong>${c1_total + c2_total}</strong> numbers.`;
+        } else if (overlap.length > 0) {
+            let totalC = overlap.length * (N-2) * (N-3) * (lsd_choices.length - 1);
+            partCHtml += `<em>All valid first digits overlap with the last digit choices. One ${parityStr} digit is always used up initially.</em><br>
+            <span class="slot">${overlap.length}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> × <span class="slot">${lsd_choices.length - 1}</span> = <strong>${totalC}</strong> numbers.`;
+        } else {
+            let totalC = msd_choices.length * (N-2) * (N-3) * lsd_choices.length;
+            partCHtml += `<em>No overlap between first and last digit options. We can multiply directly:</em><br>
+            <span class="slot">${msd_choices.length}</span> × <span class="slot">${N-2}</span> × <span class="slot">${N-3}</span> × <span class="slot">${lsd_choices.length}</span> = <strong>${totalC}</strong> numbers.`;
+        }
+
+        document.getElementById('ans-c').innerHTML = partCHtml;
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem on load
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>
