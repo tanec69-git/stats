@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piecewise Function Composition</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 600px; /* Widened slightly to accommodate piecewise brackets */
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        .problem-box {
+            font-size: 1.25rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            overflow-x: auto;
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            font-size: 1.15rem;
+            text-align: left;
+            overflow-x: auto;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .math-step {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: Piecewise Composition</h2>
+    <p>Find the simplified expression and domains for $f(g(x))$.</p>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <button onclick="revealAnswer()" id="reveal-btn">Show Answer</button>
+    <button onclick="generateProblem()" class="secondary">Generate New Example</button>
+
+    <div class="answer-box" id="answer-section">
+        <div class="math-step">
+            <strong>Step 1 (Substitute g(x) into expressions and domains):</strong>
+            <div id="step1-math"></div>
+        </div>
+        <div class="math-step">
+            <strong>Step 2 (Expand expressions and solve inequalities for x):</strong>
+            <div id="final-math"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Robust formatting helpers to handle signs and coefficients gracefully
+    function formatLinear(m, k) {
+        if (m === 0) return k.toString();
+        let termX = m === 1 ? "x" : (m === -1 ? "-x" : m + "x");
+        if (k === 0) return termX;
+        return termX + (k > 0 ? " + " + k : " - " + Math.abs(k));
+    }
+
+    function formatQuad(a, b, c) {
+        let res = "";
+        if (a !== 0) res += (a === 1 ? "x^2" : (a === -1 ? "-x^2" : a + "x^2"));
+        if (b !== 0) {
+            if (res !== "") {
+                res += (b > 0 ? " + " + b + "x" : " - " + Math.abs(b) + "x");
+            } else {
+                res += (b === 1 ? "x" : (b === -1 ? "-x" : b + "x"));
+            }
+        }
+        if (c !== 0) {
+            if (res !== "") {
+                res += (c > 0 ? " + " + c : " - " + Math.abs(c));
+            } else {
+                res += c.toString();
+            }
+        }
+        return res === "" ? "0" : res;
+    }
+
+    function formatConst(val) {
+        if (val === 0) return "";
+        return val > 0 ? " + " + val : " - " + Math.abs(val);
+    }
+
+    function generateProblem() {
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 1. Generate g(x) = mx + k 
+        // Keeping m > 0 ensures inequalities don't flip when dividing, simplifying practice.
+        let m = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3
+        let k = Math.floor(Math.random() * 7) - 3; // -3 to 3
+
+        // 2. Generate clean domain thresholds
+        // We calculate 'c' based on a target 'x_threshold' so that (c - k) / m is always a whole number.
+        let x_threshold = Math.floor(Math.random() * 9) - 4; // -4 to 4
+        let c = (m * x_threshold) + k;
+
+        // 3. Generate f(x) components
+        // Top Piece: Ax^2
+        let A = Math.random() > 0.5 ? (Math.random() > 0.5 ? 2 : 1) : -1;
+        // Bottom Piece: Cx + D
+        let C = Math.floor(Math.random() * 4) + 1;
+        if (Math.random() > 0.5) C = -C;
+        let D = Math.floor(Math.random() * 9) - 4;
+
+        // --- String Formatting ---
+        let gx_str = formatLinear(m, k);
+        let f1_str = formatQuad(A, 0, 0);
+        let f2_str = formatLinear(C, D);
+
+        // --- Step 1: Direct Substitution ---
+        let A_prefix = A === 1 ? "" : (A === -1 ? "-" : A);
+        let sub_f1 = `${A_prefix}(${gx_str})^2`;
+        
+        let C_prefix = C === 1 ? "" : (C === -1 ? "-" : C);
+        let sub_f2 = `${C_prefix}(${gx_str})${formatConst(D)}`;
+
+        // --- Step 2: Final Expansion ---
+        // A(mx+k)^2 = A(m^2)x^2 + A(2mk)x + A(k^2)
+        let final_f1 = formatQuad(A * m * m, 2 * A * m * k, A * k * k);
+        
+        // C(mx+k) + D = (Cm)x + (Ck + D)
+        let final_f2 = formatLinear(C * m, (C * k) + D);
+
+        // --- Update DOM with LaTeX ---
+        document.getElementById('problem-statement').innerHTML = `
+            $$ f(x) = \\begin{cases} 
+            ${f1_str} & \\text{if } x < ${c} \\\\ 
+            ${f2_str} & \\text{if } x \\ge ${c} 
+            \\end{cases} $$
+            $$ g(x) = ${gx_str} $$
+        `;
+
+        document.getElementById('step1-math').innerHTML = `
+            $$ f(g(x)) = \\begin{cases} 
+            ${sub_f1} & \\text{if } ${gx_str} < ${c} \\\\ 
+            ${sub_f2} & \\text{if } ${gx_str} \\ge ${c} 
+            \\end{cases} $$
+        `;
+
+        document.getElementById('final-math').innerHTML = `
+            $$ f(g(x)) = \\begin{cases} 
+            ${final_f1} & \\text{if } x < ${x_threshold} \\\\ 
+            ${final_f2} & \\text{if } x \\ge ${x_threshold} 
+            \\end{cases} $$
+        `;
+
+        // Trigger MathJax re-render
+        if (window.MathJax) {
+            MathJax.typesetPromise().catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem on load
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>

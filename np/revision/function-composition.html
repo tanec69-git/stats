@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Composition Practice</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        .problem-box {
+            font-size: 1.25rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            font-size: 1.15rem;
+            text-align: left;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: Function Composition</h2>
+    <p>Given the functions below, find the simplified expression for $f(g(x))$.</p>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <button onclick="revealAnswer()" id="reveal-btn">Show Answer</button>
+    <button onclick="generateProblem()" class="secondary">Generate New Example</button>
+
+    <div class="answer-box" id="answer-section">
+        <strong>Step 1 (Substitution):</strong>
+        <div id="step1-math"></div>
+        <br>
+        <strong>Step 2 (Simplified):</strong>
+        <div id="final-math"></div>
+    </div>
+</div>
+
+<script>
+    // Helper functions for random coefficient generation
+    function getC() { 
+        let v = Math.floor(Math.random() * 7) - 3; // -3 to 3
+        return v === 0 ? 1 : v; // Avoid 0 for leading coefficients
+    }
+    function getK() { 
+        return Math.floor(Math.random() * 11) - 5; // -5 to 5
+    }
+    function formatTerm(c, x, k) {
+        let t = c === 1 ? x : (c === -1 ? '-' + x : c + x);
+        if (k === 0) return t;
+        return t + (k > 0 ? ' + ' + k : ' - ' + Math.abs(k));
+    }
+
+    // Problem generators
+    function generateLinear() {
+        let a = getC(), b = getK(), c = getC(), d = getK();
+        let fx = formatTerm(a, 'x', b);
+        let gx = formatTerm(c, 'x', d);
+        
+        let prefix = a === 1 ? '' : (a === -1 ? '-' : a);
+        let suffix = b === 0 ? '' : (b > 0 ? ' + ' + b : ' - ' + Math.abs(b));
+        let step1 = `${prefix}(${gx})${suffix}`;
+        
+        let finalC = a * c;
+        let finalK = (a * d) + b;
+        let finalAns = formatTerm(finalC, 'x', finalK);
+        
+        return { fx, gx, step1, finalAns };
+    }
+
+    function generateQuadratic() {
+        let b = getK(), c = getC(), d = getK();
+        let suffix = b === 0 ? '' : (b > 0 ? ' + ' + b : ' - ' + Math.abs(b));
+        let fx = `x^2${suffix}`;
+        let gx = formatTerm(c, 'x', d);
+        
+        let step1 = `(${gx})^2${suffix}`;
+
+        let finalA = c * c;
+        let finalB = 2 * c * d;
+        let finalC_const = (d * d) + b;
+
+        let finalAns = `${finalA === 1 ? '' : finalA}x^2`;
+        if (finalB !== 0) finalAns += finalB > 0 ? ` + ${finalB}x` : ` - ${Math.abs(finalB)}x`;
+        if (finalC_const !== 0) finalAns += finalC_const > 0 ? ` + ${finalC_const}` : ` - ${Math.abs(finalC_const)}`;
+        if (finalAns === "") finalAns = "0";
+
+        return { fx, gx, step1, finalAns };
+    }
+
+    function generateProblem() {
+        // Hide answer section on new problem
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 50% chance for linear composition, 50% for quadratic
+        let prob = Math.random() > 0.5 ? generateLinear() : generateQuadratic();
+
+        // Update DOM
+        document.getElementById('problem-statement').innerHTML = `
+            $f(x) = ${prob.fx}$ <br><br>
+            $g(x) = ${prob.gx}$
+        `;
+        document.getElementById('step1-math').innerHTML = `$f(g(x)) = ${prob.step1}$`;
+        document.getElementById('final-math').innerHTML = `$f(g(x)) = ${prob.finalAns}$`;
+
+        // Tell MathJax to re-render the math dynamically
+        if (window.MathJax) {
+            MathJax.typesetPromise().catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem when window loads
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>
