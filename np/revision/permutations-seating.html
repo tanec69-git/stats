@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinatorics: Seating Arrangements</title>
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #1976d2;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --box-bg: #e3f2fd;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            max-width: 700px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: var(--primary); text-align: center; }
+        .problem-box {
+            font-size: 1.15rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: var(--box-bg);
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            line-height: 1.6;
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f1f8e9;
+            color: #33691e;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .math-step { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #c5e1a5; }
+        .math-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .btn-container { text-align: center; }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+            font-weight: 600;
+        }
+        button:hover { background-color: #115293; }
+        button.secondary { background-color: #757575; }
+        button.secondary:hover { background-color: #616161; }
+        .highlight { font-weight: bold; color: #d32f2f; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: Seating Permutations</h2>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <div class="btn-container">
+        <button onclick="revealAnswer()" id="reveal-btn">Show Step-by-Step Answer</button>
+        <button onclick="generateProblem()" class="secondary">Generate New Example</button>
+    </div>
+
+    <div class="answer-box" id="answer-section">
+        <div class="math-step" id="ans-i"></div>
+        <div class="math-step" id="ans-ii"></div>
+        <div class="math-step" id="ans-iii"></div>
+        <div class="math-step" id="ans-iv"></div>
+    </div>
+</div>
+
+<script>
+    // Factorial helper function
+    function fact(n) {
+        if (n === 0 || n === 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= n; i++) res *= i;
+        return res;
+    }
+
+    // Number formatting with commas
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function generateProblem() {
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 1. Generate Parameters (Keeping numbers reasonable to prevent massive scientific notation)
+        const men = Math.floor(Math.random() * 3) + 3; // 3 to 5
+        const women = Math.floor(Math.random() * 3) + 3; // 3 to 5
+        const total = men + women;
+
+        // 2. Update Problem Statement
+        document.getElementById('problem-statement').innerHTML = `
+            A corporate team consists of <strong>${men} Men</strong> and <strong>${women} Women</strong>. They attend a seminar together. <br><br>
+            If they are sitting in the same row with ${total} seats, how many ways can they be seated if:
+            <br><br>
+            (i) there is no restriction,<br>
+            (ii) all the men must sit together,<br>
+            (iii) all the men and all the women must sit together,<br>
+            (iv) 2 specific team members (e.g., the two interns) must not sit together?
+        `;
+
+        // 3. Calculations
+        // (i) No restriction: Total!
+        const totalWays = fact(total);
+
+        // (ii) All men together: Treat men as 1 block + individual women. Total units = Women + 1. 
+        // Ways = (Women + 1)! * Men!
+        const unitsII = women + 1;
+        const waysII = fact(unitsII) * fact(men);
+
+        // (iii) Men together & Women together: Treat as 2 blocks. 
+        // Ways = 2! * Men! * Women!
+        const waysIII = 2 * fact(men) * fact(women);
+
+        // (iv) 2 specific not together: Total ways - Ways they ARE together.
+        // Ways together: Treat the 2 people as 1 block + remaining (Total - 2). Total units = Total - 1.
+        // Ways = (Total - 1)! * 2!
+        const unitsTogether = total - 1;
+        const waysTogether = fact(unitsTogether) * 2;
+        const waysNotTogether = totalWays - waysTogether;
+
+        // 4. Update Answer HTML with MathJax
+        document.getElementById('ans-i').innerHTML = `
+            <strong>(i) No restriction:</strong><br>
+            Simply arrange all ${total} individuals in ${total} seats.<br>
+            $${total}! = \\mathbf{${formatNumber(totalWays)}}$ ways.
+        `;
+
+        document.getElementById('ans-ii').innerHTML = `
+            <strong>(ii) All the men must sit together:</strong><br>
+            Use the <em>Grouping Method</em>. Treat the ${men} men as a single "block". <br>
+            We now have ${women} individual women + 1 block of men = <strong>${unitsII} units</strong> to arrange ($${unitsII}!$ ways).<br>
+            The men can also swap seats among themselves inside their block ($${men}!$ ways).<br>
+            $${unitsII}! \\times ${men}! = ${formatNumber(fact(unitsII))} \\times ${formatNumber(fact(men))} = \\mathbf{${formatNumber(waysII)}}$ ways.
+        `;
+
+        document.getElementById('ans-iii').innerHTML = `
+            <strong>(iii) All the men and all the women must sit together:</strong><br>
+            Group the men into 1 block and the women into 1 block. There are <strong>2 blocks</strong> to arrange ($2!$ ways).<br>
+            The men arrange internally ($${men}!$ ways) and the women arrange internally ($${women}!$ ways).<br>
+            $2! \\times ${men}! \\times ${women}! = 2 \\times ${formatNumber(fact(men))} \\times ${formatNumber(fact(women))} = \\mathbf{${formatNumber(waysIII)}}$ ways.
+        `;
+
+        document.getElementById('ans-iv').innerHTML = `
+            <strong>(iv) Two specific members must not sit together:</strong><br>
+            Use the <em>Complement Method</em>: Total Arrangements − Arrangements where they ARE together.<br>
+            If they sit together, treat them as 1 block + ${total - 2} others = <strong>${unitsTogether} units</strong>.<br>
+            Ways they are together: $${unitsTogether}! \\times 2! = ${formatNumber(waysTogether)}$.<br>
+            Ways they are <span class="highlight">not</span> together: $${total}! - (${unitsTogether}! \\times 2!) = ${formatNumber(totalWays)} - ${formatNumber(waysTogether)} = \\mathbf{${formatNumber(waysNotTogether)}}$ ways.
+        `;
+
+        // Re-render MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise().catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem on load
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>

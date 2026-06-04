@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinatorics: Committee Selection Practice</title>
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --box-bg: #e8f5e9;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 650px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: var(--primary); text-align: center; }
+        .problem-box {
+            font-size: 1.15rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: var(--box-bg);
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            line-height: 1.6;
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f3e5f5;
+            color: #4a148c;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .math-step { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #ce93d8; }
+        .math-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .btn-container { text-align: center; }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #1b5e20; }
+        button.secondary { background-color: #6c757d; }
+        button.secondary:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: Sub-Group Combinations</h2>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <div class="btn-container">
+        <button onclick="revealAnswer()" id="reveal-btn">Show Step-by-Step Answer</button>
+        <button onclick="generateProblem()" class="secondary">Generate New Example</button>
+    </div>
+
+    <div class="answer-box" id="answer-section">
+        <div class="math-step" id="ans-breakdown"></div>
+        <div class="math-step" id="ans-final"></div>
+    </div>
+</div>
+
+<script>
+    // Mathematical combination function nCr
+    function C(n, r) {
+        if (r > n || r < 0) return 0;
+        if (r === 0 || r === n) return 1;
+        let res = 1;
+        for (let i = 1; i <= r; i++) {
+            res = res * (n - i + 1) / i;
+        }
+        return res;
+    }
+
+    // Number formatting with commas
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function generateProblem() {
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 1. Generate Population Parameters
+        const pop1 = Math.floor(Math.random() * 20) + 10; // 10 to 29 Analysts
+        const pop2 = Math.floor(Math.random() * 15) + 5;  // 5 to 19 Consultants
+        const pop3 = Math.floor(Math.random() * 10) + 3;  // 3 to 12 Managers
+
+        // 2. Generate Selection Requirements (ensuring they don't exceed populations)
+        const req1 = Math.floor(Math.random() * 4) + 1; // 1 to 4 Analysts
+        const req2 = Math.floor(Math.random() * 3) + 1; // 1 to 3 Consultants
+        const req3 = Math.floor(Math.random() * 2) + 1; // 1 to 2 Managers
+        
+        const totalReq = req1 + req2 + req3;
+
+        // Pluralization helpers
+        const strReq1 = req1 === 1 ? "1 Analyst" : `${req1} Analysts`;
+        const strReq2 = req2 === 1 ? "1 Consultant" : `${req2} Consultants`;
+        const strReq3 = req3 === 1 ? "1 Manager" : `${req3} Managers`;
+
+        // 3. Update Problem Statement
+        document.getElementById('problem-statement').innerHTML = `
+            There are ${pop1} Analysts, ${pop2} Consultants, and ${pop3} Managers in a firm. 
+            <br><br>
+            How many ways can a project team of ${totalReq} be selected, if it must comprise ${strReq1}, ${strReq2}, and ${strReq3}?
+        `;
+
+        // 4. Calculate Steps
+        const ways1 = C(pop1, req1);
+        const ways2 = C(pop2, req2);
+        const ways3 = C(pop3, req3);
+        const totalWays = ways1 * ways2 * ways3;
+
+        // 5. Update Answer HTML with LaTeX
+        document.getElementById('ans-breakdown').innerHTML = `
+            <strong>Step 1: Calculate combinations for each group independently.</strong><br><br>
+            Since the order in which we select team members doesn't matter, we use the Combination formula ($^nC_r$).<br><br>
+            • Choosing ${strReq1} from ${pop1}: &nbsp;&nbsp; $^{${pop1}}C_{${req1}} = ${formatNumber(ways1)}$<br>
+            • Choosing ${strReq2} from ${pop2}: &nbsp;&nbsp; $^{${pop2}}C_{${req2}} = ${formatNumber(ways2)}$<br>
+            • Choosing ${strReq3} from ${pop3}: &nbsp;&nbsp; $^{${pop3}}C_{${req3}} = ${formatNumber(ways3)}$
+        `;
+
+        document.getElementById('ans-final').innerHTML = `
+            <strong>Step 2: Apply the Fundamental Counting Principle.</strong><br><br>
+            Multiply the individual combinations together to find the total number of distinct teams that can be formed.<br><br>
+            $${formatNumber(ways1)} \\times ${formatNumber(ways2)} \\times ${formatNumber(ways3)} = \\mathbf{${formatNumber(totalWays)}}$ <strong>ways</strong>.
+        `;
+
+        // Re-render MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise().catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem on load
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>
