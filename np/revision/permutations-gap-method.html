@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinatorics: The Gap Method</title>
+    
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #00695c; /* Teal theme */
+            --bg-color: #f4fdfb;
+            --card-bg: #ffffff;
+            --text-main: #263238;
+            --box-bg: #e0f2f1;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            max-width: 650px;
+            width: 100%;
+        }
+        h2 { margin-top: 0; color: var(--primary); text-align: center; }
+        .problem-box {
+            font-size: 1.15rem;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: var(--box-bg);
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            line-height: 1.6;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .answer-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f1f8e9;
+            color: #33691e;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .math-step { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #c5e1a5; }
+        .math-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .btn-container { text-align: center; }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+            font-weight: 600;
+        }
+        button:hover { background-color: #004d40; }
+        button.secondary { background-color: #546e7a; }
+        button.secondary:hover { background-color: #37474f; }
+        
+        .visual-gap {
+            display: inline-block;
+            background: #ffe082;
+            color: #d84315;
+            padding: 4px 10px;
+            margin: 5px 2px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .visual-letter {
+            display: inline-block;
+            background: #b0bec5;
+            color: #263238;
+            padding: 4px 12px;
+            margin: 5px 2px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Practice: The Gap Method</h2>
+    <p style="text-align: center;">Find the number of arrangements of the letters in the generated word, if the vowels must be separated.</p>
+    
+    <div class="problem-box" id="problem-statement">
+        Loading problem...
+    </div>
+
+    <div class="btn-container">
+        <button onclick="revealAnswer()" id="reveal-btn">Show Step-by-Step Answer</button>
+        <button onclick="generateProblem()" class="secondary">Generate New Word</button>
+    </div>
+
+    <div class="answer-box" id="answer-section">
+        <div class="math-step" id="ans-breakdown"></div>
+        <div class="math-step" id="ans-visual"></div>
+        <div class="math-step" id="ans-final"></div>
+    </div>
+</div>
+
+<script>
+    // Math helper functions
+    function fact(n) {
+        if (n === 0 || n === 1) return 1;
+        let res = 1;
+        for (let i = 2; i <= n; i++) res *= i;
+        return res;
+    }
+
+    function perm(n, r) {
+        if (r > n) return 0;
+        return fact(n) / fact(n - r);
+    }
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Word bank (Words with all unique letters to avoid division by repeating factorials)
+    const words = ["FORBID", "METHOD", "PRODUCT", "PLASTIC", "CREDIT", "AUTHOR", "PICTURE", "QUALITY", "DESIGN", "VIRTUAL"];
+
+    function generateProblem() {
+        document.getElementById('answer-section').style.display = 'none';
+        document.getElementById('reveal-btn').style.display = 'inline-block';
+
+        // 1. Pick a random word
+        const word = words[Math.floor(Math.random() * words.length)];
+        document.getElementById('problem-statement').innerText = word;
+
+        // 2. Separate Vowels and Consonants
+        const vowelsList = ['A', 'E', 'I', 'O', 'U'];
+        let wordVowels = [];
+        let wordConsonants = [];
+
+        for (let char of word) {
+            if (vowelsList.includes(char)) {
+                wordVowels.push(char);
+            } else {
+                wordConsonants.push(char);
+            }
+        }
+
+        const numV = wordVowels.length;
+        const numC = wordConsonants.length;
+        const numGaps = numC + 1;
+
+        // 3. Math Calculations
+        const waysConsonants = fact(numC);
+        const waysVowels = perm(numGaps, numV);
+        const totalWays = waysConsonants * waysVowels;
+
+        // 4. Build Visualization
+        let visualHTML = "";
+        for (let i = 0; i < numC; i++) {
+            visualHTML += `<span class="visual-gap">_</span>`;
+            visualHTML += `<span class="visual-letter">${wordConsonants[i]}</span>`;
+        }
+        visualHTML += `<span class="visual-gap">_</span>`;
+
+        // 5. Populate Answer Boxes
+        document.getElementById('ans-breakdown').innerHTML = `
+            <strong>Step 1: Identify Letters</strong><br>
+            Vowels (${numV}): { ${wordVowels.join(', ')} }<br>
+            Consonants (${numC}): { ${wordConsonants.join(', ')} }<br><br>
+            <strong>Step 2: Arrange the Consonants</strong><br>
+            Arrange the unrestricted letters first. <br>
+            $${numC}! = ${formatNumber(waysConsonants)}$ ways.
+        `;
+
+        document.getElementById('ans-visual').innerHTML = `
+            <strong>Step 3: Create Gaps for Vowels</strong><br>
+            To keep the vowels separated, they must be placed in the spaces (gaps) between and at the ends of the consonants.<br>
+            <div style="text-align:center; margin: 15px 0;">${visualHTML}</div>
+            There are <strong>${numGaps} available gaps</strong> for the ${numV} vowels. We use permutations because the order of the vowels matters.<br>
+            $^{${numGaps}}P_{${numV}} = \\frac{${numGaps}!}{(${numGaps}-${numV})!} = ${formatNumber(waysVowels)}$ ways.
+        `;
+
+        document.getElementById('ans-final').innerHTML = `
+            <strong>Step 4: Multiply to Find Total</strong><br>
+            Total Arrangements = (Ways to arrange consonants) $\\times$ (Ways to place vowels in gaps)<br>
+            $${formatNumber(waysConsonants)} \\times ${formatNumber(waysVowels)} = \\mathbf{${formatNumber(totalWays)}}$ <strong>ways</strong>.
+        `;
+
+        // Re-render MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise().catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function revealAnswer() {
+        document.getElementById('answer-section').style.display = 'block';
+        document.getElementById('reveal-btn').style.display = 'none';
+    }
+
+    // Initialize first problem on load
+    window.onload = function() {
+        generateProblem();
+    };
+</script>
+
+</body>
+</html>
