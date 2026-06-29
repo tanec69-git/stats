@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Game Expected Value Analysis</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px auto;
+            max-width: 850px;
+            color: #333;
+            padding: 0 15px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .section-container {
+            margin-bottom: 30px;
+        }
+        .main-question {
+            background-color: #eef2f5;
+            border: 1px solid #cdd4db;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .question-block {
+            background-color: #f1f8ff;
+            border-left: 5px solid #0366d6;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .question-block p {
+            margin: 0;
+            font-size: 1.05em;
+            color: #24292e;
+        }
+        .answer-block {
+            padding: 10px 20px;
+            background-color: #fff;
+        }
+        .probability-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            background-color: #fff;
+        }
+        .probability-table th, .probability-table td {
+            border: 1px solid #cdd4db;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .probability-table th {
+            background-color: #f8f9fa;
+        }
+        .formula-note {
+            color: #666;
+            font-style: italic;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+        .highlight-box {
+            background-color: #fff8c5;
+            border-left: 4px solid #e3b341;
+            padding: 10px 15px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Casino Game Analysis 🎰🪙</h1>
+
+    <div class="main-question">
+        <p><strong>6.</strong> A casino has a game where a player tosses 3 fair coins. He wins $10 if 3 heads occur, $5 if 2 heads occur, $y if 1 head occurs and $2 if no head occurs. <br><br>
+        Express in terms of y his expected gain from each game. <br>
+        Given that he pays $4.50 to play each game, calculate:<br>
+        (a) the value of y for which the game is fair. <br>
+        (b) his expected gain or loss over 200 games if y = 2.50.</p>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p>📝 <strong>Preliminary: Express his expected gain from each game in terms of y</strong></p>
+        </div>
+        <div class="answer-block">
+            <p>First, we determine the probabilities for tossing 3 fair coins. The total number of possible outcomes is \( 2^3 = 8 \).</p>
+            
+            <table class="probability-table">
+                <tr>
+                    <th>Number of Heads</th>
+                    <td>3</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th>Probability \( P(X=x) \)</th>
+                    <td>\( \frac{1}{8} \)</td>
+                    <td>\( \frac{3}{8} \)</td>
+                    <td>\( \frac{3}{8} \)</td>
+                    <td>\( \frac{1}{8} \)</td>
+                </tr>
+                <tr>
+                    <th>Payout (Gain)</th>
+                    <td>$10</td>
+                    <td>$5</td>
+                    <td>$y</td>
+                    <td>$2</td>
+                </tr>
+            </table>
+
+            <p class="formula-note">Expected gain \( E(G) = \sum (\text{Payout} \times \text{Probability}) \)</p>
+            <p>
+            $$
+            \begin{aligned}
+            E(G) &= 10\left(\frac{1}{8}\right) + 5\left(\frac{3}{8}\right) + y\left(\frac{3}{8}\right) + 2\left(\frac{1}{8}\right) \\
+            E(G) &= \frac{10}{8} + \frac{15}{8} + \frac{3y}{8} + \frac{2}{8} \\
+            E(G) &= \frac{27 + 3y}{8}
+            \end{aligned}
+            $$
+            </p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p>⚖️ <strong>(a) Calculate the value of y for which the game is fair.</strong></p>
+        </div>
+        <div class="answer-block">
+            <p>A game is considered "fair" when the expected gain from the game equals the cost to play the game. Therefore, the net expected profit is exactly $0.</p>
+            <p>Cost to play = $4.50</p>
+            <p>
+            $$
+            \begin{aligned}
+            E(G) &= 4.50 \\
+            \frac{27 + 3y}{8} &= 4.50 \\
+            27 + 3y &= 36 \\
+            3y &= 36 - 27 \\
+            3y &= 9 \\
+            y &= 3
+            \end{aligned}
+            $$
+            </p>
+            <div class="highlight-box">
+                The value of y for a fair game is $3.00.
+            </div>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p>📉 <strong>(b) Calculate his expected gain or loss over 200 games if y = 2.50.</strong></p>
+        </div>
+        <div class="answer-block">
+            <p>First, calculate the expected gross gain for a single game when \( y = 2.50 \).</p>
+            <p>
+            $$
+            \begin{aligned}
+            E(G) &= \frac{27 + 3(2.50)}{8} \\
+            E(G) &= \frac{27 + 7.50}{8} \\
+            E(G) &= \frac{34.50}{8} = \$4.3125
+            \end{aligned}
+            $$
+            </p>
+            
+            <p>Now, calculate the expected <em>net</em> gain per game by subtracting the cost to play:</p>
+            <p>$$ \text{Net Gain per game} = E(G) - \text{Cost} $$</p>
+            <p>$$ \text{Net Gain per game} = 4.3125 - 4.50 = -\$0.1875 $$</p>
+            
+            <p>Since the net gain is negative, the player expects to lose $0.1875 per game. Over 200 games:</p>
+            <p>$$ \text{Total expected net} = 200 \times (-0.1875) = -37.50 $$</p>
+            
+            <div class="highlight-box">
+                His expected loss over 200 games is $37.50.
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

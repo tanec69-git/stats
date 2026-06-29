@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Variables: Expectation and Variance</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px auto;
+            max-width: 850px;
+            color: #333;
+            padding: 0 15px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .section-container {
+            margin-bottom: 30px;
+        }
+        .main-question {
+            background-color: #eef2f5;
+            border: 1px solid #cdd4db;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        .question-block {
+            background-color: #f1f8ff;
+            border-left: 5px solid #0366d6;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .question-block p {
+            margin: 0;
+            font-size: 1.05em;
+            color: #24292e;
+        }
+        .answer-block {
+            padding: 10px 20px;
+            background-color: #fff;
+        }
+        .formula-note {
+            color: #666;
+            font-style: italic;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Expectation and Variance Analysis</h1>
+
+    <div class="main-question">
+        <p><strong>3.</strong> Given \( X \) and \( Y \) are independent random variables and that \( E(X) = 5 \), \( Var(X) = 9 \), \( E(Y) = 4 \), \( Var(Y) = 16 \). Find:</p>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(a)</strong> \( E(X^2) \)</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">Using the variance formula: \( Var(X) = E(X^2) - [E(X)]^2 \)</p>
+            <p>$$ 9 = E(X^2) - (5)^2 $$</p>
+            <p>$$ 9 = E(X^2) - 25 $$</p>
+            <p>$$ E(X^2) = 9 + 25 $$</p>
+            <p>$$ E(X^2) = 34 $$</p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(b)</strong> Standard deviation, \( \sigma \) of \( X \)</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">The standard deviation is the square root of the variance: \( \sigma_X = \sqrt{Var(X)} \)</p>
+            <p>$$ \sigma_X = \sqrt{9} $$</p>
+            <p>$$ \sigma_X = 3 $$</p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(c)</strong> \( E(5X + 2) \)</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">Using the linearity of expectation property: \( E(aX + b) = aE(X) + b \)</p>
+            <p>$$ E(5X + 2) = 5E(X) + 2 $$</p>
+            <p>$$ E(5X + 2) = 5(5) + 2 $$</p>
+            <p>$$ E(5X + 2) = 25 + 2 $$</p>
+            <p>$$ E(5X + 2) = 27 $$</p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(d)</strong> \( E(5X + 2Y) \)</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">Using the linearity of expectation for multiple variables: \( E(aX + bY) = aE(X) + bE(Y) \)</p>
+            <p>$$ E(5X + 2Y) = 5E(X) + 2E(Y) $$</p>
+            <p>$$ E(5X + 2Y) = 5(5) + 2(4) $$</p>
+            <p>$$ E(5X + 2Y) = 25 + 8 $$</p>
+            <p>$$ E(5X + 2Y) = 33 $$</p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(e)</strong> \( Var(5X + 2) \)</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">Using the properties of variance: \( Var(aX + b) = a^2Var(X) \). Note that adding a constant (\( b \)) does not change the variance, but multiplying by a constant (\( a \)) scales the variance by \( a^2 \).</p>
+            <p>$$ Var(5X + 2) = 5^2 Var(X) $$</p>
+            <p>$$ Var(5X + 2) = 25(9) $$</p>
+            <p>$$ Var(5X + 2) = 225 $$</p>
+        </div>
+    </div>
+
+</body>
+</html>

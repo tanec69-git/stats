@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Random Variable Problem</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px auto;
+            max-width: 850px;
+            color: #333;
+            padding: 0 15px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .section-container {
+            margin-bottom: 30px;
+        }
+        .main-question {
+            background-color: #eef2f5;
+            border: 1px solid #cdd4db;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 1.05em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 400px;
+            margin: 15px 0;
+            background-color: #fff;
+        }
+        th, td {
+            border: 1px solid #cdd4db;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        .question-block {
+            background-color: #f1f8ff;
+            border-left: 5px solid #0366d6;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .question-block p {
+            margin: 0;
+            font-size: 1.05em;
+            color: #24292e;
+        }
+        .answer-block {
+            padding: 10px 20px;
+            background-color: #fff;
+        }
+        .formula-note {
+            color: #666;
+            font-style: italic;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Discrete Random Variable Analysis</h1>
+
+    <div class="main-question">
+        <p><strong>4.</strong> A discrete random variable X takes values 0, 1, 2, 4, 8 with probabilities as shown in the table below:</p>
+        
+        <table>
+            <tr>
+                <td><strong>x</strong></td>
+                <td>0</td>
+                <td>1</td>
+                <td>2</td>
+                <td>4</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td><strong>P(X=x)</strong></td>
+                <td>\( 2p \)</td>
+                <td>\( \frac{1}{2} \)</td>
+                <td>\( \frac{1}{4} \)</td>
+                <td>\( \frac{1}{8} \)</td>
+                <td>\( \frac{1}{16} \)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(a)</strong> Evaluate \( p \).</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">For a valid probability distribution, the sum of all probabilities must equal 1: \( \sum P(X=x) = 1 \)</p>
+            <p>$$ 2p + \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + \frac{1}{16} = 1 $$</p>
+            <p>First, find a common denominator (16) for the fractions:</p>
+            <p>$$ 2p + \frac{8}{16} + \frac{4}{16} + \frac{2}{16} + \frac{1}{16} = 1 $$</p>
+            <p>$$ 2p + \frac{15}{16} = 1 $$</p>
+            <p>$$ 2p = 1 - \frac{15}{16} $$</p>
+            <p>$$ 2p = \frac{1}{16} $$</p>
+            <p>$$ p = \frac{1}{32} $$</p>
+            <p><em>Note: This means \( P(X=0) = 2(\frac{1}{32}) = \frac{1}{16} \).</em></p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(b)</strong> Find \( E(X) \) and \( Var(X) \).</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution for \( E(X) \):</strong></p>
+            <p class="formula-note">Expected value formula: \( E(X) = \sum x \cdot P(X=x) \)</p>
+            <p>$$ E(X) = \left(0 \cdot \frac{1}{16}\right) + \left(1 \cdot \frac{1}{2}\right) + \left(2 \cdot \frac{1}{4}\right) + \left(4 \cdot \frac{1}{8}\right) + \left(8 \cdot \frac{1}{16}\right) $$</p>
+            <p>$$ E(X) = 0 + \frac{1}{2} + \frac{2}{4} + \frac{4}{8} + \frac{8}{16} $$</p>
+            <p>$$ E(X) = 0 + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} + \frac{1}{2} $$</p>
+            <p>$$ E(X) = \frac{4}{2} = 2 $$</p>
+
+            <br>
+            <p><strong>Solution for \( Var(X) \):</strong></p>
+            <p class="formula-note">Variance formula: \( Var(X) = E(X^2) - [E(X)]^2 \)</p>
+            <p>First, calculate \( E(X^2) \):</p>
+            <p>$$ E(X^2) = \sum x^2 \cdot P(X=x) $$</p>
+            <p>$$ E(X^2) = \left(0^2 \cdot \frac{1}{16}\right) + \left(1^2 \cdot \frac{1}{2}\right) + \left(2^2 \cdot \frac{1}{4}\right) + \left(4^2 \cdot \frac{1}{8}\right) + \left(8^2 \cdot \frac{1}{16}\right) $$</p>
+            <p>$$ E(X^2) = 0 + \left(1 \cdot \frac{1}{2}\right) + \left(4 \cdot \frac{1}{4}\right) + \left(16 \cdot \frac{1}{8}\right) + \left(64 \cdot \frac{1}{16}\right) $$</p>
+            <p>$$ E(X^2) = 0 + 0.5 + 1 + 2 + 4 = 7.5 $$</p>
+            <p>Now, substitute back into the variance formula:</p>
+            <p>$$ Var(X) = 7.5 - (2)^2 $$</p>
+            <p>$$ Var(X) = 7.5 - 4 $$</p>
+            <p>$$ Var(X) = 3.5 $$</p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(c)</strong> A random variable Y is defined by \( Y = 2X + 3 \). Find \( E(Y) \).</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p class="formula-note">Using the linearity of expectation property: \( E(aX + b) = aE(X) + b \)</p>
+            <p>$$ E(Y) = E(2X + 3) $$</p>
+            <p>$$ E(Y) = 2E(X) + 3 $$</p>
+            <p>$$ E(Y) = 2(2) + 3 $$</p>
+            <p>$$ E(Y) = 4 + 3 $$</p>
+            <p>$$ E(Y) = 7 $$</p>
+        </div>
+    </div>
+
+</body>
+</html>

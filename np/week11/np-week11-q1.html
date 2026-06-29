@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Distribution - Questions and Solutions</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px auto;
+            max-width: 850px;
+            color: #333;
+            padding: 0 15px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .section-container {
+            margin-bottom: 40px;
+        }
+        .question-block {
+            background-color: #f1f8ff;
+            border-left: 5px solid #0366d6;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        .question-block p {
+            margin: 0;
+            font-size: 1.05em;
+            color: #24292e;
+        }
+        .answer-block {
+            padding: 10px 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Coin Flip Experiment Analysis</h1>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>1. (a)</strong> Define the sample space for an experiment which involves 4 flips of a balanced coin.</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p>The sample space \( S \) for an experiment involving 4 flips of a balanced coin contains \( 2^4 = 16 \) possible outcomes. Let H represent Heads and T represent Tails. The complete sample space is:</p>
+            <p>
+            $$ 
+            \begin{aligned} 
+            S = \{ & HHHH, HHHT, HHTH, HHTT, \\ 
+                   & HTHH, HTHT, HTTH, HTTT, \\ 
+                   & THHH, THHT, THTH, THTT, \\ 
+                   & TTHH, TTHT, TTTH, TTTT \} 
+            \end{aligned} 
+            $$
+            </p>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(b)</strong> Let X be the number of heads. Represent the probability distribution f(x) = P(X=x) in a table form.</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p>The possible values for \( X \) (the number of heads) are 0, 1, 2, 3, and 4. By counting the number of outcomes for each scenario from the sample space above, we can determine the probability \( f(x) = P(X=x) \).</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>\( x \) (Number of Heads)</th>
+                        <th>Outcomes from Sample Space</th>
+                        <th>\( f(x) = P(X=x) \)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>0</strong></td>
+                        <td>TTTT</td>
+                        <td>\( \frac{1}{16} \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td>HTTT, THTT, TTHT, TTTH</td>
+                        <td>\( \frac{4}{16} = \frac{1}{4} \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td>HHTT, HTHT, HTTH, THHT, THTH, TTHH</td>
+                        <td>\( \frac{6}{16} = \frac{3}{8} \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td>HHHT, HHTH, HTHH, THHH</td>
+                        <td>\( \frac{4}{16} = \frac{1}{4} \)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td>HHHH</td>
+                        <td>\( \frac{1}{16} \)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-container">
+        <div class="question-block">
+            <p><strong>(c)</strong> Calculate the expected value of X.</p>
+        </div>
+        <div class="answer-block">
+            <p><strong>Solution:</strong></p>
+            <p>The expected value \( E(X) \) is the sum of the product of each possible value of \( X \) and its corresponding probability.</p>
+            <p>$$ E(X) = \sum_{x=0}^{4} x \cdot P(X=x) $$</p>
+            <p>$$ E(X) = \left(0 \cdot \frac{1}{16}\right) + \left(1 \cdot \frac{4}{16}\right) + \left(2 \cdot \frac{6}{16}\right) + \left(3 \cdot \frac{4}{16}\right) + \left(4 \cdot \frac{1}{16}\right) $$</p>
+            <p>$$ E(X) = 0 + \frac{4}{16} + \frac{12}{16} + \frac{12}{16} + \frac{4}{16} $$</p>
+            <p>$$ E(X) = \frac{32}{16} $$</p>
+            <p>$$ E(X) = 2 $$</p>
+        </div>
+    </div>
+
+</body>
+</html>
