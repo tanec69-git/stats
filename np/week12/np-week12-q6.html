@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seed Germination Probability App 🌱</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #2e7d32; /* Forest Green */
+            --secondary: #558b2f; /* Light Olive */
+            --accent: #8d6e63; /* Earthy Brown */
+            --bg: #f1f8e9; /* Very Light Green */
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+        .question-box {
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #f9fbe7;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: var(--secondary);
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Seed Germination Probability App 🌱</h1>
+
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>6. A biologist did a study on 20 seeds of a particular species of plant and found that the probability of its seeds germinating successfully is 0.75. The germination of each seed is independent of the others.</p>
+            <ol type="a">
+                <li>Calculate the expected number of seeds that germinate successfully and the value of its standard deviation.</li>
+                <li>Calculate the probability that at least 16 seeds germinate successfully.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (a): Expected Number and Standard Deviation 🧮</h2>
+        <p>This is a <strong>Binomial Distribution</strong> problem because we have a fixed number of independent trials (seeds), each with two outcomes (germinates or doesn't), and a constant probability of success.</p>
+        <ul>
+            <li>Number of trials ($n$) = 20 seeds</li>
+            <li>Probability of success ($p$) = 0.75</li>
+            <li>Probability of failure ($q$) = $1 - 0.75 = 0.25$</li>
+        </ul>
+        <div class="solution-step">
+            <p><strong>Expected Number (Mean, $\mu$):</strong></p>
+            $$\mu = n \cdot p$$
+            $$\mu = 20 \times 0.75 = 15$$
+            <p><strong>Answer: <span class="highlight">15 seeds</span></strong></p>
+            
+            <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+            
+            <p><strong>Standard Deviation ($\sigma$):</strong></p>
+            $$\sigma = \sqrt{n \cdot p \cdot q}$$
+            $$\sigma = \sqrt{20 \times 0.75 \times 0.25}$$
+            $$\sigma = \sqrt{3.75} \approx 1.93649$$
+            <p><strong>Answer: <span class="highlight">1.936</span> (to 4 s.f.)</strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (b): Probability of At Least 16 Seeds 🌼</h2>
+        <p>Let $X \sim \text{Binomial}(20, 0.75)$. We need to find the probability that <em>at least</em> 16 seeds germinate, which is $P(X \ge 16)$.</p>
+        <p>This is the sum of the probabilities of exactly 16, 17, 18, 19, and 20 seeds germinating. We use the formula $P(X = r) = {}^{n}C_{r} \cdot p^r \cdot q^{n-r}$.</p>
+        
+        <div class="solution-step">
+            $$P(X \ge 16) = P(X=16) + P(X=17) + P(X=18) + P(X=19) + P(X=20)$$
+            
+            <p>Calculating each term:</p>
+            $$P(X = 16) = {}^{20}C_{16} (0.75)^{16} (0.25)^4 \approx 0.189686$$
+            $$P(X = 17) = {}^{20}C_{17} (0.75)^{17} (0.25)^3 \approx 0.133896$$
+            $$P(X = 18) = {}^{20}C_{18} (0.75)^{18} (0.25)^2 \approx 0.066948$$
+            $$P(X = 19) = {}^{20}C_{19} (0.75)^{19} (0.25)^1 \approx 0.021141$$
+            $$P(X = 20) = {}^{20}C_{20} (0.75)^{20} (0.25)^0 \approx 0.003171$$
+            
+            <p>Summing them up:</p>
+            $$P(X \ge 16) = 0.189686 + 0.133896 + 0.066948 + 0.021141 + 0.003171 = 0.414842$$
+            <p><strong>Answer: <span class="highlight">0.4148</span> (to 4 d.p.)</strong></p>
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🔬 Interactive Binomial Calculator</h2>
+        <p>Calculate cumulative or exact probabilities instantly!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="20" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.75" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact">Exactly (=)</option>
+                <option value="atmost">At Most (≤)</option>
+                <option value="atleast" selected>At Least (≥)</option>
+                <option value="morethan">More Than (>)</option>
+                <option value="lessthan">Less Than (<)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($x$):</label>
+            <input type="number" id="r_val" value="16" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        // Ensure precise large number handling for factorials
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($x$) must be between 0 and Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            } else if (condition === "lessthan") {
+                for(let i = 0; i < r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X < ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(5)}</strong>`;
+            
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

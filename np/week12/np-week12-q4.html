@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus T-Shirt Shop App 👕</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #1e3a8a; /* Campus Navy */
+            --secondary: #d97706; /* Campus Gold/Amber */
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        .question-box {
+            background-color: #f1f5f9;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #fffbeb; /* Light amber bg */
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #1e40af;
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Campus T-Shirt Shop App 👕</h1>
+
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>4. It was observed that the probability that a student who visits the Campus T-shirt shop, will purchase a T-shirt is 0.3.</p>
+            <p>(a) If 8 students visit the shop,</p>
+            <ol type="i">
+                <li>what is the probability that 5 of them will make a purchase?</li>
+                <li>what is the probability that less than 3 will make a purchase?</li>
+            </ol>
+            <p>(b) On a particular day, 10 groups of 8 students will be visiting the shop, what is the probability that 2 of the groups would purchase 5 T-shirts each?</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (a) Solutions 🛍️</h2>
+        <p>This is a <strong>Binomial Distribution</strong>. A student either purchases a T-shirt (Success) or does not (Failure).</p>
+        <ul>
+            <li>Number of trials ($n$) = 8 students</li>
+            <li>Probability of success ($p$) = 0.3</li>
+            <li>Probability of failure ($q$) = $1 - 0.3 = 0.7$</li>
+        </ul>
+        <p>Let $X \sim \text{Binomial}(8, 0.3)$. The formula is: $$P(X = r) = {}^{n}C_{r} \cdot p^r \cdot q^{n-r}$$</p>
+
+        <h3>(i) Exactly 5 students make a purchase</h3>
+        <div class="solution-step">
+            $$P(X = 5) = {}^{8}C_5 (0.3)^5 (0.7)^3$$
+            $$P(X = 5) = 56 \times 0.00243 \times 0.343$$
+            $$P(X = 5) = 0.046675$$
+            <p><strong>Answer: <span class="highlight">0.0467</span> (to 4 s.f.)</strong></p>
+        </div>
+
+        <h3>(ii) Less than 3 make a purchase</h3>
+        <p>We need to find $P(X < 3)$, which means finding the probabilities for 0, 1, and 2.</p>
+        <div class="solution-step">
+            $$P(X < 3) = P(X=0) + P(X=1) + P(X=2)$$
+            $$P(X = 0) = {}^{8}C_0 (0.3)^0 (0.7)^8 \approx 0.057648$$
+            $$P(X = 1) = {}^{8}C_1 (0.3)^1 (0.7)^7 \approx 0.197650$$
+            $$P(X = 2) = {}^{8}C_2 (0.3)^2 (0.7)^6 \approx 0.296475$$
+            $$P(X < 3) = 0.057648 + 0.197650 + 0.296475 = 0.551773$$
+            <p><strong>Answer: <span class="highlight">0.5518</span> (to 4 s.f.)</strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (b) Solutions 🏫 (Nested Binomial)</h2>
+        <p>This is a secondary binomial distribution. Let $Y$ be the number of groups (out of 10) that purchase exactly 5 T-shirts.</p>
+        <ul>
+            <li>New trials ($n'$) = 10 groups</li>
+            <li>New probability of success ($p'$) = $P(X=5) \text{ from part a(i)} = 0.046675$</li>
+            <li>New probability of failure ($q'$) = $1 - 0.046675 = 0.953325$</li>
+        </ul>
+        <div class="solution-step">
+            <p>We want to find the probability that exactly 2 groups do this, $P(Y = 2)$:</p>
+            $$P(Y = 2) = {}^{10}C_2 (0.046675)^2 (0.953325)^8$$
+            $$P(Y = 2) = 45 \times 0.0021786 \times 0.6823467$$
+            $$P(Y = 2) = 0.066870$$
+            <p><strong>Answer: <span class="highlight">0.0669</span> (to 4 s.f.)</strong></p>
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Calculate cumulative or exact probabilities instantly!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="8" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.3" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact" selected>Exactly (=)</option>
+                <option value="lessthan">Less Than (<)</option>
+                <option value="atmost">At Most (≤)</option>
+                <option value="atleast">At Least (≥)</option>
+                <option value="morethan">More Than (>)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($r$):</label>
+            <input type="number" id="r_val" value="5" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($r$) must be between 0 and Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "lessthan") {
+                for(let i = 0; i < r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X < ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(5)}</strong>`;
+            
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

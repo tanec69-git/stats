@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polytechnic Probability App ✍️</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #0b6623; /* Forest Green */
+            --secondary: #4caf50;
+            --bg: #f0fdf4;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        .question-box {
+            background-color: #e6f4ea;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #09501b;
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+            background: #e6f4ea;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #d97706; /* Accent color for answers */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Polytechnic Probability App ✍️</h1>
+
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>3. In a polytechnic, 1 student in 5 is left-handed.</p>
+            <p>(a) Find the probability that in a class of 10 students</p>
+            <ol type="i">
+                <li>exactly 3 will be left-handed,</li>
+                <li>more than half will be left-handed.</li>
+            </ol>
+            <p>(b) Find the mean and the standard deviation of the number of left-handed people in a group of 25 students.</p>
+            <p>(c) In 8 classes, each with 10 students, what is the probability of finding 2 classes with exactly 3 left-handed students?</p>
+            <p><em>Give your answers correct to 4 decimal places.</em></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (a) Solutions 📐</h2>
+        <p>This is a <strong>Binomial Distribution</strong>. A student is either left-handed (Success) or right-handed/ambidextrous (Failure).</p>
+        <ul>
+            <li>Number of trials ($n$) = 10 students</li>
+            <li>Probability of success ($p$) = $\frac{1}{5} = 0.2$</li>
+            <li>Probability of failure ($q$) = $1 - 0.2 = 0.8$</li>
+        </ul>
+        <p>Let $X \sim \text{Binomial}(10, 0.2)$. The formula is: $$P(X = r) = {}^{n}C_{r} \cdot p^r \cdot q^{n-r}$$</p>
+
+        <h3>(i) Exactly 3 left-handed students</h3>
+        <div class="solution-step">
+            $$P(X = 3) = {}^{10}C_3 (0.2)^3 (0.8)^7$$
+            $$P(X = 3) = 120 \times 0.008 \times 0.209715$$
+            $$P(X = 3) = 0.201326$$
+            <p><strong>Answer: <span class="highlight">0.2013</span></strong></p>
+        </div>
+
+        <h3>(ii) More than half are left-handed</h3>
+        <p>More than half of 10 is strictly greater than 5. We need to find $P(X > 5)$, which is $P(X \ge 6)$.</p>
+        <div class="solution-step">
+            $$P(X > 5) = P(X=6) + P(X=7) + P(X=8) + P(X=9) + P(X=10)$$
+            $$P(X = 6) = {}^{10}C_6 (0.2)^6 (0.8)^4 \approx 0.005505$$
+            $$P(X = 7) = {}^{10}C_7 (0.2)^7 (0.8)^3 \approx 0.000786$$
+            $$P(X = 8) = {}^{10}C_8 (0.2)^8 (0.8)^2 \approx 0.000074$$
+            $$P(X = 9) = {}^{10}C_9 (0.2)^9 (0.8)^1 \approx 0.000004$$
+            $$P(X = 10) = {}^{10}C_{10} (0.2)^{10} (0.8)^0 \approx 0.000000$$
+            $$P(X > 5) = 0.005505 + 0.000786 + 0.000074 + 0.000004 + 0 = 0.006369$$
+            <p><strong>Answer: <span class="highlight">0.0064</span></strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (b) Solutions 📊</h2>
+        <p>Here we look at a larger group where $n = 25$ and $p = 0.2$.</p>
+        <div class="solution-step">
+            <p><strong>Mean ($\mu$):</strong></p>
+            $$\mu = n \cdot p = 25 \times 0.2 = 5$$
+            <p><strong>Answer: <span class="highlight">Mean = 5.0000</span></strong></p>
+            <br>
+            <p><strong>Standard Deviation ($\sigma$):</strong></p>
+            $$\sigma = \sqrt{n \cdot p \cdot q} = \sqrt{25 \times 0.2 \times 0.8}$$
+            $$\sigma = \sqrt{4} = 2$$
+            <p><strong>Answer: <span class="highlight">Standard Deviation = 2.0000</span></strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (c) Solutions 🧩 (Nested Binomial)</h2>
+        <p>This is a secondary binomial distribution. Let $Y$ be the number of classes (out of 8) that have exactly 3 left-handed students.</p>
+        <ul>
+            <li>New trials ($n'$) = 8 classes</li>
+            <li>New probability of success ($p'$) = $P(X=3) \text{ from part (a)} = 0.201326$</li>
+            <li>New probability of failure ($q'$) = $1 - 0.201326 = 0.798674$</li>
+        </ul>
+        <div class="solution-step">
+            <p>We want to find $P(Y = 2)$:</p>
+            $$P(Y = 2) = {}^{8}C_2 (0.201326)^2 (0.798674)^6$$
+            $$P(Y = 2) = 28 \times 0.040532 \times 0.259443$$
+            $$P(Y = 2) = 0.294435$$
+            <p><strong>Answer: <span class="highlight">0.2944</span></strong></p>
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Calculate cumulative or exact probabilities instantly!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="10" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.2" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact" selected>Exactly (=)</option>
+                <option value="atmost">At Most (≤)</option>
+                <option value="atleast">At Least (≥)</option>
+                <option value="morethan">More Than (>)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($r$):</label>
+            <input type="number" id="r_val" value="3" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($r$) must be between 0 and Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(4)}</strong>`;
+            
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Bulb Quality Control App 💡</title>
+    
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #d97706; /* Amber/Bulb Yellow */
+            --secondary: #334155; /* Slate Gray */
+            --accent: #2563eb; /* Table Blue */
+            --bg: #fffbeb; /* Light Amber Background */
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--secondary);
+            margin-top: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1);
+            margin-bottom: 25px;
+            border-top: 4px solid var(--primary);
+        }
+        .question-box {
+            background-color: #f8fafc;
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #fef3c7; /* Lighter amber */
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        
+        /* Specific Table Styling for the Question */
+        .q-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+        .q-table th, .q-table td {
+            border: 1px solid black;
+            padding: 8px 12px;
+        }
+        .q-table th {
+            font-weight: bold;
+            font-style: italic;
+            text-decoration: underline;
+            text-align: left;
+        }
+        .q-table td {
+            font-weight: bold;
+        }
+        .align-right { text-align: right; }
+        .blue-text { color: #1e6091; font-style: italic; text-decoration: underline; }
+        .black-italic { font-style: italic; }
+
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--secondary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #b45309;
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--secondary);
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+        }
+        .highlight {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Light Bulb Quality Control App 💡</h1>
+
+    <!-- THE QUESTION -->
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>7. In a large consignment of light bulbs, the probability of a bulb being faulty is 0.1. The bulbs are packed in lots of size 10. A quality control officer takes a lot and rejects it if there are at least 2 faulty bulbs. Otherwise, he accepts it.</p>
+            <p>To confirm his decision, a second quality control officer takes another lot from the batch inspected by the first officer <u>and also</u> rejects the lot if he finds at least 2 faulty bulbs. <u>Otherwise</u> he accepts it.</p>
+            <p>The whole consignment is accepted if both officers accept their lots and rejected if both officers reject their lots. If they differ in decision, a 3<sup>rd</sup> officer is brought in to examine a 3<sup>rd</sup> lot, and the whole consignment is rejected if there <u>are</u> more than 1 faulty bulb.</p>
+            <p>Find the probability that the whole consignment is finally rejected.</p>
+            <p><strong>Give your answers correct to 3 significant figures.</strong></p>
+
+            <table class="q-table">
+                <thead>
+                    <tr>
+                        <th>1<sup>st</sup> Officer</th>
+                        <th>2<sup>nd</sup> Officer</th>
+                        <th>3<sup>rd</sup> Officer</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>P(X<2)</td>
+                        <td>P(X<2)</td>
+                        <td></td>
+                        <td class="black-italic">Accepted</td>
+                    </tr>
+                    <tr>
+                        <td class="align-right blue-text">P(X≥2)</td>
+                        <td class="align-right blue-text">P(X≥2)</td>
+                        <td></td>
+                        <td class="blue-text">Rejected</td>
+                    </tr>
+                    <tr>
+                        <td>P(X<2)</td>
+                        <td class="align-right blue-text">P(X≥2)</td>
+                        <td>P(X<2)</td>
+                        <td class="black-italic">Accepted</td>
+                    </tr>
+                    <tr>
+                        <td class="align-right blue-text">P(X≥2)</td>
+                        <td>P(X<2)</td>
+                        <td class="align-right blue-text">P(X≥2)</td>
+                        <td class="blue-text">Rejected</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PART 1: Probability for a single lot -->
+    <div class="card">
+        <h2>Step 1: Probability for a Single Lot 📦</h2>
+        <p>Let $X$ be the number of faulty bulbs in a lot of 10. This follows a binomial distribution: $X \sim \text{Binomial}(10, 0.1)$.</p>
+        <ul>
+            <li>Number of trials ($n$) = 10 bulbs</li>
+            <li>Probability of a faulty bulb ($p$) = 0.1</li>
+            <li>Probability of a working bulb ($q$) = 0.9</li>
+        </ul>
+        
+        <h3>Accepting a Lot: $P(X < 2)$</h3>
+        <p>The lot is accepted if there are 0 or 1 faulty bulbs.</p>
+        <div class="solution-step">
+            $$P(X < 2) = P(X=0) + P(X=1)$$
+            $$P(X = 0) = {}^{10}C_0 (0.1)^0 (0.9)^{10} \approx 0.348678$$
+            $$P(X = 1) = {}^{10}C_1 (0.1)^1 (0.9)^9 \approx 0.387420$$
+            $$P(\text{Accept}) = 0.348678 + 0.387420 = \mathbf{0.736098}$$
+        </div>
+
+        <h3>Rejecting a Lot: $P(X \ge 2)$</h3>
+        <p>The lot is rejected if there are at least 2 faulty bulbs (which is the same mathematically as "more than 1 faulty bulb"). We use the complement rule.</p>
+        <div class="solution-step">
+            $$P(X \ge 2) = 1 - P(X < 2)$$
+            $$P(\text{Reject}) = 1 - 0.736098 = \mathbf{0.263902}$$
+        </div>
+    </div>
+
+    <!-- PART 2: Overall Consignment Probability -->
+    <div class="card">
+        <h2>Step 2: Probability of Consignment Rejection 🚫</h2>
+        <p>The entire consignment is rejected in three specific scenarios (branches on a probability tree):</p>
+        <ol>
+            <li><strong>Reject, Reject:</strong> Both the 1st and 2nd officers reject.</li>
+            <li><strong>Accept, Reject, Reject:</strong> 1st accepts, 2nd rejects, 3rd rejects.</li>
+            <li><strong>Reject, Accept, Reject:</strong> 1st rejects, 2nd accepts, 3rd rejects.</li>
+        </ol>
+        
+        <div class="solution-step">
+            <p><strong>Scenario 1:</strong> $P(\text{Reject}) \times P(\text{Reject})$</p>
+            $$0.263902 \times 0.263902 \approx 0.069644$$
+            
+            <p><strong>Scenario 2:</strong> $P(\text{Accept}) \times P(\text{Reject}) \times P(\text{Reject})$</p>
+            $$0.736098 \times 0.263902 \times 0.263902 \approx 0.051264$$
+            
+            <p><strong>Scenario 3:</strong> $P(\text{Reject}) \times P(\text{Accept}) \times P(\text{Reject})$</p>
+            $$0.263902 \times 0.736098 \times 0.263902 \approx 0.051264$$
+            
+            <hr style="border: 0; border-top: 1px solid #d97706; margin: 15px 0;">
+            
+            <p><strong>Total Probability:</strong></p>
+            $$\text{Total} = 0.069644 + 0.051264 + 0.051264 = 0.172172$$
+            
+            <p><strong>Final Answer: <span class="highlight">0.172</span> (to 3 s.f.)</strong></p>
+        </div>
+    </div>
+
+    <!-- Interactive Calculator -->
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Explore the lot acceptance/rejection probabilities by changing the values!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Bulbs per Lot ($n$):</label>
+            <input type="number" id="n_val" value="10" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Faulty Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.1" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact">Exactly (=)</option>
+                <option value="lessthan" selected>Less Than (<) [Accept]</option>
+                <option value="atmost">At Most (≤)</option>
+                <option value="atleast">At Least (≥) [Reject]</option>
+                <option value="morethan">More Than (>)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($x$):</label>
+            <input type="number" id="r_val" value="2" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        // Mathematical functions
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($x$) must be between 0 and Bulbs per Lot ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            } else if (condition === "lessthan") {
+                for(let i = 0; i < r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X < ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(6)}</strong>`;
+            
+            // Re-render MathJax
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surgical Procedure Probability App 🩺</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #0d9488; /* Medical Teal */
+            --secondary: #0f766e;
+            --accent: #f59e0b;
+            --bg: #f0fdfa;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --table-border: #ccfbf1;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+        .question-box {
+            background-color: #f8fafc;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #f0fdfa;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--table-border);
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--secondary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: var(--secondary);
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+            background: #f0fdfa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Surgical Procedure Probability App 🩺</h1>
+
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>5. A certain surgical procedure has an 80% chance of success. A doctor performs the procedure on six patients. The random variable represents the number of successful operations.</p>
+            <p>(a) Show the above fulfils the 4 conditions of a binomial experiment.</p>
+            <p>(b) Define the random variable, X.<br>Find the probability for each value of x.<br>Hence, construct the binomial distribution.</p>
+            <p>(c) Extend the distribution in (b) by calculating and adding another rows or columns for</p>
+            <ol type="i">
+                <li>cumulative probability P(X≤x).<br>Explain in your own words the meaning of P(X≤x) and how the values vary. <em>(Hint: recall cumulative frequency distribution in Ch 3)</em></li>
+                <li>probability P(X > x).<br>Explain the relationship of P(X > x) and P(X≤x), and how the values vary.</li>
+            </ol>
+            <p>(d) Find the expected number of successful operations for the distribution, and the standard deviation.</p>
+            <p>(e) Find the probability that the surgery is successful for</p>
+            <ol type="i">
+                <li>more than 3 patients;</li>
+                <li>at most one.</li>
+            </ol>
+            <p><strong>Give your answers correct to 4 decimal places.</strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (a): 4 Conditions of a Binomial Experiment</h2>
+        <div class="solution-step">
+            <ol>
+                <li><strong>Fixed number of trials:</strong> There are exactly $n = 6$ operations performed.</li>
+                <li><strong>Two mutually exclusive outcomes:</strong> Each surgery is either a "success" or a "failure".</li>
+                <li><strong>Constant probability of success:</strong> The chance of success is $p = 0.8$ for every single procedure.</li>
+                <li><strong>Independent trials:</strong> The outcome of one patient's surgery does not affect the outcome of another's.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (b): Defining X & Constructing the Distribution</h2>
+        <p><strong>Definition:</strong> Let $X$ be the random variable representing the number of successful operations out of 6. The possible values are $x = 0, 1, 2, 3, 4, 5, 6$.</p>
+        <p>Using the formula $P(X = x) = {}^{6}C_{x} (0.8)^x (0.2)^{6-x}$, we calculate the probabilities:</p>
+        <div class="solution-step">
+            <ul>
+                <li>$P(X = 0) = {}^{6}C_0 (0.8)^0 (0.2)^6 = 0.000064$</li>
+                <li>$P(X = 1) = {}^{6}C_1 (0.8)^1 (0.2)^5 = 0.001536$</li>
+                <li>$P(X = 2) = {}^{6}C_2 (0.8)^2 (0.2)^4 = 0.015360$</li>
+                <li>$P(X = 3) = {}^{6}C_3 (0.8)^3 (0.2)^3 = 0.081920$</li>
+                <li>$P(X = 4) = {}^{6}C_4 (0.8)^4 (0.2)^2 = 0.245760$</li>
+                <li>$P(X = 5) = {}^{6}C_5 (0.8)^5 (0.2)^1 = 0.393216$</li>
+                <li>$P(X = 6) = {}^{6}C_6 (0.8)^6 (0.2)^0 = 0.262144$</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (c): Extended Distribution Table 📊</h2>
+        <p><em>All values below are rounded to 4 decimal places as requested.</em></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>$x$</th>
+                    <th>Probability $P(X = x)$</th>
+                    <th>Cumulative $P(X \le x)$</th>
+                    <th>Complement $P(X > x)$</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>0</td><td>0.0001</td><td>0.0001</td><td>0.9999</td></tr>
+                <tr><td>1</td><td>0.0015</td><td>0.0016</td><td>0.9984</td></tr>
+                <tr><td>2</td><td>0.0154</td><td>0.0170</td><td>0.9830</td></tr>
+                <tr><td>3</td><td>0.0819</td><td>0.0989</td><td>0.9011</td></tr>
+                <tr><td>4</td><td>0.2458</td><td>0.3446</td><td>0.6554</td></tr>
+                <tr><td>5</td><td>0.3932</td><td>0.7379</td><td>0.2621</td></tr>
+                <tr><td>6</td><td>0.2621</td><td>1.0000</td><td>0.0000</td></tr>
+            </tbody>
+        </table>
+
+        <div class="solution-step">
+            <p><strong>(i) Meaning of $P(X \le x)$:</strong> This is the cumulative probability, representing the chance of getting <em>at most</em> $x$ successful operations. Similar to a cumulative frequency curve (ogive), these values are monotonically increasing. They start very small at $x=0$ and accumulate up to exactly $1.0$ at $x=6$.</p>
+            <br>
+            <p><strong>(ii) Relationship between $P(X > x)$ and $P(X \le x)$:</strong> They are complementary events. The relationship is defined by $P(X > x) = 1 - P(X \le x)$. As $x$ increases, $P(X \le x)$ grows larger, forcing $P(X > x)$ to grow smaller, eventually reaching $0$ because you cannot have more than 6 successes in 6 trials.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (d): Expected Number and Standard Deviation</h2>
+        <div class="solution-step">
+            <p><strong>Mean (Expected Number, $\mu$):</strong></p>
+            $$\mu = n \cdot p = 6 \times 0.8 = 4.8$$
+            <p><strong>Answer: <span class="highlight">4.8000</span></strong></p>
+            <br>
+            <p><strong>Standard Deviation ($\sigma$):</strong></p>
+            $$\sigma = \sqrt{n \cdot p \cdot q} = \sqrt{6 \times 0.8 \times 0.2} = \sqrt{0.96} \approx 0.97979$$
+            <p><strong>Answer: <span class="highlight">0.9798</span> (to 4 d.p.)</strong></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (e): Probabilities of Specific Outcomes</h2>
+        <div class="solution-step">
+            <p><strong>(i) More than 3 patients:</strong> $P(X > 3)$</p>
+            $$P(X > 3) = P(X=4) + P(X=5) + P(X=6)$$
+            $$P(X > 3) = 0.24576 + 0.393216 + 0.262144 = 0.90112$$
+            <p><strong>Answer: <span class="highlight">0.9011</span> (to 4 d.p.)</strong></p>
+            <br>
+            <p><strong>(ii) At most one patient:</strong> $P(X \le 1)$</p>
+            $$P(X \le 1) = P(X=0) + P(X=1)$$
+            $$P(X \le 1) = 0.000064 + 0.001536 = 0.0016$$
+            <p><strong>Answer: <span class="highlight">0.0016</span> (to 4 d.p.)</strong></p>
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Calculate cumulative or exact probabilities instantly!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="6" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.8" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact">Exactly (=)</option>
+                <option value="atmost">At Most (≤)</option>
+                <option value="atleast">At Least (≥)</option>
+                <option value="morethan" selected>More Than (>)</option>
+                <option value="lessthan">Less Than (<)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($x$):</label>
+            <input type="number" id="r_val" value="3" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($x$) must be between 0 and Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            } else if (condition === "lessthan") {
+                for(let i = 0; i < r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X < ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(4)}</strong>`;
+            
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

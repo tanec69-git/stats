@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS Teams Probability App 📊</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #4a154b; /* Teams purple */
+            --secondary: #6264a7;
+            --bg: #f3f2f1;
+            --card-bg: #ffffff;
+            --text: #252423;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .question-box {
+            background-color: #e5e5f1;
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            border-radius: 0 8px 8px 0;
+        }
+        .solution-step {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        .calculator {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid var(--secondary);
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 5px;
+            display: inline-block;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        input[type="number"], select {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        select {
+            width: 140px;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: var(--secondary);
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+            background: #f3f2f1;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>MS Teams Probability App 💬</h1>
+
+    <div class="card">
+        <h2>The Question 📝</h2>
+        <div class="question-box">
+            <p>Forty-three percent of students in School of ICT receive fewer than five MS Teams messages a day. In a random sample of seven students, what is the probability that the number of students receiving fewer than five MS Teams messages a day is:</p>
+            <ol type="a">
+                <li>exactly three?</li>
+                <li>at most three?</li>
+                <li>more than three?</li>
+            </ol>
+            <p><em>Give your answers correct to 3 decimal places.</em></p>
+            <hr>
+            <p>Find the mean and standard deviation for the number of students receiving fewer than five MS Teams messages a day in such samples of seven students.</p>
+            <p><em>Give your answers correct to 3 significant figures.</em></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>The Solutions 📐</h2>
+        <p>This is a <strong>Binomial Distribution</strong> problem. A student either receives fewer than 5 messages (Success) or they do not (Failure).</p>
+        <ul>
+            <li>Number of trials ($n$) = 7 students</li>
+            <li>Probability of success ($p$) = 0.43</li>
+            <li>Probability of failure ($q$) = $1 - 0.43 = 0.57$</li>
+        </ul>
+        <p>Let $X \sim \text{Binomial}(7, 0.43)$. The formula is: $$P(X = r) = {}^{n}C_{r} \cdot p^r \cdot q^{n-r}$$</p>
+
+        <h3>(a) Exactly three students</h3>
+        <div class="solution-step">
+            $$P(X = 3) = {}^{7}C_3 (0.43)^3 (0.57)^4$$
+            $$P(X = 3) = 35 \times 0.079507 \times 0.10556$$
+            $$P(X = 3) = 0.29374$$
+            <p><strong>Answer: 0.294 (to 3 d.p.)</strong></p>
+        </div>
+
+        <h3>(b) At most three students</h3>
+        <p>We need to find $P(X \le 3)$, which is the sum of probabilities for 0, 1, 2, and 3.</p>
+        <div class="solution-step">
+            $$P(X = 0) = {}^{7}C_0 (0.43)^0 (0.57)^7 \approx 0.01954$$
+            $$P(X = 1) = {}^{7}C_1 (0.43)^1 (0.57)^6 \approx 0.10323$$
+            $$P(X = 2) = {}^{7}C_2 (0.43)^2 (0.57)^5 \approx 0.23364$$
+            $$P(X = 3) \approx 0.29374 \text{ (from part a)}$$
+            $$P(X \le 3) = 0.01954 + 0.10323 + 0.23364 + 0.29374 = 0.65015$$
+            <p><strong>Answer: 0.650 (to 3 d.p.)</strong></p>
+        </div>
+
+        <h3>(c) More than three students</h3>
+        <p>We need $P(X > 3)$. The most efficient method is using the complement rule: $1 - P(X \le 3)$.</p>
+        <div class="solution-step">
+            $$P(X > 3) = 1 - P(X \le 3)$$
+            $$P(X > 3) = 1 - 0.65015 = 0.34985$$
+            <p><strong>Answer: 0.350 (to 3 d.p.)</strong></p>
+        </div>
+
+        <hr>
+
+        <h3>Mean and Standard Deviation</h3>
+        <div class="solution-step">
+            <p><strong>Mean ($\mu$):</strong></p>
+            $$\mu = n \cdot p$$
+            $$\mu = 7 \times 0.43 = 3.01$$
+            <p><strong>Answer: Mean = 3.01 (to 3 s.f.)</strong></p>
+            <br>
+            <p><strong>Standard Deviation ($\sigma$):</strong></p>
+            $$\sigma = \sqrt{n \cdot p \cdot q}$$
+            $$\sigma = \sqrt{7 \times 0.43 \times 0.57}$$
+            $$\sigma = \sqrt{1.7157} \approx 1.3098$$
+            <p><strong>Answer: Standard Deviation = 1.31 (to 3 s.f.)</strong></p>
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Calculate cumulative or exact probabilities instantly!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="7" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.43" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="condition">Condition:</label>
+            <select id="condition">
+                <option value="exact">Exactly (=)</option>
+                <option value="atmost" selected>At Most (≤)</option>
+                <option value="atleast">At Least (≥)</option>
+                <option value="morethan">More Than (>)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($r$):</label>
+            <input type="number" id="r_val" value="3" min="0">
+        </div>
+        
+        <br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) result *= i;
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function getExactProb(n, r, p) {
+            return nCr(n, r) * Math.pow(p, r) * Math.pow(1 - p, n - r);
+        }
+
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const condition = document.getElementById('condition').value;
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n || r < 0) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($r$) must be between 0 and Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            let finalProb = 0;
+            let notation = "";
+
+            if (condition === "exact") {
+                finalProb = getExactProb(n, r, p);
+                notation = `P(X = ${r})`;
+            } else if (condition === "atmost") {
+                for(let i = 0; i <= r; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\le ${r})`;
+            } else if (condition === "atleast") {
+                for(let i = r; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X \\ge ${r})`;
+            } else if (condition === "morethan") {
+                for(let i = r + 1; i <= n; i++) finalProb += getExactProb(n, i, p);
+                notation = `P(X > ${r})`;
+            }
+
+            resultDiv.innerHTML = `Probability $${notation}$ = <strong>${finalProb.toFixed(5)}</strong>`;
+            
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>

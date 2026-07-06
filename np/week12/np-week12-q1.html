@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supermarket Probability App 🛒</title>
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        h2, h3 {
+            color: var(--primary);
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .solution-step {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+            overflow-x: auto;
+        }
+        .calculator {
+            background: #eef2f5;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #dcdde1;
+            text-align: center;
+        }
+        .input-group {
+            margin: 10px 0;
+            display: inline-block;
+            margin-right: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        input[type="number"] {
+            width: 70px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #calc-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Supermarket Probability App 🛒💳</h1>
+
+    <div class="card">
+        <h2>Part (a): Probability in a Sample of 10</h2>
+        <p>This is a <strong>Binomial Distribution</strong> problem because there are a fixed number of independent trials (customers), each with two outcomes (pays by credit card or doesn't), and a constant probability of success.</p>
+        <ul>
+            <li>Number of trials ($n$) = 10</li>
+            <li>Probability of paying by card ($p$) = 0.67</li>
+            <li>Probability of NOT paying by card ($q$) = $1 - 0.67 = 0.33$</li>
+        </ul>
+        <p>Let $X \sim \text{Binomial}(10, 0.67)$. The general formula using ${}^nC_r$ notation is:</p>
+        $$P(X = r) = {}^{n}C_{r} \cdot p^r \cdot q^{n-r}$$
+
+        <h3>(i) Exactly two customers pay by credit card ✌️</h3>
+        <div class="solution-step">
+            $$P(X = 2) = {}^{10}C_2 (0.67)^2 (0.33)^8$$
+            $$P(X = 2) = 45 \times 0.4489 \times 0.0001406$$
+            $$P(X = 2) \approx 0.0028$$
+        </div>
+
+        <h3>(ii) At least 8 paid by credit card 📈</h3>
+        <p>We need to find $P(X \ge 8)$, which is the sum of probabilities for 8, 9, and 10.</p>
+        <div class="solution-step">
+            $$P(X = 8) = {}^{10}C_8 (0.67)^8 (0.33)^2 \approx 0.1990$$
+            $$P(X = 9) = {}^{10}C_9 (0.67)^9 (0.33)^1 \approx 0.0898$$
+            $$P(X = 10) = {}^{10}C_{10} (0.67)^{10} (0.33)^0 \approx 0.0182$$
+            $$P(X \ge 8) = 0.1990 + 0.0898 + 0.0182 \approx 0.3070$$
+        </div>
+
+        <h3>(iii) More than 2 paid by credit card 📊</h3>
+        <p>We need $P(X > 2)$. It is faster to use the complement rule: $1 - P(X \le 2)$.</p>
+        <div class="solution-step">
+            $$P(X \le 2) = P(X=0) + P(X=1) + P(X=2)$$
+            $$P(X = 0) = {}^{10}C_0 (0.67)^0 (0.33)^{10} \approx 0.000015$$
+            $$P(X = 1) = {}^{10}C_1 (0.67)^1 (0.33)^9 \approx 0.000305$$
+            $$P(X = 2) \approx 0.002841 \text{ (from part i)}$$
+            $$P(X \le 2) = 0.000015 + 0.000305 + 0.002841 = 0.003161$$
+            $$P(X > 2) = 1 - 0.003161 \approx 0.9968$$
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Part (b): Mean in a Sample of 100 💵</h2>
+        <p>Here, we are looking at the number of customers who <strong>do not</strong> pay by credit card. </p>
+        <ul>
+            <li>Sample size ($n$) = 100</li>
+            <li>Probability of <em>not</em> paying by card ($q$) = 0.33</li>
+        </ul>
+        <div class="solution-step">
+            <p>The formula for the expected value (mean) of a binomial distribution is $\mu = n \cdot p_{event}$.</p>
+            $$\text{Mean} = 100 \times 0.33 = 33 \text{ customers}$$
+        </div>
+    </div>
+
+    <div class="calculator card">
+        <h2>🧮 Interactive Binomial Calculator</h2>
+        <p>Calculate $P(X = r) = {}^{n}C_{r} \cdot p^r \cdot (1-p)^{n-r}$ for any scenario!</p>
+        
+        <div class="input-group">
+            <label for="n_val">Trials ($n$):</label>
+            <input type="number" id="n_val" value="10" min="1">
+        </div>
+        <div class="input-group">
+            <label for="p_val">Prob ($p$):</label>
+            <input type="number" id="p_val" value="0.67" step="0.01" min="0" max="1">
+        </div>
+        <div class="input-group">
+            <label for="r_val">Target ($r$):</label>
+            <input type="number" id="r_val" value="2" min="0">
+        </div>
+        
+        <br><br>
+        <button onclick="calculateBinomial()">Calculate Probability ✨</button>
+        
+        <div id="calc-result"></div>
+    </div>
+
+    <script>
+        // Math helper functions
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= num; i++) {
+                result *= i;
+            }
+            return result;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        // App calculation logic
+        function calculateBinomial() {
+            const n = parseInt(document.getElementById('n_val').value);
+            const r = parseInt(document.getElementById('r_val').value);
+            const p = parseFloat(document.getElementById('p_val').value);
+            const resultDiv = document.getElementById('calc-result');
+
+            if (r > n) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Target ($r$) cannot be greater than Trials ($n$).";
+                return;
+            }
+            if (p < 0 || p > 1) {
+                resultDiv.innerHTML = "⚠️ <strong>Error:</strong> Probability ($p$) must be between 0 and 1.";
+                return;
+            }
+
+            const combinations = nCr(n, r);
+            const probSuccess = Math.pow(p, r);
+            const probFailure = Math.pow(1 - p, n - r);
+            const finalProb = combinations * probSuccess * probFailure;
+
+            resultDiv.innerHTML = `Probability $P(X = ${r})$ = <strong>${finalProb.toFixed(5)}</strong>`;
+            
+            // Re-render MathJax for dynamically added content
+            MathJax.typesetPromise([resultDiv]);
+        }
+    </script>
+
+</body>
+</html>
