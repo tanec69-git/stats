@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Density Function Interactive</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-box {
+            background: #fafafa;
+            padding: 15px 20px;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 18px;
+            cursor: pointer;
+            border: none;
+            background: #0056b3;
+            color: white;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #004494;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .solution-box {
+            padding: 20px;
+            background: #eef7ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none; /* Hidden until a button is clicked */
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Interactive Probability Density Viewer</h2>
+    
+    <div class="question-box">
+        <p>1. A continuous random variable \(X\) has the probability density shown in the figure.</p>
+        <p>&nbsp;&nbsp;&nbsp;(a) Show that the value of \(k = \frac{1}{8}\).</p>
+        <p>&nbsp;&nbsp;&nbsp;(b) Find the probability that \(X\) will take a value<br>
+           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(i) between -1 and 4<br>
+           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ii) greater than -2.
+        </p>
+    </div>
+
+    <div class="controls">
+        <button onclick="showSolution('a')">Show Part (a) Solution</button>
+        <button onclick="showSolution('bi')">Show Part (b)(i) Solution</button>
+        <button onclick="showSolution('bii')">Show Part (b)(ii) Solution</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="pdfCanvas" width="700" height="300"></canvas>
+    </div>
+
+    <div id="solution" class="solution-box"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Coordinate mapping limits to center the graph properly
+    const minX = -4.5, maxX = 7.5;
+    const minY = -0.08, maxY = 0.25;
+    
+    // Helper functions to map mathematical coordinates to canvas pixels
+    function mapX(x) { return ((x - minX) / (maxX - minX)) * canvas.width; }
+    function mapY(y) { return canvas.height - ((y - minY) / (maxY - minY)) * canvas.height; }
+    
+    // Core drawing function
+    function drawGraph(activePart) {
+        // Clear canvas for re-draw
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw Shaded Probability Area
+        if (activePart) {
+            ctx.fillStyle = 'rgba(0, 123, 255, 0.25)'; // Semi-transparent blue
+            let startX, endX;
+            if (activePart === 'a') { startX = -2; endX = 6; }
+            else if (activePart === 'bi') { startX = -1; endX = 4; }
+            else if (activePart === 'bii') { startX = -2; endX = 6; }
+            
+            let pxStartX = mapX(startX);
+            let pxEndX = mapX(endX);
+            let pxWidth = pxEndX - pxStartX;
+            let pxHeight = mapY(0) - mapY(1/8);
+            
+            ctx.fillRect(pxStartX, mapY(1/8), pxWidth, pxHeight);
+        }
+
+        // 2. Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        // X-axis
+        ctx.moveTo(mapX(-4), mapY(0));
+        ctx.lineTo(mapX(7), mapY(0));
+        // Y-axis
+        ctx.moveTo(mapX(0), mapY(-0.05));
+        ctx.lineTo(mapX(0), mapY(0.2));
+        ctx.stroke();
+
+        // 3. Draw Axis Arrows
+        ctx.fillStyle = '#333';
+        ctx.beginPath(); // X arrow
+        ctx.moveTo(mapX(7), mapY(0)); ctx.lineTo(mapX(6.8), mapY(0.015)); ctx.lineTo(mapX(6.8), mapY(-0.015)); ctx.fill();
+        ctx.beginPath(); // Y arrow
+        ctx.moveTo(mapX(0), mapY(0.2)); ctx.lineTo(mapX(-0.15), mapY(0.18)); ctx.lineTo(mapX(0.15), mapY(0.18)); ctx.fill();
+
+        // 4. Draw Labels & Ticks
+        ctx.font = '16px Arial';
+        ctx.fillText('x', mapX(7.2), mapY(-0.02));
+        ctx.fillText('y', mapX(-0.4), mapY(0.2));
+        ctx.fillText('k', mapX(-0.4), mapY(1/8) - 8);
+
+        ctx.font = '14px Arial';
+        for(let i = -3; i <= 6; i++) {
+            ctx.beginPath();
+            ctx.moveTo(mapX(i), mapY(0));
+            ctx.lineTo(mapX(i), mapY(-0.015));
+            ctx.stroke();
+            // Adjust zero label slightly
+            if(i !== 0) {
+                ctx.fillText(i, mapX(i) - 5, mapY(-0.04));
+            } else {
+                ctx.fillText(i, mapX(i) + 8, mapY(-0.04));
+            }
+        }
+
+        // 5. Draw the uniform PDF Line (y = k = 1/8)
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.moveTo(mapX(-2), mapY(1/8));
+        ctx.lineTo(mapX(6), mapY(1/8));
+        ctx.stroke();
+
+        // 6. Draw dashed boundary lines
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(mapX(-2), mapY(1/8)); ctx.lineTo(mapX(-2), mapY(0));
+        ctx.moveTo(mapX(6), mapY(1/8)); ctx.lineTo(mapX(6), mapY(0));
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset to solid lines
+    }
+
+    // Solutions database using MathJax LaTeX syntax
+    // Note: Double backslashes (\\) are used in JS strings to output a single backslash (\) for MathJax
+    const solutions = {
+        'a': `<h3>Part (a) Solution</h3>
+              <p>For a continuous probability density function, the total area under the curve must be exactly <strong>\\(1\\)</strong>.</p>
+              <p>The probability distribution forms a rectangle:</p>
+              <ul>
+                  <li>\\(\\text{Base width} = 6 - (-2) = 8\\)</li>
+                  <li>\\(\\text{Height} = k\\)</li>
+              </ul>
+              <p>\\(\\text{Area} = \\text{Base} \\times \\text{Height}\\)</p>
+              <p>\\(1 = 8 \\times k\\)</p>
+              <p>\\(k = \\frac{1}{8}\\)</p>`,
+        
+        'bi': `<h3>Part (b)(i) Solution: Probability between -1 and 4</h3>
+              <p>The probability is the geometric area of the shaded rectangle between \\(x = -1\\) and \\(x = 4\\).</p>
+              <ul>
+                  <li>\\(\\text{Base width} = 4 - (-1) = 5\\)</li>
+                  <li>\\(\\text{Height} = \\frac{1}{8}\\)</li>
+              </ul>
+              <p>\\(P(-1 < X < 4) = \\text{Area} = \\text{Base} \\times \\text{Height}\\)</p>
+              <p>\\(P(-1 < X < 4) = 5 \\times \\frac{1}{8} = \\mathbf{\\frac{5}{8}}\\) (or 0.625)</p>`,
+              
+        'bii': `<h3>Part (b)(ii) Solution: Probability greater than -2</h3>
+              <p>The PDF is only valid and defined up to \\(x = 6\\). Therefore, finding the probability for \\(X > -2\\) spans the entire defined area of the graph (from \\(-2\\) to \\(6\\)).</p>
+              <ul>
+                  <li>\\(\\text{Base width} = 6 - (-2) = 8\\)</li>
+                  <li>\\(\\text{Height} = \\frac{1}{8}\\)</li>
+              </ul>
+              <p>\\(P(X > -2) = \\text{Area} = \\text{Base} \\times \\text{Height}\\)</p>
+              <p>\\(P(X > -2) = 8 \\times \\frac{1}{8} = \\mathbf{1}\\)</p>
+              <p><em>It is absolutely certain that X will be greater than -2.</em></p>`
+    };
+
+    function showSolution(part) {
+        // Redraw graph with active shading
+        drawGraph(part);
+        
+        // Inject solution HTML
+        const solDiv = document.getElementById('solution');
+        solDiv.style.display = 'block';
+        solDiv.innerHTML = solutions[part];
+        
+        // Tell MathJax to process the newly injected LaTeX formulas
+        if (window.MathJax) {
+            MathJax.typesetPromise([solDiv]).catch((err) => console.log(err.message));
+        }
+    }
+
+    // Draw the initial unshaded graph on page load
+    window.onload = function() {
+        drawGraph(null);
+    };
+</script>
+</body>
+</html>

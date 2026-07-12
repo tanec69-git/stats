@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangular Probability Density Function Interactive</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-box {
+            background: #fafafa;
+            padding: 15px 20px;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 25px;
+            font-size: 16px;
+            overflow-x: auto;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background: #0056b3;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #004494;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .solution-box {
+            padding: 20px;
+            background: #eef7ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            font-size: 15px;
+            display: none;
+            line-height: 1.6;
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        .math-block {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>E-commerce Delivery Time PDF Viewer</h2>
+    
+    <div class="question-box">
+        <p>5. An e-commerce company monitors the delivery times (in days) of its parcels. Based on historical data, the company observes that the shortest delivery time is 1 day and longest delivery time is 7 days. The delivery time of a randomly selected parcel is \(X\) days.</p>
+        <p>The probability density function is given by:</p>
+        <p>
+            $$ f(x) = \begin{cases} 
+            \frac{1}{6}(x - 1), & 1 \le x \le 3 \\ 
+            \frac{1}{12}(7 - x), & 3 < x \le 7 
+            \end{cases} $$
+        </p>
+        <p>
+           (a) Show that this probability density function (PDF) is valid.<br>
+           (b) Find \(P(2 \le X \le 6)\).<br>
+           (c) "The probability increases from day 1 to day 3, but decreases from day 3 to day 7." Explain what this indicates about the delivery times in context.<br>
+           (d) Find the probability that delivery takes more than 5 days.<br>
+           (e) Find the probability that the delivery arrives within 2 days.
+        </p>
+    </div>
+
+    <div class="controls">
+        <button onclick="showSolution('a')">Show Part (a)</button>
+        <button onclick="showSolution('b')">Show Part (b)</button>
+        <button onclick="showSolution('c')">Show Part (c)</button>
+        <button onclick="showSolution('d')">Show Part (d)</button>
+        <button onclick="showSolution('e')">Show Part (e)</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="pdfCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div id="solution" class="solution-box"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Coordinate mapping limits to center the graph properly
+    const minX = -0.5, maxX = 8.5;
+    const minY = -0.08, maxY = 0.45;
+    
+    // Core piecewise function definition
+    function f(x) {
+        if (x >= 1 && x <= 3) return (1/6) * (x - 1);
+        if (x > 3 && x <= 7) return (1/12) * (7 - x);
+        return 0;
+    }
+    
+    function mapX(x) { return ((x - minX) / (maxX - minX)) * canvas.width; }
+    function mapY(y) { return canvas.height - ((y - minY) / (maxY - minY)) * canvas.height; }
+    
+    function drawGraph(activePart) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw Shaded Areas based on active part
+        if (activePart && activePart !== 'c') { // Part c has no specific area shading
+            ctx.fillStyle = 'rgba(0, 123, 255, 0.25)';
+            ctx.beginPath();
+            
+            let startX, endX;
+            if (activePart === 'a') { startX = 1; endX = 7; }
+            else if (activePart === 'b') { startX = 2; endX = 6; }
+            else if (activePart === 'd') { startX = 5; endX = 7; }
+            else if (activePart === 'e') { startX = 1; endX = 2; }
+            
+            ctx.moveTo(mapX(startX), mapY(0));
+            
+            // If the shaded region crosses the peak at x=3, we must include the peak in the path
+            if (startX < 3 && endX > 3) {
+                ctx.lineTo(mapX(startX), mapY(f(startX)));
+                ctx.lineTo(mapX(3), mapY(f(3))); // Peak
+                ctx.lineTo(mapX(endX), mapY(f(endX)));
+            } else {
+                // Otherwise it's just a single triangle or trapezoid on one side
+                ctx.lineTo(mapX(startX), mapY(f(startX)));
+                ctx.lineTo(mapX(endX), mapY(f(endX)));
+            }
+            
+            ctx.lineTo(mapX(endX), mapY(0));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // 2. Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        // X-axis
+        ctx.moveTo(mapX(-0.2), mapY(0)); ctx.lineTo(mapX(8.2), mapY(0));
+        // Y-axis
+        ctx.moveTo(mapX(0), mapY(-0.05)); ctx.lineTo(mapX(0), mapY(0.4));
+        ctx.stroke();
+
+        // 3. Draw Axis Arrows
+        ctx.fillStyle = '#333';
+        ctx.beginPath(); // X arrow
+        ctx.moveTo(mapX(8.2), mapY(0)); ctx.lineTo(mapX(8.1), mapY(0.015)); ctx.lineTo(mapX(8.1), mapY(-0.015)); ctx.fill();
+        ctx.beginPath(); // Y arrow
+        ctx.moveTo(mapX(0), mapY(0.4)); ctx.lineTo(mapX(-0.08), mapY(0.38)); ctx.lineTo(mapX(0.08), mapY(0.38)); ctx.fill();
+
+        // 4. Labels and Ticks
+        ctx.font = '14px Arial';
+        ctx.fillText('x (days)', mapX(8.2), mapY(-0.03));
+        ctx.fillText('f(x)', mapX(0.15), mapY(0.4));
+        
+        // X-axis Ticks
+        for (let i = 1; i <= 7; i++) {
+            ctx.beginPath();
+            ctx.moveTo(mapX(i), mapY(0)); ctx.lineTo(mapX(i), mapY(-0.01));
+            ctx.stroke();
+            ctx.fillText(i, mapX(i) - 4, mapY(-0.03));
+        }
+        
+        // Y-axis Ticks
+        const yTicks = [
+            {val: 1/12, label: '1/12'}, 
+            {val: 2/12, label: '1/6'}, 
+            {val: 3/12, label: '1/4'}, 
+            {val: 4/12, label: '1/3'}
+        ];
+        
+        yTicks.forEach(tick => {
+            ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(tick.val)); ctx.lineTo(mapX(0.1), mapY(tick.val));
+            ctx.stroke();
+            ctx.fillText(tick.label, mapX(-0.35), mapY(tick.val) + 4);
+            
+            // Faint reference lines
+            ctx.beginPath();
+            ctx.setLineDash([2, 4]);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            // Draw line up to the right side of the triangle (x=7)
+            ctx.moveTo(mapX(0), mapY(tick.val)); ctx.lineTo(mapX(7), mapY(tick.val));
+            ctx.stroke();
+            ctx.setLineDash([]);
+        });
+
+        // 5. Draw the PDF Function Lines (The Triangle)
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        
+        // Segment 1 (1 to 3)
+        ctx.moveTo(mapX(1), mapY(0));
+        ctx.lineTo(mapX(3), mapY(1/3));
+        
+        // Segment 2 (3 to 7)
+        ctx.lineTo(mapX(7), mapY(0));
+        ctx.stroke();
+        
+        // 6. Draw dashed boundary drop line at the peak
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#666';
+        ctx.moveTo(mapX(3), mapY(1/3)); ctx.lineTo(mapX(3), mapY(0));
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    const solutions = {
+        'a': `<h3>Part (a): Show PDF is Valid</h3>
+                 <p>For a PDF to be valid, the total area under the curve must equal exactly 1. The graph forms a single large triangle from \\(x=1\\) to \\(x=7\\).</p>
+                 <div class="math-block">
+                     <ul>
+                         <li><strong>Base:</strong> \\(7 - 1 = 6\\)</li>
+                         <li><strong>Height (at peak \\(x=3\\)):</strong> \\(f(3) = \\frac{1}{6}(3-1) = \\frac{2}{6} = \\mathbf{\\frac{1}{3}}\\)</li>
+                     </ul>
+                     <p>\\(\\text{Total Area} = \\frac{1}{2} \\times \\text{Base} \\times \\text{Height}\\)</p>
+                     <p>\\(\\text{Total Area} = \\frac{1}{2} \\times 6 \\times \\frac{1}{3} = \\frac{6}{6} = \\mathbf{1}\\)</p>
+                 </div>
+                 <p>Since the area is 1, the PDF is valid.</p>`,
+                 
+        'b': `<h3>Part (b): Find \\(P(2 \\le X \\le 6)\\)</h3>
+              <p>This is the area between \\(x=2\\) and \\(x=6\\). Because the peak is at \\(x=3\\), we split this into two geometric trapezoids.</p>
+              <div class="math-block">
+                  <strong>1. Left Trapezoid (\\(x=2\\) to \\(x=3\\)):</strong><br>
+                  Heights: \\(f(2) = \\frac{1}{6}(2-1) = \\mathbf{\\frac{1}{6}}\\) and \\(f(3) = \\mathbf{\\frac{1}{3}}\\) (or \\(\\frac{2}{6}\\))<br>
+                  Width: \\(3 - 2 = 1\\)<br>
+                  \\(\\text{Area}_1 = \\frac{1}{2} \\times (\\frac{1}{6} + \\frac{2}{6}) \\times 1 = \\frac{1}{2} \\times \\frac{3}{6} = \\mathbf{\\frac{1}{4}}\\) (or 0.25)
+              </div>
+              <div class="math-block">
+                  <strong>2. Right Trapezoid (\\(x=3\\) to \\(x=6\\)):</strong><br>
+                  Heights: \\(f(3) = \\mathbf{\\frac{1}{3}}\\) (or \\(\\frac{4}{12}\\)) and \\(f(6) = \\frac{1}{12}(7-6) = \\mathbf{\\frac{1}{12}}\\)<br>
+                  Width: \\(6 - 3 = 3\\)<br>
+                  \\(\\text{Area}_2 = \\frac{1}{2} \\times (\\frac{4}{12} + \\frac{1}{12}) \\times 3 = \\frac{1}{2} \\times \\frac{5}{12} \\times 3 = \\mathbf{\\frac{5}{8}}\\) (or 0.625)
+              </div>
+              <p>\\(P(2 \\le X \\le 6) = \\frac{1}{4} + \\frac{5}{8} = \\frac{2}{8} + \\frac{5}{8} = \\mathbf{\\frac{7}{8}}\\) (or 0.875)</p>`,
+              
+        'c': `<h3>Part (c): Contextual Explanation</h3>
+               <p><strong>Question:</strong> "The probability increases from day 1 to day 3, but decreases from day 3 to day 7." Explain what this indicates about the delivery times in context.</p>
+               <div class="math-block">
+                   <p><strong>Answer:</strong></p>
+                   <p>This indicates that the <strong>most common (modal) delivery time is around 3 days</strong>, where the probability density peaks.</p>
+                   <p>Very fast deliveries (closer to 1 day) and very slow deliveries (closer to 7 days) are less common. The majority of parcels will arrive in that middle window clustered around the 3rd day.</p>
+               </div>`,
+               
+        'd': `<h3>Part (d): Find Probability delivery takes more than 5 days</h3>
+                <p>We need to find \\(P(X > 5)\\). This is the area of the small right-side triangle from \\(x=5\\) to \\(x=7\\).</p>
+                <div class="math-block">
+                    <ul>
+                        <li><strong>Height at \\(x=5\\):</strong> \\(f(5) = \\frac{1}{12}(7-5) = \\frac{2}{12} = \\mathbf{\\frac{1}{6}}\\)</li>
+                        <li><strong>Base:</strong> \\(7 - 5 = 2\\)</li>
+                    </ul>
+                    <p>\\(P(X > 5) = \\text{Area of Triangle} = \\frac{1}{2} \\times \\text{Base} \\times \\text{Height}\\)</p>
+                    <p>\\(P(X > 5) = \\frac{1}{2} \\times 2 \\times \\frac{1}{6} = \\mathbf{\\frac{1}{6}}\\) (or approx 0.1667)</p>
+                </div>`,
+
+        'e': `<h3>Part (e): Find Probability delivery arrives within 2 days</h3>
+                <p>We need to find \\(P(X \\le 2)\\). Since the minimum time is 1 day, this is \\(P(1 \\le X \\le 2)\\). This forms the small left-side triangle.</p>
+                <div class="math-block">
+                    <ul>
+                        <li><strong>Height at \\(x=2\\):</strong> \\(f(2) = \\frac{1}{6}(2-1) = \\mathbf{\\frac{1}{6}}\\)</li>
+                        <li><strong>Base:</strong> \\(2 - 1 = 1\\)</li>
+                    </ul>
+                    <p>\\(P(X \\le 2) = \\text{Area of Triangle} = \\frac{1}{2} \\times \\text{Base} \\times \\text{Height}\\)</p>
+                    <p>\\(P(X \\le 2) = \\frac{1}{2} \\times 1 \\times \\frac{1}{6} = \\mathbf{\\frac{1}{12}}\\) (or approx 0.0833)</p>
+                </div>`
+    };
+
+    function showSolution(part) {
+        drawGraph(part);
+        const solDiv = document.getElementById('solution');
+        solDiv.style.display = 'block';
+        solDiv.innerHTML = solutions[part];
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise([solDiv]).catch((err) => console.log(err.message));
+        }
+    }
+
+    window.onload = function() {
+        drawGraph(null);
+    };
+</script>
+</body>
+</html>

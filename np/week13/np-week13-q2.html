@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Random Variable Interactive App</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-box {
+            background: #fafafa;
+            padding: 15px 20px;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 18px;
+            cursor: pointer;
+            border: none;
+            background: #0056b3;
+            color: white;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #004494;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .solution-box {
+            padding: 20px;
+            background: #eef7ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none;
+            line-height: 1.6;
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Interactive Probability Distribution Viewer</h2>
+    
+    <div class="question-box">
+        <p>2. The graph of the probability distribution of a continuous random variable \(X\) takes on values from 1 to 3.</p>
+        <p>Find:<br>
+           &nbsp;&nbsp;&nbsp;(a) \(m\)<br>
+           &nbsp;&nbsp;&nbsp;(b) \(P(1.5 < x \le 3.0)\)
+        </p>
+    </div>
+
+    <div class="controls">
+        <button onclick="showSolution('a')">Show Part (a) Solution</button>
+        <button onclick="showSolution('b')">Show Part (b) Solution</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="pdfCanvas" width="700" height="350"></canvas>
+    </div>
+
+    <div id="solution" class="solution-box"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Coordinate mapping limits
+    const minX = -0.5, maxX = 4.0;
+    const minY = -0.2, maxY = 1.2;
+    
+    // Constant calculated value of m for drawing accuracy
+    const m_val = 15/16; // 0.9375
+    
+    function mapX(x) { return ((x - minX) / (maxX - minX)) * canvas.width; }
+    function mapY(y) { return canvas.height - ((y - minY) / (maxY - minY)) * canvas.height; }
+    
+    function drawGraph(activePart) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw Shaded Probability Area
+        if (activePart) {
+            ctx.fillStyle = 'rgba(0, 123, 255, 0.25)';
+            ctx.beginPath();
+            
+            if (activePart === 'a') {
+                // Shade total area (trapezoid + triangle)
+                ctx.moveTo(mapX(1), mapY(0));
+                ctx.lineTo(mapX(1), mapY(0.25));
+                ctx.lineTo(mapX(1.5), mapY(m_val));
+                ctx.lineTo(mapX(3), mapY(0));
+                ctx.closePath();
+                ctx.fill();
+            }
+            else if (activePart === 'b') {
+                // Shade only the right triangle
+                ctx.moveTo(mapX(1.5), mapY(0));
+                ctx.lineTo(mapX(1.5), mapY(m_val));
+                ctx.lineTo(mapX(3), mapY(0));
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        // 2. Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        // X-axis
+        ctx.moveTo(mapX(-0.2), mapY(0));
+        ctx.lineTo(mapX(3.8), mapY(0));
+        // Y-axis
+        ctx.moveTo(mapX(0), mapY(-0.1));
+        ctx.lineTo(mapX(0), mapY(1.1));
+        ctx.stroke();
+
+        // 3. Draw Axis Arrows
+        ctx.fillStyle = '#333';
+        ctx.beginPath(); // X arrow
+        ctx.moveTo(mapX(3.8), mapY(0)); ctx.lineTo(mapX(3.7), mapY(0.03)); ctx.lineTo(mapX(3.7), mapY(-0.03)); ctx.fill();
+        ctx.beginPath(); // Y arrow
+        ctx.moveTo(mapX(0), mapY(1.1)); ctx.lineTo(mapX(-0.05), mapY(1.05)); ctx.lineTo(mapX(0.05), mapY(1.05)); ctx.fill();
+
+        // 4. Draw Labels
+        ctx.font = '16px Arial';
+        ctx.fillText('x', mapX(3.8), mapY(-0.05));
+        ctx.fillText('m', mapX(-0.25), mapY(m_val) + 5);
+        ctx.fillText('0.25', mapX(-0.4), mapY(0.25) + 5);
+        
+        ctx.font = '15px Arial';
+        ctx.fillText('1', mapX(0.95), mapY(-0.08));
+        ctx.fillText('1.5', mapX(1.42), mapY(-0.08));
+        ctx.fillText('3', mapX(2.95), mapY(-0.08));
+
+        // 5. Draw the PDF Lines
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.moveTo(mapX(1), mapY(0.25));
+        ctx.lineTo(mapX(1.5), mapY(m_val));
+        ctx.lineTo(mapX(3), mapY(0));
+        ctx.stroke();
+
+        // 6. Draw dashed boundary lines
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.2;
+        
+        // Vertical dashed lines
+        ctx.moveTo(mapX(1), mapY(0.25)); ctx.lineTo(mapX(1), mapY(0));
+        ctx.moveTo(mapX(1.5), mapY(m_val)); ctx.lineTo(mapX(1.5), mapY(0));
+        
+        // Horizontal dashed lines
+        ctx.moveTo(mapX(0), mapY(0.25)); ctx.lineTo(mapX(1), mapY(0.25));
+        ctx.moveTo(mapX(0), mapY(m_val)); ctx.lineTo(mapX(1.5), mapY(m_val));
+        
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset to solid lines
+    }
+
+    const solutions = {
+        'a': `<h3>Part (a) Solution: Find \\(m\\)</h3>
+              <p>The total area under the probability density curve must exactly equal <strong>\\(1\\)</strong>. We can split the area into two geometric shapes: a trapezoid (from \\(x=1\\) to \\(1.5\\)) and a triangle (from \\(x=1.5\\) to \\(3\\)).</p>
+              
+              <p><strong>1. Area of the Trapezoid (Left Side):</strong></p>
+              <ul>
+                  <li>\\(\\text{Width} = 1.5 - 1 = 0.5\\)</li>
+                  <li>\\(\\text{Parallel Heights} = 0.25\\) and \\(m\\)</li>
+                  <li>\\(\\text{Area}_1 = \\frac{1}{2} \\times (0.25 + m) \\times 0.5 = 0.25(0.25 + m) = 0.0625 + 0.25m\\)</li>
+              </ul>
+              
+              <p><strong>2. Area of the Triangle (Right Side):</strong></p>
+              <ul>
+                  <li>\\(\\text{Base} = 3 - 1.5 = 1.5\\)</li>
+                  <li>\\(\\text{Height} = m\\)</li>
+                  <li>\\(\\text{Area}_2 = \\frac{1}{2} \\times 1.5 \\times m = 0.75m\\)</li>
+              </ul>
+              
+              <p><strong>3. Solve for \\(m\\):</strong></p>
+              <p>\\(\\text{Total Area} = \\text{Area}_1 + \\text{Area}_2 = 1\\)</p>
+              <p>\\((0.0625 + 0.25m) + 0.75m = 1\\)</p>
+              <p>\\(0.0625 + 1.0m = 1\\)</p>
+              <p>\\(m = 1 - 0.0625\\)</p>
+              <p>\\(m = \\mathbf{0.9375}\\) (or \\(\\mathbf{\\frac{15}{16}}\\))</p>`,
+        
+        'b': `<h3>Part (b) Solution: Find \\(P(1.5 < x \\le 3.0)\\)</h3>
+              <p>This probability represents the area under the curve specifically between \\(x = 1.5\\) and \\(x = 3.0\\). Geometrically, this is exactly the area of the right-side triangle.</p>
+              <ul>
+                  <li>\\(\\text{Base} = 3 - 1.5 = 1.5\\)</li>
+                  <li>\\(\\text{Height} = m = 0.9375\\) (from Part a)</li>
+              </ul>
+              <p>\\(P(1.5 < x \\le 3.0) = \\text{Area of Triangle}\\)</p>
+              <p>\\(= \\frac{1}{2} \\times \\text{Base} \\times \\text{Height}\\)</p>
+              <p>\\(= \\frac{1}{2} \\times 1.5 \\times 0.9375\\)</p>
+              <p>\\(= 0.75 \\times 0.9375\\)</p>
+              <p>\\(= \\mathbf{0.703125}\\) (or \\(\\mathbf{\\frac{45}{64}}\\))</p>`
+    };
+
+    function showSolution(part) {
+        drawGraph(part);
+        const solDiv = document.getElementById('solution');
+        solDiv.style.display = 'block';
+        solDiv.innerHTML = solutions[part];
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise([solDiv]).catch((err) => console.log(err.message));
+        }
+    }
+
+    window.onload = function() {
+        drawGraph(null);
+    };
+</script>
+</body>
+</html>

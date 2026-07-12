@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniform Distribution Interactive App</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-box {
+            background: #fafafa;
+            padding: 15px 20px;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background: #0056b3;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #004494;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .solution-box {
+            padding: 20px;
+            background: #eef7ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            font-size: 15px;
+            display: none;
+            line-height: 1.6;
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        .math-block {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Uniform Probability Distribution Viewer</h2>
+    
+    <div class="question-box">
+        <p>4. An airline quotes a flight time of 2 hours 10 minutes for its flights from City A to City B. Suppose we believe that actual flight times are uniformly distributed between 2 hours and 2 hours 25 minutes.</p>
+        <p>
+           &nbsp;&nbsp;&nbsp;(a) Show the graph of the probability density function for flight time.<br>
+           &nbsp;&nbsp;&nbsp;(b) What is the probability that the flight will be no more than 10 minutes late?<br>
+           &nbsp;&nbsp;&nbsp;(c) Find the expected flight time.
+        </p>
+    </div>
+
+    <div class="controls">
+        <button onclick="showSolution('a')">Show Part (a) Solution</button>
+        <button onclick="showSolution('b')">Show Part (b) Solution</button>
+        <button onclick="showSolution('c')">Show Part (c) Solution</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="pdfCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div id="solution" class="solution-box"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Convert times to minutes for plotting
+    // 2 hours = 120 mins | 2 hours 25 mins = 145 mins
+    const minTime = 120;
+    const maxTime = 145;
+    const heightK = 1 / (maxTime - minTime); // 1/25 = 0.04
+    
+    // Canvas coordinate mapping
+    const minX = 110, maxX = 155;
+    const minY = -0.01, maxY = 0.06;
+    
+    function mapX(x) { return ((x - minX) / (maxX - minX)) * canvas.width; }
+    function mapY(y) { return canvas.height - ((y - minY) / (maxY - minY)) * canvas.height; }
+    
+    function drawGraph(activePart) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw Shaded Areas based on active part
+        if (activePart) {
+            ctx.fillStyle = 'rgba(0, 123, 255, 0.25)';
+            
+            let startX = 0, endX = 0;
+            if (activePart === 'a') { 
+                startX = minTime; 
+                endX = maxTime; 
+                ctx.fillRect(mapX(startX), mapY(heightK), mapX(endX) - mapX(startX), mapY(0) - mapY(heightK));
+            }
+            else if (activePart === 'b') { 
+                // "No more than 10 mins late" -> Quoted 130 + 10 = 140
+                startX = minTime; 
+                endX = 140; 
+                ctx.fillRect(mapX(startX), mapY(heightK), mapX(endX) - mapX(startX), mapY(0) - mapY(heightK));
+            }
+            else if (activePart === 'c') {
+                // Expected time is the mean: 132.5
+                ctx.beginPath();
+                ctx.strokeStyle = '#e74c3c'; // Red line for mean
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 4]);
+                ctx.moveTo(mapX(132.5), mapY(heightK));
+                ctx.lineTo(mapX(132.5), mapY(0));
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = '14px Arial';
+                ctx.fillText('Mean = 132.5', mapX(133), mapY(0.02));
+            }
+        }
+
+        // 2. Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        
+        // X-axis (y = 0)
+        ctx.moveTo(mapX(112), mapY(0)); 
+        ctx.lineTo(mapX(153), mapY(0));
+        
+        // Y-axis (placed at x = 115 for padding)
+        const yAxisX = 115;
+        ctx.moveTo(mapX(yAxisX), mapY(-0.005)); 
+        ctx.lineTo(mapX(yAxisX), mapY(0.055));
+        ctx.stroke();
+
+        // 3. Draw Axis Arrows
+        ctx.fillStyle = '#333';
+        ctx.beginPath(); // X arrow
+        ctx.moveTo(mapX(153), mapY(0)); ctx.lineTo(mapX(152), mapY(0.002)); ctx.lineTo(mapX(152), mapY(-0.002)); ctx.fill();
+        ctx.beginPath(); // Y arrow
+        ctx.moveTo(mapX(yAxisX), mapY(0.055)); ctx.lineTo(mapX(yAxisX - 0.5), mapY(0.053)); ctx.lineTo(mapX(yAxisX + 0.5), mapY(0.053)); ctx.fill();
+
+        // 4. Labels and Ticks
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#333';
+        ctx.fillText('Flight Time x (mins)', mapX(142), mapY(-0.006));
+        ctx.fillText('f(x)', mapX(115.5), mapY(0.055));
+        
+        // X-axis Ticks (120, 130, 140, 145)
+        const xTicks = [120, 130, 140, 145];
+        xTicks.forEach(tick => {
+            ctx.beginPath();
+            ctx.moveTo(mapX(tick), mapY(0)); ctx.lineTo(mapX(tick), mapY(-0.0015));
+            ctx.stroke();
+            ctx.fillText(tick, mapX(tick) - 10, mapY(-0.004));
+        });
+        
+        // Y-axis Tick for Height
+        ctx.beginPath();
+        ctx.moveTo(mapX(yAxisX), mapY(heightK)); ctx.lineTo(mapX(yAxisX + 0.5), mapY(heightK));
+        ctx.stroke();
+        ctx.fillText('1/25 (0.04)', mapX(110.5), mapY(heightK) + 4);
+        
+        // Reference dotted line to the y-axis
+        ctx.beginPath();
+        ctx.setLineDash([2, 4]);
+        ctx.strokeStyle = '#ccc';
+        ctx.lineWidth = 1;
+        ctx.moveTo(mapX(yAxisX), mapY(heightK)); ctx.lineTo(mapX(minTime), mapY(heightK));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 5. Draw the Uniform PDF Line
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.moveTo(mapX(minTime), mapY(heightK));
+        ctx.lineTo(mapX(maxTime), mapY(heightK));
+        ctx.stroke();
+
+        // 6. Draw dashed boundary drop lines
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#666';
+        
+        ctx.moveTo(mapX(minTime), mapY(heightK)); ctx.lineTo(mapX(minTime), mapY(0));
+        ctx.moveTo(mapX(maxTime), mapY(heightK)); ctx.lineTo(mapX(maxTime), mapY(0));
+        
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    const solutions = {
+        'a': `<h3>Part (a) Solution: Graph of PDF</h3>
+                 <p>First, we convert the times into minutes to make the calculations consistent:</p>
+                 <ul>
+                     <li>Minimum time (\\(a\\)) = 2 hours = <strong>120 minutes</strong></li>
+                     <li>Maximum time (\\(b\\)) = 2 hours 25 minutes = <strong>145 minutes</strong></li>
+                 </ul>
+                 <div class="math-block">
+                     <p>Because the distribution is uniform, it forms a rectangle. The total area must equal 1.</p>
+                     \\(\\text{Height } (k) = \\frac{1}{b - a} = \\frac{1}{145 - 120} = \\frac{1}{25} = \\mathbf{0.04}\\)
+                 </div>
+                 <p>The graph is a horizontal line at \\(f(x) = \\frac{1}{25}\\) bounded between \\(x = 120\\) and \\(x = 145\\). Area = \\(1\\).</p>`,
+                 
+        'b': `<h3>Part (b) Solution: Probability no more than 10 minutes late</h3>
+              <p>The quoted flight time is 2 hours 10 minutes (<strong>130 minutes</strong>).</p>
+              <p>"No more than 10 minutes late" means the flight takes a maximum of \\(130 + 10 = \\mathbf{140 \\text{ minutes}}\\).</p>
+              <p>We need to find \\(P(120 \\le X \\le 140)\\), which is the shaded geometric area from 120 to 140.</p>
+              <div class="math-block">
+                  <strong>Area of Rectangle:</strong><br>
+                  \\(\\text{Base} = 140 - 120 = 20\\)<br>
+                  \\(\\text{Height} = \\frac{1}{25}\\)<br><br>
+                  \\(P(X \\le 140) = \\text{Base} \\times \\text{Height} = 20 \\times \\frac{1}{25} = \\frac{20}{25} = \\mathbf{0.8}\\)
+              </div>
+              <p>There is an <strong>80%</strong> probability the flight will be no more than 10 minutes late.</p>`,
+              
+        'c': `<h3>Part (c) Solution: Expected Flight Time</h3>
+               <p>The expected value \\(E(X)\\) for a uniform continuous distribution is simply the mean (the exact center point between the minimum and maximum values).</p>
+               <div class="math-block">
+                   \\(E(X) = \\frac{a + b}{2}\\)<br><br>
+                   \\(E(X) = \\frac{120 + 145}{2} = \\frac{265}{2} = \\mathbf{132.5 \\text{ minutes}}\\)
+               </div>
+               <p>Converted back into hours and minutes, the expected flight time is <strong>2 hours and 12.5 minutes</strong>.</p>`
+    };
+
+    function showSolution(part) {
+        drawGraph(part);
+        const solDiv = document.getElementById('solution');
+        solDiv.style.display = 'block';
+        solDiv.innerHTML = solutions[part];
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise([solDiv]).catch((err) => console.log(err.message));
+        }
+    }
+
+    window.onload = function() {
+        drawGraph(null);
+    };
+</script>
+</body>
+</html>

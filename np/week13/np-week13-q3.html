@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piecewise Probability Density Function Interactive</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-box {
+            background: #fafafa;
+            padding: 15px 20px;
+            border-left: 5px solid #0056b3;
+            margin-bottom: 25px;
+            font-size: 16px;
+            overflow-x: auto;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background: #0056b3;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #004494;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background: #fff;
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .solution-box {
+            padding: 20px;
+            background: #eef7ff;
+            border: 1px solid #cce5ff;
+            border-radius: 5px;
+            font-size: 15px;
+            display: none;
+            line-height: 1.6;
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        .math-block {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Piecewise Probability Distribution Viewer</h2>
+    
+    <div class="question-box">
+        <p>3. The weight loss (in kg) after a week's slimming programme is a random variable \(X\) that has the following density function:</p>
+        <p>
+            $$ f(x) = \begin{cases} 
+            0.2x + 0.6, & \text{for } 1 < x < 2 \\ 
+            0.1, & \text{for } 2 \le x < 3 \\ 
+            0, & \text{otherwise} 
+            \end{cases} $$
+        </p>
+        <p>Sketch the above probability density function graph and show that the area under the graph is equal to 1.</p>
+        <p>Find the probability that the weight loss of a person who goes through the programme to be:<br>
+           &nbsp;&nbsp;&nbsp;(i) at least 1.5kg<br>
+           &nbsp;&nbsp;&nbsp;(ii) at most 2.5kg<br>
+           &nbsp;&nbsp;&nbsp;(iii) between 1.8 to 2.8kg
+        </p>
+    </div>
+
+    <div class="controls">
+        <button onclick="showSolution('area')">Show Total Area Solution</button>
+        <button onclick="showSolution('i')">Show Part (i) Solution</button>
+        <button onclick="showSolution('ii')">Show Part (ii) Solution</button>
+        <button onclick="showSolution('iii')">Show Part (iii) Solution</button>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="pdfCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <div id="solution" class="solution-box"></div>
+</div>
+
+<script>
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Adjusted coordinate mapping to place the Y-axis at x=0 natively
+    const minX = -0.5, maxX = 3.5;
+    const minY = -0.15, maxY = 1.15;
+    
+    // Explicit functions for drawing bounds correctly
+    function f1(x) { return 0.2 * x + 0.6; } // For 1 to 2
+    function f2(x) { return 0.1; }           // For 2 to 3
+    
+    function mapX(x) { return ((x - minX) / (maxX - minX)) * canvas.width; }
+    function mapY(y) { return canvas.height - ((y - minY) / (maxY - minY)) * canvas.height; }
+    
+    function drawGraph(activePart) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Draw Shaded Areas based on active part
+        if (activePart) {
+            ctx.fillStyle = 'rgba(0, 123, 255, 0.25)';
+            
+            let startX, endX;
+            if (activePart === 'area') { startX = 1; endX = 3; }
+            else if (activePart === 'i') { startX = 1.5; endX = 3; }
+            else if (activePart === 'ii') { startX = 1; endX = 2.5; }
+            else if (activePart === 'iii') { startX = 1.8; endX = 2.8; }
+            
+            // Shade Piece 1 (Trapezoid from 1 to 2) - Fixed rendering logic
+            if (startX < 2 && endX > 1) {
+                let s1 = Math.max(1, startX);
+                let e1 = Math.min(2, endX);
+                ctx.beginPath();
+                ctx.moveTo(mapX(s1), mapY(0));
+                ctx.lineTo(mapX(s1), mapY(f1(s1))); // Use explicit f1 to avoid discontinuity gaps
+                ctx.lineTo(mapX(e1), mapY(f1(e1)));
+                ctx.lineTo(mapX(e1), mapY(0));
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Shade Piece 2 (Rectangle from 2 to 3)
+            if (startX < 3 && endX > 2) {
+                let s2 = Math.max(2, startX);
+                let e2 = Math.min(3, endX);
+                ctx.beginPath();
+                ctx.moveTo(mapX(s2), mapY(0));
+                ctx.lineTo(mapX(s2), mapY(f2(s2)));
+                ctx.lineTo(mapX(e2), mapY(f2(e2)));
+                ctx.lineTo(mapX(e2), mapY(0));
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        // 2. Draw Axes
+        ctx.beginPath();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        // X-axis (y=0)
+        ctx.moveTo(mapX(-0.4), mapY(0)); ctx.lineTo(mapX(3.4), mapY(0));
+        // Y-axis (x=0)
+        ctx.moveTo(mapX(0), mapY(-0.1)); ctx.lineTo(mapX(0), mapY(1.1));
+        ctx.stroke();
+
+        // 3. Draw Axis Arrows
+        ctx.fillStyle = '#333';
+        ctx.beginPath(); // X arrow
+        ctx.moveTo(mapX(3.4), mapY(0)); ctx.lineTo(mapX(3.35), mapY(0.025)); ctx.lineTo(mapX(3.35), mapY(-0.025)); ctx.fill();
+        ctx.beginPath(); // Y arrow
+        ctx.moveTo(mapX(0), mapY(1.1)); ctx.lineTo(mapX(-0.03), mapY(1.05)); ctx.lineTo(mapX(0.03), mapY(1.05)); ctx.fill();
+
+        // 4. Labels and Ticks
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#333';
+        ctx.fillText('x', mapX(3.4), mapY(-0.05));
+        ctx.fillText('f(x)', mapX(0.05), mapY(1.1));
+        
+        // X-axis Ticks
+        const xTicks = [1, 1.5, 2, 2.5, 3];
+        xTicks.forEach(tick => {
+            ctx.beginPath();
+            ctx.moveTo(mapX(tick), mapY(0)); ctx.lineTo(mapX(tick), mapY(-0.02));
+            ctx.stroke();
+            ctx.fillText(tick, mapX(tick) - 5, mapY(-0.05));
+        });
+        
+        // Y-axis Ticks
+        const yTicks = [0.1, 0.6, 0.8, 1.0];
+        yTicks.forEach(tick => {
+            ctx.beginPath();
+            ctx.moveTo(mapX(0), mapY(tick)); ctx.lineTo(mapX(0.02), mapY(tick));
+            ctx.stroke();
+            ctx.fillText(tick, mapX(-0.25), mapY(tick) + 4);
+            
+            // Draw faint reference lines across to the y-axis
+            ctx.beginPath();
+            ctx.setLineDash([2, 4]);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            if(tick === 0.1) { ctx.moveTo(mapX(0), mapY(tick)); ctx.lineTo(mapX(2), mapY(tick)); }
+            if(tick === 0.8) { ctx.moveTo(mapX(0), mapY(tick)); ctx.lineTo(mapX(1), mapY(tick)); }
+            if(tick === 1.0) { ctx.moveTo(mapX(0), mapY(tick)); ctx.lineTo(mapX(2), mapY(tick)); }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        });
+
+        // 5. Draw the Piecewise Function Lines
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        
+        // Segment 1 (1 < x < 2)
+        ctx.moveTo(mapX(1), mapY(0.8));
+        ctx.lineTo(mapX(2), mapY(1.0));
+        ctx.stroke();
+        
+        // Segment 2 (2 <= x < 3)
+        ctx.beginPath();
+        ctx.moveTo(mapX(2), mapY(0.1));
+        ctx.lineTo(mapX(3), mapY(0.1));
+        ctx.stroke();
+
+        // 6. Draw dashed boundary drop lines
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = '#666';
+        
+        ctx.moveTo(mapX(1), mapY(0.8)); ctx.lineTo(mapX(1), mapY(0));
+        ctx.moveTo(mapX(2), mapY(1.0)); ctx.lineTo(mapX(2), mapY(0.1)); // connects top and bottom of jump
+        ctx.moveTo(mapX(3), mapY(0.1)); ctx.lineTo(mapX(3), mapY(0));
+        
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 7. Draw open/closed circles for discontinuities
+        ctx.fillStyle = '#000';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        
+        ctx.beginPath(); // Open circle at (1, 0.8)
+        ctx.arc(mapX(1), mapY(0.8), 4, 0, Math.PI * 2); 
+        ctx.fillStyle = '#fff'; ctx.fill(); ctx.stroke();
+        
+        ctx.beginPath(); // Open circle at (2, 1.0)
+        ctx.arc(mapX(2), mapY(1.0), 4, 0, Math.PI * 2); 
+        ctx.fillStyle = '#fff'; ctx.fill(); ctx.stroke();
+        
+        ctx.beginPath(); // Closed circle at (2, 0.1)
+        ctx.arc(mapX(2), mapY(0.1), 4, 0, Math.PI * 2); 
+        ctx.fillStyle = '#000'; ctx.fill();
+        
+        ctx.beginPath(); // Open circle at (3, 0.1)
+        ctx.arc(mapX(3), mapY(0.1), 4, 0, Math.PI * 2); 
+        ctx.fillStyle = '#fff'; ctx.fill(); ctx.stroke();
+    }
+
+    const solutions = {
+        'area': `<h3>Verify Total Area = 1</h3>
+                 <p>The total area is split into two parts due to the piecewise function: a trapezoid between \\(x=1\\) and \\(x=2\\), and a rectangle between \\(x=2\\) and \\(x=3\\).</p>
+                 <div class="math-block">
+                     <strong>1. Area of Trapezoid (\\(1 < x < 2\\)):</strong><br>
+                     Heights: \\(f(1) = 0.2(1) + 0.6 = 0.8\\)<br>
+                     \\(f(2) = 0.2(2) + 0.6 = 1.0\\)<br>
+                     Width: \\(2 - 1 = 1\\)<br>
+                     \\(\\text{Area}_1 = \\frac{1}{2} \\times (0.8 + 1.0) \\times 1 = 0.5 \\times 1.8 = \\mathbf{0.9}\\)
+                 </div>
+                 <div class="math-block">
+                     <strong>2. Area of Rectangle (\\(2 \\le x < 3\\)):</strong><br>
+                     Height: \\(0.1\\)<br>
+                     Width: \\(3 - 2 = 1\\)<br>
+                     \\(\\text{Area}_2 = 1 \\times 0.1 = \\mathbf{0.1}\\)
+                 </div>
+                 <p>\\(\\text{Total Area} = 0.9 + 0.1 = \\mathbf{1.0}\\) (Proven)</p>`,
+                 
+        'i': `<h3>Part (i) Solution: Probability of at least 1.5kg</h3>
+              <p>Find \\(P(X \\ge 1.5)\\). This covers the region from \\(1.5\\) to \\(3\\).</p>
+              <div class="math-block">
+                  <strong>1. Trapezoid portion (\\(1.5 \\le x < 2\\)):</strong><br>
+                  \\(f(1.5) = 0.2(1.5) + 0.6 = 0.3 + 0.6 = 0.9\\)<br>
+                  \\(f(2) = 1.0\\)<br>
+                  Width = \\(2 - 1.5 = 0.5\\)<br>
+                  Area = \\(\\frac{1}{2} \\times (0.9 + 1.0) \\times 0.5 = 0.5 \\times 1.9 \\times 0.5 = \\mathbf{0.475}\\)
+              </div>
+              <div class="math-block">
+                  <strong>2. Rectangle portion (\\(2 \\le x < 3\\)):</strong><br>
+                  Since we are going all the way to 3, the whole rectangle is included.<br>
+                  Area = \\(\\mathbf{0.1}\\)
+              </div>
+              <p>\\(P(X \\ge 1.5) = 0.475 + 0.1 = \\mathbf{0.575}\\)</p>`,
+              
+        'ii': `<h3>Part (ii) Solution: Probability of at most 2.5kg</h3>
+               <p>Find \\(P(X \\le 2.5)\\). This covers the region from \\(1\\) to \\(2.5\\).</p>
+               <div class="math-block">
+                   <strong>1. Full Trapezoid (\\(1 < x < 2\\)):</strong><br>
+                   From the total area calculation, we know this entire section has an area of \\(\\mathbf{0.9}\\).
+               </div>
+               <div class="math-block">
+                   <strong>2. Partial Rectangle (\\(2 \\le x \\le 2.5\\)):</strong><br>
+                   Height = \\(0.1\\)<br>
+                   Width = \\(2.5 - 2 = 0.5\\)<br>
+                   Area = \\(0.5 \\times 0.1 = \\mathbf{0.05}\\)
+               </div>
+               <p>\\(P(X \\le 2.5) = 0.9 + 0.05 = \\mathbf{0.95}\\)</p>`,
+               
+        'iii': `<h3>Part (iii) Solution: Probability between 1.8 and 2.8kg</h3>
+                <p>Find \\(P(1.8 < X < 2.8)\\). This crosses the discontinuity at \\(x=2\\).</p>
+                <div class="math-block">
+                    <strong>1. Partial Trapezoid (\\(1.8 < x < 2\\)):</strong><br>
+                    \\(f(1.8) = 0.2(1.8) + 0.6 = 0.36 + 0.6 = 0.96\\)<br>
+                    \\(f(2) = 1.0\\)<br>
+                    Width = \\(2 - 1.8 = 0.2\\)<br>
+                    Area = \\(\\frac{1}{2} \\times (0.96 + 1.0) \\times 0.2 = 0.1 \\times 1.96 = \\mathbf{0.196}\\)
+                </div>
+                <div class="math-block">
+                    <strong>2. Partial Rectangle (\\(2 \\le x < 2.8\\)):</strong><br>
+                    Height = \\(0.1\\)<br>
+                    Width = \\(2.8 - 2 = 0.8\\)<br>
+                    Area = \\(0.8 \\times 0.1 = \\mathbf{0.08}\\)
+                </div>
+                <p>\\(P(1.8 < X < 2.8) = 0.196 + 0.08 = \\mathbf{0.276}\\)</p>`
+    };
+
+    function showSolution(part) {
+        drawGraph(part);
+        const solDiv = document.getElementById('solution');
+        solDiv.style.display = 'block';
+        solDiv.innerHTML = solutions[part];
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise([solDiv]).catch((err) => console.log(err.message));
+        }
+    }
+
+    window.onload = function() {
+        drawGraph(null);
+    };
+</script>
+</body>
+</html>
