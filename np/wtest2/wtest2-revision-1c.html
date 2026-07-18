@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Rules Generator</title>
+    <!-- Load MathJax for rendering LaTeX formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f4f4f9;
+        }
+        #app-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #problem-section, #answers-section {
+            width: 100%;
+            max-width: 700px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .question-list, .answer-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+        }
+        .question-list li, .answer-list li {
+            margin-bottom: 20px;
+        }
+        .controls {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            border-left: 6px solid #28a745;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+            color: #1e7e34;
+        }
+        .math-block {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h2>Probability Rules Solver</h2>
+        
+        <div id="problem-section">
+            <p id="problem-statement"></p>
+            <ul class="question-list">
+                <li>(i) &nbsp; <span id="q1-text"></span></li>
+                <li>(ii) &nbsp; <span id="q2-text"></span></li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="generateProblem()">Generate New Problem</button>
+            <button onclick="showAnswers()">Show Answers</button>
+        </div>
+
+        <div id="answers-section">
+            <h3>Step-by-Step Solutions:</h3>
+            <ul class="answer-list">
+                <li id="ans1"></li>
+                <li id="ans2"></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function generateProblem() {
+            // Hide answers when generating a new problem
+            document.getElementById('answers-section').style.display = 'none';
+
+            // Randomize event letter pairs to add variety
+            const letterPairs = [
+                ['A', 'B'], ['C', 'D'], ['X', 'Y'], ['M', 'N'], ['E', 'F']
+            ];
+            const pair = letterPairs[Math.floor(Math.random() * letterPairs.length)];
+            const e1 = pair[0];
+            const e2 = pair[1];
+
+            let p1, pUnion;
+            
+            // Loop guarantees we do NOT use the original image values (0.4 and 0.6)
+            do {
+                // Generate P(E1) between 0.15 and 0.55
+                p1 = (Math.floor(Math.random() * 9) + 3) * 0.05;
+                // Generate P(E1 U E2) ensuring it is strictly greater than P(E1) and max 0.95
+                let diff = (Math.floor(Math.random() * 8) + 2) * 0.05;
+                pUnion = p1 + diff;
+                
+                p1 = parseFloat(p1.toFixed(2));
+                pUnion = parseFloat(pUnion.toFixed(2));
+            } while (p1 === 0.40 && pUnion === 0.60);
+
+            // Populate Problem Text
+            document.getElementById('problem-statement').innerHTML = `Two events ${e1} and ${e2} are such that \\( P(${e1}) = ${p1} \\) and \\( P(${e1} \\cup ${e2}) = ${pUnion} \\). Find \\( P(${e2}) \\)`;
+            
+            document.getElementById('q1-text').innerText = `if ${e1} and ${e2} are mutually exclusive events,`;
+            document.getElementById('q2-text').innerText = `if ${e1} and ${e2} are independent events.`;
+
+            // --- Calculations ---
+            
+            // Mutually Exclusive: P(A U B) = P(A) + P(B) -> P(B) = P(A U B) - P(A)
+            let p2_me = pUnion - p1;
+            let p2_me_str = parseFloat(p2_me.toFixed(2));
+
+            // Independent: P(A U B) = P(A) + P(B) - P(A)P(B)
+            // P(A U B) - P(A) = P(B)(1 - P(A))
+            // P(B) = (P(A U B) - P(A)) / (1 - P(A))
+            let p2_ind = (pUnion - p1) / (1 - p1);
+            let p2_ind_str = Number.isInteger(p2_ind * 100) ? p2_ind.toFixed(2) : p2_ind.toFixed(4);
+            let comp_p1 = parseFloat((1 - p1).toFixed(2));
+
+            // --- Generate MathJax Solutions ---
+
+            // Answer 1 Step-by-Step (Mutually Exclusive)
+            let ans1_latex = `(i) Since ${e1} and ${e2} are mutually exclusive, \\( P(${e1} \\cap ${e2}) = 0 \\).\n` +
+            `<div class="math-block">$$ P(${e1} \\cup ${e2}) = P(${e1}) + P(${e2}) $$</div>\n` +
+            `<div class="math-block">$$ ${pUnion} = ${p1} + P(${e2}) $$</div>\n` +
+            `<div class="math-block">$$ P(${e2}) = ${pUnion} - ${p1} = ${p2_me_str} $$</div>`;
+
+            // Answer 2 Step-by-Step (Independent)
+            let ans2_latex = `(ii) Since ${e1} and ${e2} are independent, \\( P(${e1} \\cap ${e2}) = P(${e1})P(${e2}) \\).\n` +
+            `<div class="math-block">$$ P(${e1} \\cup ${e2}) = P(${e1}) + P(${e2}) - P(${e1} \\cap ${e2}) $$</div>\n` +
+            `<div class="math-block">$$ P(${e1} \\cup ${e2}) = P(${e1}) + P(${e2}) - P(${e1})P(${e2}) $$</div>\n` +
+            `<div class="math-block">$$ ${pUnion} = ${p1} + P(${e2}) - (${p1} \\cdot P(${e2})) $$</div>\n` +
+            `<div class="math-block">$$ ${pUnion} - ${p1} = P(${e2})(1 - ${p1}) $$</div>\n` +
+            `<div class="math-block">$$ ${p2_me_str} = ${comp_p1} \\cdot P(${e2}) $$</div>\n` +
+            `<div class="math-block">$$ P(${e2}) = \\frac{${p2_me_str}}{${comp_p1}} \\approx ${p2_ind_str} $$</div>`;
+
+            document.getElementById('ans1').innerHTML = ans1_latex.replace(/\n/g, "");
+            document.getElementById('ans2').innerHTML = ans2_latex.replace(/\n/g, "");
+
+            // Instruct MathJax to re-render the dynamic content
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        // Generate the first problem when the page loads
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>

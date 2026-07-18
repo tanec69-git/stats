@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Probability Problem App</title>
+    <!-- Load MathJax for rendering LaTeX formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f4f4f9;
+        }
+        #app-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #problem-section, #answers-section {
+            width: 100%;
+            max-width: 700px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #problem-statement-container {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        #definition-container {
+            margin-bottom: 20px;
+            text-align: left;
+            font-style: italic;
+        }
+        .question-list, .answer-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+            text-align: left;
+        }
+        .question-list li, .answer-list li {
+            margin-bottom: 15px;
+        }
+        .controls {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            border-left: 6px solid #28a745;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+            color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h2>Probability Problem Solver</h2>
+        
+        <div id="problem-section">
+            <p id="problem-statement-container"></p>
+            <p id="definition-container"></p>
+            <p id="random-selected-text">A randomly selected member is examined:</p>
+
+            <ul class="question-list">
+                <li>(i) <span id="q1-text"></span></li>
+                <li>(ii) <span id="q2-text"></span></li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="generateProblem()">Generate New Problem</button>
+            <button onclick="showAnswers()">Show Answers</button>
+        </div>
+
+        <div id="answers-section">
+            <h3>Step-by-Step Solutions:</h3>
+            <ul class="answer-list">
+                <li id="ans1"></li>
+                <li id="ans2"></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Define varied scenarios (excluding the original health club one)
+        const scenarios = [
+            {
+                intro: "At a large corporate headquarters,",
+                subject_plural: "employees",
+                subject_singular: "employee",
+                eventA_desc: "utilizing the free gym perk",
+                eventB_desc: "utilizing the free lunch perk",
+                symbolA: "G",
+                symbolB: "L",
+                q1_phrase: "is utilizing the free lunch perk?",
+                q2_phrase: "is utilizing the free gym perk, what is the probability that they are also utilizing the free lunch perk?"
+            },
+            {
+                intro: "In a neighborhood of a major city,",
+                subject_plural: "households",
+                subject_singular: "household",
+                eventA_desc: "owning a dishwasher",
+                eventB_desc: "owning a tumble dryer",
+                symbolA: "D",
+                symbolB: "T",
+                q1_phrase: "owns a tumble dryer?",
+                q2_phrase: "owns a dishwasher, what is the probability that they also own a tumble dryer?"
+            },
+            {
+                intro: "On a large construction site,",
+                subject_plural: "workers",
+                subject_singular: "worker",
+                eventA_desc: "wearing safety helmets",
+                eventB_desc: "wearing safety gloves",
+                symbolA: "H",
+                symbolB: "G",
+                q1_phrase: "is wearing safety gloves?",
+                q2_phrase: "is wearing a safety helmet, what is the probability that they are also wearing safety gloves?"
+            }
+        ];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateProblem() {
+            // Hide answers when generating a new problem
+            document.getElementById('answers-section').style.display = 'none';
+
+            // Select a random scenario
+            const scen = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+            // Generate valid, non-contradictory percentages
+            let p_a_int = getRandomInt(20, 65);  // P(A)
+            let p_a = p_a_int / 100;
+            
+            let p_anb_int = getRandomInt(5, p_a_int - 5); // P(AnB) - must be < P(A)
+            let p_anb = p_anb_int / 100;
+
+            // Generate P(AuB). It must be >= P(A) and <= P(A) + P(B).
+            // This range is dynamic to ensure valid P(B) calculation (0-100%).
+            let p_aub_int = getRandomInt(p_a_int + 5, Math.min(95, 100 + p_a_int - p_anb_int - 5));
+            let p_aub = p_aub_int / 100;
+
+            // Calculate solution percentages (for the step-by-step display)
+            let p_b = p_aub - p_a + p_anb;
+            let p_b_int = Math.round(p_b * 100);
+
+            let p_bga = p_anb / p_a;
+            let p_bga_int = Math.round(p_bga * 100);
+
+            // Populate HTML Text
+            document.getElementById('problem-statement-container').innerText = `${scen.intro} ${p_a_int}% of the ${scen.subject_plural} are ${scen.eventA_desc}, ${p_anb_int}% are both ${scen.eventA_desc} and ${scen.eventB_desc}, and ${p_aub_int}% are either ${scen.eventA_desc} or ${scen.eventB_desc}.`;
+            
+            document.getElementById('definition-container').innerText = `Let ${scen.symbolA} represent the event that a ${scen.subject_singular} is ${scen.eventA_desc}, and ${scen.symbolB} represent the event that a ${scen.subject_singular} is ${scen.eventB_desc}.`;
+
+            document.getElementById('random-selected-text').innerText = `A ${scen.subject_singular} is selected at random from the firm:`;
+
+            document.getElementById('q1-text').innerText = `What is the probability that the ${scen.subject_singular} ${scen.q1_phrase}`;
+            document.getElementById('q2-text').innerText = `If the selected ${scen.subject_singular} ${scen.q2_phrase}`;
+
+            // --- Generate MathJax Solutions ---
+
+            // Answer 1 Step-by-Step
+            let ans1_latex = `(i) Finding \\( P(${scen.symbolB}) \\):\n` +
+            `$$ P(${scen.symbolA} \\cup ${scen.symbolB}) = P(${scen.symbolA}) + P(${scen.symbolB}) - P(${scen.symbolA} \\cap ${scen.symbolB}) $$\n` +
+            `$$ ${p_aub} = ${p_a} + P(${scen.symbolB}) - ${p_anb} $$\n` +
+            `$$ P(${scen.symbolB}) = ${p_aub} - ${p_a} + ${p_anb} $$\n` +
+            `$$ P(${scen.symbolB}) = ${p_b.toFixed(2)} = ${p_b_int}\\% $$`;
+
+            // Answer 2 Step-by-Step
+            let ans2_latex = `(ii) Finding conditional probability \\( P(${scen.symbolB} \\mid ${scen.symbolA}) \\):\n` +
+            `$$ P(${scen.symbolB} \\mid ${scen.symbolA}) = \\frac{P(${scen.symbolA} \\cap ${scen.symbolB})}{P(${scen.symbolA})} $$\n` +
+            `$$ P(${scen.symbolB} \\mid ${scen.symbolA}) = \\frac{${p_anb}}{${p_a}} = \\frac{${p_anb_int}}{${p_a_int}} $$\n` +
+            `$$ P(${scen.symbolB} \\mid ${scen.symbolA}) \\approx ${p_bga.toFixed(3)} \\approx ${p_bga_int}\\% $$`;
+
+            document.getElementById('ans1').innerHTML = ans1_latex.replace(/\n/g, "<br>");
+            document.getElementById('ans2').innerHTML = ans2_latex.replace(/\n/g, "<br>");
+
+            // Instruct MathJax to re-render the dynamic content
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        // Generate the first problem when the page loads
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>

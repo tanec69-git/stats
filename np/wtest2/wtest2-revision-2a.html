@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Probability Distribution App</title>
+    <!-- Load MathJax for rendering LaTeX formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        #app-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #problem-section, #answers-section {
+            width: 100%;
+            max-width: 750px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 80%;
+            text-align: center;
+        }
+        th, td {
+            border: 2px solid black;
+            padding: 10px;
+            font-size: 1.1em;
+        }
+        .question-list, .answer-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+        }
+        .question-list li, .answer-list li {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .controls {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            border-left: 6px solid #28a745;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+            color: #1e7e34;
+        }
+        .math-block {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h2>Probability Distribution Problem Generator</h2>
+        
+        <div id="problem-section">
+            <p id="problem-statement"></p>
+            
+            <table id="dist-table">
+                <tbody>
+                    <tr id="x-row">
+                        <th>x</th>
+                        <td id="x0"></td>
+                        <td id="x1"></td>
+                        <td id="x2"></td>
+                        <td id="x3"></td>
+                        <td id="x4"></td>
+                    </tr>
+                    <tr id="p-row">
+                        <th>P(X=x)</th>
+                        <td id="p0"></td>
+                        <td id="p1"></td>
+                        <td id="p2"></td>
+                        <td id="p3"></td>
+                        <td id="p4"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <ul class="question-list">
+                <li id="q1"></li>
+                <li id="q2"></li>
+                <li id="q3"></li>
+                <li id="q4"></li>
+                <li id="q5"></li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="generateProblem()">Generate New Problem</button>
+            <button onclick="showAnswers()">Show Answers</button>
+        </div>
+
+        <div id="answers-section">
+            <h3>Step-by-Step Solutions:</h3>
+            <ul class="answer-list">
+                <li id="ans1"></li>
+                <li id="ans2"></li>
+                <li id="ans3"></li>
+                <li id="ans4"></li>
+                <li id="ans5"></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                text: "A retail store tracks the daily demand for a high-end appliance. Let the random variable X represent the number of appliances sold in a day. The probability distribution of X is shown in the table below.",
+                x_vals: [0, 1, 2, 3, 5]
+            },
+            {
+                text: "A quality control inspector records the number of defective components found in daily random batches. Let the random variable X represent the number of defects. The probability distribution is shown below.",
+                x_vals: [0, 1, 2, 4, 6]
+            },
+            {
+                text: "A logistics company analyzes the number of delivery delays per route. Let the random variable X represent the number of delayed packages. The probability distribution is given in the table.",
+                x_vals: [1, 2, 3, 4, 5]
+            }
+        ];
+
+        // Valid sets of probabilities that sum to 1
+        const probSets = [
+            [0.10, 0.20, 0.40, 0.15, 0.15],
+            [0.05, 0.25, 0.30, 0.20, 0.20],
+            [0.15, 0.35, 0.25, 0.10, 0.15],
+            [0.20, 0.30, 0.20, 0.10, 0.20]
+        ];
+
+        function generateProblem() {
+            // Hide answers
+            document.getElementById('answers-section').style.display = 'none';
+
+            // Pick a scenario
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            const x = scenario.x_vals;
+
+            // Pick probabilities and the unknown k index
+            const p = probSets[Math.floor(Math.random() * probSets.length)];
+            const kIndex = Math.floor(Math.random() * 5);
+            const kValue = p[kIndex];
+
+            // Setup a, b for Var(aX + b) or Var(aX - b)
+            const a = Math.floor(Math.random() * 4) + 2; // 2 to 5
+            const b = Math.floor(Math.random() * 9) + 1; // 1 to 9
+            const sign = Math.random() > 0.5 ? '+' : '-';
+            const exprStr = `${a}X ${sign} ${b}`;
+
+            // Calculate E(X)
+            let ex = 0;
+            for(let i=0; i<5; i++) ex += x[i] * p[i];
+            ex = parseFloat(ex.toFixed(3));
+
+            // Calculate E(X^2)
+            let ex2 = 0;
+            for(let i=0; i<5; i++) ex2 += (x[i] * x[i]) * p[i];
+            ex2 = parseFloat(ex2.toFixed(3));
+
+            // Calculate Var(X)
+            let varx = ex2 - (ex * ex);
+            varx = parseFloat(varx.toFixed(4));
+
+            // Calculate Var(aX + b)
+            let varax = (a * a) * varx;
+            varax = parseFloat(varax.toFixed(4));
+
+            // Render Problem DOM
+            document.getElementById('problem-statement').innerText = scenario.text;
+            
+            for(let i=0; i<5; i++) {
+                document.getElementById(`x${i}`).innerText = x[i];
+                document.getElementById(`p${i}`).innerText = (i === kIndex) ? 'k' : p[i].toFixed(2);
+            }
+
+            // Render MathJax Questions Dynamically to fix literal display issues
+            document.getElementById('q1').innerHTML = `(i) &nbsp; Find the value of \\( k \\).`;
+            document.getElementById('q2').innerHTML = `(ii) &nbsp; Find the value of \\( E(X) \\).`;
+            document.getElementById('q3').innerHTML = `(iii) &nbsp; Show that \\( E(X^2) = ${ex2} \\).`;
+            document.getElementById('q4').innerHTML = `(iv) &nbsp; Find \\( Var(X) \\).`;
+            document.getElementById('q5').innerHTML = `(v) &nbsp; Find \\( Var(${exprStr}) \\).`;
+
+            // Render MathJax Answers
+            let sumKnownStr = p.filter((_, i) => i !== kIndex).map(v => v.toFixed(2)).join(' + ');
+            let sumKnown = p.filter((_, i) => i !== kIndex).reduce((acc, val) => acc + val, 0).toFixed(2);
+            
+            let ans1_latex = `(i) The sum of all probabilities must equal 1.\n` +
+            `<div class="math-block">$$ k + ${sumKnownStr} = 1 $$</div>\n` +
+            `<div class="math-block">$$ k + ${sumKnown} = 1 $$</div>\n` +
+            `<div class="math-block">$$ k = 1 - ${sumKnown} = ${kValue.toFixed(2)} $$</div>`;
+
+            let exStr = x.map((xi, i) => `(${xi})(${p[i].toFixed(2)})`).join(' + ');
+            let ans2_latex = `(ii) \\( E(X) = \\sum x \\cdot P(X=x) \\)\n` +
+            `<div class="math-block">$$ E(X) = ${exStr} $$</div>\n` +
+            `<div class="math-block">$$ E(X) = ${ex} $$</div>`;
+
+            let ex2Str = x.map((xi, i) => `(${xi}^2)(${p[i].toFixed(2)})`).join(' + ');
+            let ans3_latex = `(iii) \\( E(X^2) = \\sum x^2 \\cdot P(X=x) \\)\n` +
+            `<div class="math-block">$$ E(X^2) = ${ex2Str} $$</div>\n` +
+            `<div class="math-block">$$ E(X^2) = ${ex2} \\quad \\text{(Shown)} $$</div>`;
+
+            let ans4_latex = `(iv) \\( Var(X) = E(X^2) - [E(X)]^2 \\)\n` +
+            `<div class="math-block">$$ Var(X) = ${ex2} - (${ex})^2 $$</div>\n` +
+            `<div class="math-block">$$ Var(X) = ${ex2} - ${(ex*ex).toFixed(4)} $$</div>\n` +
+            `<div class="math-block">$$ Var(X) = ${varx} $$</div>`;
+
+            let ans5_latex = `(v) Using the property \\( Var(aX + b) = a^2 Var(X) \\):\n` +
+            `<div class="math-block">$$ Var(${exprStr}) = ${a}^2 \\cdot Var(X) $$</div>\n` +
+            `<div class="math-block">$$ Var(${exprStr}) = ${a*a} \\cdot ${varx} $$</div>\n` +
+            `<div class="math-block">$$ Var(${exprStr}) = ${varax} $$</div>`;
+
+            document.getElementById('ans1').innerHTML = ans1_latex.replace(/\n/g, "");
+            document.getElementById('ans2').innerHTML = ans2_latex.replace(/\n/g, "");
+            document.getElementById('ans3').innerHTML = ans3_latex.replace(/\n/g, "");
+            document.getElementById('ans4').innerHTML = ans4_latex.replace(/\n/g, "");
+            document.getElementById('ans5').innerHTML = ans5_latex.replace(/\n/g, "");
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        // Initialize on load
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>

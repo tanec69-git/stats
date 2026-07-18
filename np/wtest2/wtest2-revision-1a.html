@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Probability Problem Generator</title>
+    <!-- Load MathJax for rendering LaTeX -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        #problem-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: center;
+        }
+        .question-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+            max-width: 600px;
+            text-align: left;
+        }
+        .question-list li {
+            margin-bottom: 15px;
+        }
+        .controls {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 5px solid #28a745;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="problem-section">
+        <p id="scenario-text"></p>
+
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th id="col1-header"></th>
+                    <th id="col2-header"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th id="row1-header"></th>
+                    <td id="cell-r1c1"></td>
+                    <td id="cell-r1c2"></td>
+                </tr>
+                <tr>
+                    <th id="row2-header"></th>
+                    <td id="cell-r2c1"></td>
+                    <td id="cell-r2c2"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p id="selection-text"></p>
+
+        <ul class="question-list">
+            <li>(i) &nbsp; <span id="q1-text"></span></li>
+            <li>(ii) &nbsp; <span id="q2-text"></span></li>
+            <li>(iii) &nbsp; <span id="q3-text"></span></li>
+            <li>(iv) &nbsp; <span id="q4-text"></span></li>
+        </ul>
+    </div>
+
+    <div class="controls">
+        <button onclick="generateProblem()">Generate New Problem</button>
+        <button onclick="showAnswers()">Show Answers</button>
+    </div>
+
+    <div id="answers-section">
+        <h3>Step-by-Step Solutions:</h3>
+        <ul class="question-list">
+            <li id="ans1"></li>
+            <li id="ans2"></li>
+            <li id="ans3"></li>
+            <li id="ans4"></li>
+        </ul>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                entity: "A hospital",
+                subject: "patients",
+                action: "received either Treatment A or Treatment B",
+                row1: "Treatment A",
+                row2: "Treatment B",
+                col1: "Recovered",
+                col2: "Not Recovered",
+                q1_phrase: "the patient received Treatment A",
+                q2_phrase: "the patient did not recover",
+                q3_phrase: "the patient received Treatment A and did not recover",
+                q4_phrase: "the patient received Treatment B, given that the patient recovered"
+            },
+            {
+                entity: "A university",
+                subject: "students",
+                action: "enrolled in either the Science Stream or the Arts Stream",
+                row1: "Science Stream",
+                row2: "Arts Stream",
+                col1: "Passed",
+                col2: "Failed",
+                q1_phrase: "the student enrolled in the Science Stream",
+                q2_phrase: "the student failed",
+                q3_phrase: "the student enrolled in the Science Stream and failed",
+                q4_phrase: "the student enrolled in the Arts Stream, given that the student passed"
+            },
+            {
+                entity: "A tech company",
+                subject: "customers",
+                action: "purchased either a Laptop or a Tablet",
+                row1: "Laptop",
+                row2: "Tablet",
+                col1: "Bought Warranty",
+                col2: "No Warranty",
+                q1_phrase: "the customer purchased a Laptop",
+                q2_phrase: "the customer did not buy a warranty",
+                q3_phrase: "the customer purchased a Laptop and did not buy a warranty",
+                q4_phrase: "the customer purchased a Tablet, given that they bought a warranty"
+            }
+        ];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateProblem() {
+            document.getElementById('answers-section').style.display = 'none';
+
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+            const r1c1 = getRandomInt(100, 500);
+            const r1c2 = getRandomInt(20, 200);
+            const r2c1 = getRandomInt(100, 500);
+            const r2c2 = getRandomInt(10, 150);
+
+            const totalR1 = r1c1 + r1c2;
+            const totalR2 = r2c1 + r2c2;
+            const totalC1 = r1c1 + r2c1;
+            const totalC2 = r1c2 + r2c2;
+            const grandTotal = totalR1 + totalR2;
+
+            document.getElementById('scenario-text').innerHTML = `${scenario.entity} collected the following data on ${scenario.col1.toLowerCase()} rates from ${grandTotal} ${scenario.subject} who ${scenario.action}:`;
+            
+            document.getElementById('col1-header').innerText = scenario.col1;
+            document.getElementById('col2-header').innerText = scenario.col2;
+            document.getElementById('row1-header').innerText = scenario.row1;
+            document.getElementById('row2-header').innerText = scenario.row2;
+
+            document.getElementById('cell-r1c1').innerText = r1c1;
+            document.getElementById('cell-r1c2').innerText = r1c2;
+            document.getElementById('cell-r2c1').innerText = r2c1;
+            document.getElementById('cell-r2c2').innerText = r2c2;
+
+            document.getElementById('selection-text').innerText = `If a ${scenario.subject.slice(0, -1)} is selected at random, find the probability that`;
+
+            document.getElementById('q1-text').innerText = scenario.q1_phrase + ",";
+            document.getElementById('q2-text').innerText = scenario.q2_phrase + ",";
+            document.getElementById('q3-text').innerText = scenario.q3_phrase + ",";
+            document.getElementById('q4-text').innerText = scenario.q4_phrase + ".";
+            
+            const ans1 = `(i) \\( P(\\text{${scenario.row1}}) = \\frac{${totalR1}}{${grandTotal}} = ${(totalR1/grandTotal).toFixed(4)} \\)`;
+            const ans2 = `(ii) \\( P(\\text{${scenario.col2}}) = \\frac{${totalC2}}{${grandTotal}} = ${(totalC2/grandTotal).toFixed(4)} \\)`;
+            const ans3 = `(iii) \\( P(\\text{${scenario.row1}} \\cap \\text{${scenario.col2}}) = \\frac{${r1c2}}{${grandTotal}} = ${(r1c2/grandTotal).toFixed(4)} \\)`;
+            const ans4 = `(iv) \\( P(\\text{${scenario.row2}} \\mid \\text{${scenario.col1}}) = \\frac{P(\\text{${scenario.row2}} \\cap \\text{${scenario.col1}})}{P(\\text{${scenario.col1}})} = \\frac{${r2c1}}{${totalC1}} = ${(r2c1/totalC1).toFixed(4)} \\)`;
+
+            document.getElementById('ans1').innerHTML = ans1;
+            document.getElementById('ans2').innerHTML = ans2;
+            document.getElementById('ans3').innerHTML = ans3;
+            document.getElementById('ans4').innerHTML = ans4;
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>

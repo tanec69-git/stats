@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binomial Distribution App</title>
+    <!-- Load MathJax for rendering LaTeX formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        #app-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #problem-section, #answers-section {
+            width: 100%;
+            max-width: 750px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .question-list, .sub-question-list, .answer-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+        }
+        .question-list > li, .answer-list > li {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .sub-question-list {
+            padding-left: 30px;
+            margin-top: 10px;
+        }
+        .sub-question-list li {
+            margin-bottom: 15px;
+        }
+        .controls {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            border-left: 6px solid #28a745;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+            color: #1e7e34;
+        }
+        .math-block {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h2>Binomial Distribution Solver</h2>
+        
+        <div id="problem-section">
+            <p id="problem-intro"></p>
+            
+            <ul class="question-list">
+                <li>
+                    (a) <span id="part-a-intro"></span>
+                    <ul class="sub-question-list">
+                        <li id="q-a-i"></li>
+                        <li id="q-a-ii"></li>
+                        <li id="q-a-iii"></li>
+                    </ul>
+                </li>
+                <li id="q-b"></li>
+                <li id="q-c"></li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="generateProblem()">Generate New Problem</button>
+            <button onclick="showAnswers()">Show Answers</button>
+        </div>
+
+        <div id="answers-section">
+            <h3>Step-by-Step Solutions:</h3>
+            <ul class="answer-list">
+                <li id="ans-a-i"></li>
+                <li id="ans-a-ii"></li>
+                <li id="ans-a-iii"></li>
+                <li id="ans-b"></li>
+                <li id="ans-c"></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Helper functions for math
+        function factorial(num) {
+            if (num === 0 || num === 1) return 1;
+            for (var i = num - 1; i >= 1; i--) {
+                num *= i;
+            }
+            return num;
+        }
+
+        function nCr(n, r) {
+            return factorial(n) / (factorial(r) * factorial(n - r));
+        }
+
+        function binomProb(n, p, x) {
+            return nCr(n, x) * Math.pow(p, x) * Math.pow(1 - p, n - x);
+        }
+
+        const scenarios = [
+            {
+                supplier: "An electronics manufacturer",
+                container: "batches",
+                item_plural: "microchips",
+                item_singular: "microchip",
+                bad_adj: "defective",
+                good_adj: "functional"
+            },
+            {
+                supplier: "A commercial bakery",
+                container: "boxes",
+                item_plural: "pastries",
+                item_singular: "pastry",
+                bad_adj: "burnt",
+                good_adj: "perfect"
+            },
+            {
+                supplier: "A clothing distributor",
+                container: "shipments",
+                item_plural: "shirts",
+                item_singular: "shirt",
+                bad_adj: "flawed",
+                good_adj: "flawless"
+            }
+        ];
+
+        function generateProblem() {
+            document.getElementById('answers-section').style.display = 'none';
+
+            const sc = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+            // Ensure values are DIFFERENT from the original image (9%, 15, 3, 12, 20, 4)
+            let p_percent;
+            do { p_percent = Math.floor(Math.random() * 8) + 5; } while (p_percent === 9); // 5% to 12%
+            
+            let p = p_percent / 100;
+            // Calculate q cleanly to avoid baseline float drift, then format below for display
+            let q = (100 - p_percent) / 100; 
+
+            // Format for display string to avoid 0.9299999999999999
+            let p_str = p.toFixed(2);
+            let q_str = q.toFixed(2);
+
+            let n;
+            do { n = Math.floor(Math.random() * 9) + 10; } while (n === 15); // 10 to 18
+
+            let k;
+            do { k = Math.floor(Math.random() * 2) + 2; } while (k === 3); // 2 or 4
+
+            let good_k = n - k;
+
+            let total_containers;
+            do { total_containers = Math.floor(Math.random() * 21) + 30; } while (total_containers === 20); // 30 to 50
+
+            let m;
+            do { m = Math.floor(Math.random() * 3) + 3; } while (m === 4); // 3 or 5
+
+            // Generate DOM Text
+            document.getElementById('problem-intro').innerText = `${sc.supplier} receives several ${sc.container} of ${sc.item_plural}, and quality control discovers that ${p_percent}% of the ${sc.item_plural} are ${sc.bad_adj}.`;
+            
+            document.getElementById('part-a-intro').innerText = `A sample of ${n} ${sc.item_plural} is taken and the random variable X represents the number of ${sc.bad_adj} ${sc.item_plural} in the sample. Determine the probability that`;
+            
+            document.getElementById('q-a-i').innerText = `(i) exactly ${k} ${sc.item_plural} are ${sc.bad_adj},`;
+            document.getElementById('q-a-ii').innerText = `(ii) more than ${k} ${sc.item_plural} are ${sc.bad_adj},`;
+            document.getElementById('q-a-iii').innerText = `(iii) at least ${good_k} ${sc.item_plural} are ${sc.good_adj}.`;
+            
+            document.getElementById('q-b').innerText = `(b) Calculate the mean and the standard deviation of X.`;
+            
+            document.getElementById('q-c').innerHTML = `(c) A total of ${total_containers} ${sc.container} of ${sc.item_plural} were processed, and each ${sc.container.slice(0, -1)} contains ${n} ${sc.item_plural}. Find the probability that, in a random selection of ${m} ${sc.container}, <b>all</b> the selected ${sc.container} contain exactly ${k} ${sc.bad_adj} ${sc.item_plural}.`;
+
+            // --- Calculations & MathJax ---
+
+            // (a)(i) Exact probability
+            let prob_exact = binomProb(n, p, k);
+            let ans_a_i_latex = `(a)(i) \\( X \\sim B(${n}, ${p_str}) \\). We need \\( P(X = ${k}) \\):\n` +
+            `<div class="math-block">$$ P(X = ${k}) = \\binom{${n}}{${k}} (${p_str})^${k} (${q_str})^{${n-k}} $$</div>\n` +
+            `<div class="math-block">$$ P(X = ${k}) = ${nCr(n, k)} \\times ${Math.pow(p, k).toFixed(6)} \\times ${Math.pow(q, n-k).toFixed(6)} \\approx ${prob_exact.toFixed(4)} $$</div>`;
+
+            // (a)(ii) More than probability
+            let prob_le_k = 0;
+            let prob_le_k_str = "";
+            for (let i = 0; i <= k; i++) {
+                let p_i = binomProb(n, p, i);
+                prob_le_k += p_i;
+                prob_le_k_str += `P(X=${i})` + (i < k ? " + " : "");
+            }
+            let prob_more_than = 1 - prob_le_k;
+            
+            let ans_a_ii_latex = `(a)(ii) We need \\( P(X > ${k}) \\). Using the complement rule:\n` +
+            `<div class="math-block">$$ P(X > ${k}) = 1 - P(X \\le ${k}) $$</div>\n` +
+            `<div class="math-block">$$ P(X > ${k}) = 1 - [${prob_le_k_str}] $$</div>\n` +
+            `<div class="math-block">$$ P(X > ${k}) = 1 - ${prob_le_k.toFixed(5)} \\approx ${prob_more_than.toFixed(4)} $$</div>`;
+
+            // (a)(iii) At least [good_k] are good
+            let ans_a_iii_latex = `(a)(iii) Let \\( Y \\) be the number of ${sc.good_adj} ${sc.item_plural}. If at least ${good_k} are ${sc.good_adj}, then at most \\( ${n} - ${good_k} = ${k} \\) are ${sc.bad_adj}.\n` +
+            `<div class="math-block">$$ P(Y \\ge ${good_k}) = P(X \\le ${k}) $$</div>\n` +
+            `<div class="math-block">$$ P(X \\le ${k}) = ${prob_le_k_str} \\approx ${prob_le_k.toFixed(4)} $$</div>`;
+
+            // (b) Mean and Std Dev
+            let mean = n * p;
+            let variance = n * p * q;
+            let std_dev = Math.sqrt(variance);
+
+            let ans_b_latex = `(b) Mean \\( \\mu \\) and Standard Deviation \\( \\sigma \\):\n` +
+            `<div class="math-block">$$ \\mu = np = ${n} \\times ${p_str} = ${mean.toFixed(2)} $$</div>\n` +
+            `<div class="math-block">$$ \\sigma = \\sqrt{npq} = \\sqrt{${n} \\times ${p_str} \\times ${q_str}} = \\sqrt{${variance.toFixed(4)}} \\approx ${std_dev.toFixed(4)} $$</div>`;
+
+            // (c) Selection of containers
+            let prob_c = Math.pow(prob_exact, m);
+            let ans_c_latex = `(c) The probability that a single ${sc.container.slice(0, -1)} has exactly ${k} ${sc.bad_adj} ${sc.item_plural} is \\( P(X = ${k}) = ${prob_exact.toFixed(4)} \\). \n` +
+            `<br>We want all ${m} randomly selected ${sc.container} to fit this criteria. Assuming independence:\n` +
+            `<div class="math-block">$$ P(\\text{All } ${m} \\text{ have exactly } ${k}) = [P(X = ${k})]^${m} $$</div>\n` +
+            `<div class="math-block">$$ P(\\text{All } ${m}) = (${prob_exact.toFixed(4)})^${m} \\approx ${prob_c.toExponential(4)} $$</div>`;
+
+            document.getElementById('ans-a-i').innerHTML = ans_a_i_latex.replace(/\n/g, "");
+            document.getElementById('ans-a-ii').innerHTML = ans_a_ii_latex.replace(/\n/g, "");
+            document.getElementById('ans-a-iii').innerHTML = ans_a_iii_latex.replace(/\n/g, "");
+            document.getElementById('ans-b').innerHTML = ans_b_latex.replace(/\n/g, "");
+            document.getElementById('ans-c').innerHTML = ans_c_latex.replace(/\n/g, "");
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        // Initialize on load
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>

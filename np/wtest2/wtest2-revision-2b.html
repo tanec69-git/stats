@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discrete Random Variables Solver</title>
+    <!-- Load MathJax for rendering LaTeX formulas -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 40px auto;
+            max-width: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        #app-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #problem-section, #answers-section {
+            width: 100%;
+            max-width: 750px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .question-list, .answer-list {
+            list-style-type: none;
+            padding-left: 0;
+            width: 100%;
+        }
+        .question-list li, .answer-list li {
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+        .controls {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #004494;
+        }
+        #answers-section {
+            display: none;
+            border-left: 6px solid #28a745;
+        }
+        #answers-section h3 {
+            margin-top: 0;
+            color: #1e7e34;
+        }
+        .math-block {
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <h2>Expectation & Variance Problem Generator</h2>
+        
+        <div id="problem-section">
+            <p id="problem-statement"></p>
+            <ul class="question-list">
+                <li id="q1"></li>
+                <li id="q2"></li>
+            </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="generateProblem()">Generate New Problem</button>
+            <button onclick="showAnswers()">Show Answers</button>
+        </div>
+
+        <div id="answers-section">
+            <h3>Step-by-Step Solutions:</h3>
+            <ul class="answer-list">
+                <li id="ans1"></li>
+                <li id="ans2"></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // A pool of clean, mathematically sound scenarios to ensure fraction math works out neatly 
+        // without floating-point errors visually disrupting the step-by-step LaTeX rendering.
+        const pool = [
+            { p: '1/4', q: '1/2', r: '1/4', p_n: 0.25, q_n: 0.5, r_n: 0.25, ey: '1', ey_n: 1, vary: '1/2', vary_n: 0.5, ey2: '3/2', ey_sq: '1', ey2_minus_ey: '1/2' },
+            { p: '1/8', q: '1/2', r: '3/8', p_n: 0.125, q_n: 0.5, r_n: 0.375, ey: '5/4', ey_n: 1.25, vary: '7/16', vary_n: 0.4375, ey2: '2', ey_sq: '25/16', ey2_minus_ey: '3/4' },
+            { p: '1/5', q: '3/5', r: '1/5', p_n: 0.2, q_n: 0.6, r_n: 0.2, ey: '1', ey_n: 1, vary: '2/5', vary_n: 0.4, ey2: '7/5', ey_sq: '1', ey2_minus_ey: '2/5' },
+            { p: '3/8', q: '1/2', r: '1/8', p_n: 0.375, q_n: 0.5, r_n: 0.125, ey: '3/4', ey_n: 0.75, vary: '7/16', vary_n: 0.4375, ey2: '1', ey_sq: '9/16', ey2_minus_ey: '1/4' },
+            { p: '1/10', q: '3/10', r: '3/5', p_n: 0.1, q_n: 0.3, r_n: 0.6, ey: '3/2', ey_n: 1.5, vary: '9/20', vary_n: 0.45, ey2: '27/10', ey_sq: '9/4', ey2_minus_ey: '6/5' }
+        ];
+
+        const vars = ['X', 'Y', 'Z', 'W'];
+
+        function generateProblem() {
+            // Hide answers
+            document.getElementById('answers-section').style.display = 'none';
+
+            // Select random variable and data set
+            const v = vars[Math.floor(Math.random() * vars.length)];
+            const data = pool[Math.floor(Math.random() * pool.length)];
+
+            // Setup a, b for finding E(aY + b)
+            const a = Math.floor(Math.random() * 4) + 2; // 2 to 5
+            const b = (Math.floor(Math.random() * 8) + 1) * (Math.random() > 0.5 ? 1 : -1); // -8 to 8 (excluding 0)
+            const sign = b > 0 ? '+' : '-';
+            const abs_b = Math.abs(b);
+
+            // Populate Problem DOM with MathJax
+            document.getElementById('problem-statement').innerHTML = `A discrete random variable \\( ${v} \\) takes values of 0, 1 and 2 only with probability \\( p \\), \\( q \\) and \\( r \\) respectively. Given that \\( E(${v}) = ${data.ey} \\) and \\( Var(${v}) = ${data.vary} \\).`;
+            
+            document.getElementById('q1').innerHTML = `(i) &nbsp; Find \\( E(${a}${v} ${sign} ${abs_b}) \\).`;
+            document.getElementById('q2').innerHTML = `(ii) &nbsp; Find the values of \\( p \\), \\( q \\) and \\( r \\).`;
+
+            // Calculate Answer 1 value
+            let ans1_calc = (a * data.ey_n) + b;
+
+            // Generate Answer 1 MathJax
+            let ans1_latex = `(i) Using the properties of expectation \\( E(a${v} + b) = aE(${v}) + b \\):\n` +
+            `<div class="math-block">$$ E(${a}${v} ${sign} ${abs_b}) = ${a}E(${v}) ${sign} ${abs_b} $$</div>\n` +
+            `<div class="math-block">$$ E(${a}${v} ${sign} ${abs_b}) = ${a}\\left(${data.ey}\\right) ${sign} ${abs_b} $$</div>\n` +
+            `<div class="math-block">$$ E(${a}${v} ${sign} ${abs_b}) = ${a * data.ey_n} ${sign} ${abs_b} = ${ans1_calc} $$</div>`;
+
+            // Generate Answer 2 MathJax
+            let ans2_latex = `(ii) Set up the equations based on the definitions of probability, expectation, and variance.\n` +
+            `<br><br>The sum of all probabilities is 1:\n` +
+            `<div class="math-block">$$ p + q + r = 1 \\quad \\text{--- (1)} $$</div>\n` +
+            `The expectation \\( E(${v}) \\):\n` +
+            `<div class="math-block">$$ E(${v}) = 0(p) + 1(q) + 2(r) $$</div>\n` +
+            `<div class="math-block">$$ q + 2r = ${data.ey} \\quad \\text{--- (2)} $$</div>\n` +
+            `The variance \\( Var(${v}) = E(${v}^2) - [E(${v})]^2 \\):\n` +
+            `<div class="math-block">$$ ${data.vary} = (0^2(p) + 1^2(q) + 2^2(r)) - \\left(${data.ey}\\right)^2 $$</div>\n` +
+            `<div class="math-block">$$ ${data.vary} = q + 4r - ${data.ey_sq} $$</div>\n` +
+            `<div class="math-block">$$ q + 4r = ${data.vary} + ${data.ey_sq} = ${data.ey2} \\quad \\text{--- (3)} $$</div>\n` +
+            `Subtract equation (2) from equation (3):\n` +
+            `<div class="math-block">$$ (q + 4r) - (q + 2r) = ${data.ey2} - ${data.ey} $$</div>\n` +
+            `<div class="math-block">$$ 2r = ${data.ey2_minus_ey} $$</div>\n` +
+            `<div class="math-block">$$ r = ${data.r} $$</div>\n` +
+            `Substitute \\( r \\) back into equation (2):\n` +
+            `<div class="math-block">$$ q + 2\\left(${data.r}\\right) = ${data.ey} $$</div>\n` +
+            `<div class="math-block">$$ q = ${data.q} $$</div>\n` +
+            `Substitute \\( q \\) and \\( r \\) into equation (1):\n` +
+            `<div class="math-block">$$ p = 1 - ${data.q} - ${data.r} $$</div>\n` +
+            `<div class="math-block">$$ p = ${data.p} $$</div>`;
+
+            document.getElementById('ans1').innerHTML = ans1_latex.replace(/\n/g, "");
+            document.getElementById('ans2').innerHTML = ans2_latex.replace(/\n/g, "");
+
+            // Re-render MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        function showAnswers() {
+            document.getElementById('answers-section').style.display = 'block';
+        }
+
+        // Initialize on load
+        window.onload = generateProblem;
+    </script>
+</body>
+</html>
