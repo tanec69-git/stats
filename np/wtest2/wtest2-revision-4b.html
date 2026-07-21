@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piecewise PDF Generator</title>
+    <!-- MathJax for rendering mathematics -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            /* Centering the display */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 750px;
+            width: 100%;
+            text-align: left;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .question-block {
+            margin: 20px 0;
+            line-height: 1.6;
+            font-size: 1.1em;
+            overflow-x: auto;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #0056b3;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        #solutions-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f1f8ff;
+            border-left: 5px solid #0056b3;
+            border-radius: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Continuous Random Variable Question Generator</h2>
+        
+        <div class="question-block">
+            <p>The probability density function, \(f(x)\) of a continuous random variable is defined as follows:</p>
+            <div id="equation-container">
+                <!-- Equation injected here -->
+            </div>
+            <p style="text-align: right; margin-top: -30px;">where k is a constant.</p>
+            <p>Sketch the graph of \(f(x)\) and determine the value of \(k\).</p>
+        </div>
+
+        <div class="buttons">
+            <button onclick="generateQuestion()">Generate New Question</button>
+            <button onclick="toggleSolutions()">Show / Hide Answers</button>
+        </div>
+
+        <div id="solutions-container">
+            <h3>Worked Solutions:</h3>
+            <div id="solutions-text">
+                <!-- Derivations injected here -->
+            </div>
+            
+            <h4>Sketch of \(f(x)\):</h4>
+            <div class="canvas-container">
+                <canvas id="graphCanvas" width="600" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data configurations (the configuration matching the excluded image has been removed)
+        const configurations = [
+            { x1: 2, x2: 4, x3: 6, denom1: 10, offset: 1, const3: 0.15 }, // Clean Default
+            { x1: 4, x2: 7, x3: 9, denom1: 16, offset: 2, const3: 0.1 },  // Var 1
+            { x1: 2, x2: 4, x3: 5, denom1: 5, offset: 1, const3: 0.1 },   // Var 2
+            { x1: 3, x2: 6, x3: 7, denom1: 9, offset: 2, const3: 0.2 }    // Var 3
+        ];
+
+        let currentConfig = null;
+        let currentK = null;
+
+        function updateQuestion(cfg) {
+            const eqHTML = `
+            \\[
+            f(x) = \\begin{cases} 
+            \\frac{x}{${cfg.denom1}} & \\text{for } 0 \\le x < ${cfg.x1} \\\\[2ex]
+            \\frac{x-${cfg.offset}}{k} & \\text{for } ${cfg.x1} \\le x < ${cfg.x2} \\\\[2ex]
+            ${cfg.const3} & \\text{for } ${cfg.x2} \\le x < ${cfg.x3} \\\\[2ex]
+            0 & \\text{otherwise} 
+            \\end{cases}
+            \\]`;
+            document.getElementById('equation-container').innerHTML = eqHTML;
+        }
+
+        function updateSolutions(cfg) {
+            // Calculate areas geometrically to solve for k
+            
+            // Area 1: Triangle
+            const area1 = Number((0.5 * cfg.x1 * (cfg.x1 / cfg.denom1)).toFixed(4));
+            
+            // Area 3: Rectangle
+            const width3 = cfg.x3 - cfg.x2;
+            const area3 = Number((width3 * cfg.const3).toFixed(4));
+            
+            // Area 2: Trapezium in terms of k
+            const width2 = cfg.x2 - cfg.x1;
+            const side1_num = cfg.x1 - cfg.offset;
+            const side2_num = cfg.x2 - cfg.offset;
+            const trap_factor = Number((0.5 * width2 * (side1_num + side2_num)).toFixed(4));
+            
+            // Solve for k: Area1 + (trap_factor / k) + Area3 = 1
+            const targetArea2 = Number((1 - area1 - area3).toFixed(4));
+            currentK = Number((trap_factor / targetArea2).toFixed(4));
+
+            const solutionHTML = `
+                <div class="step">
+                    <strong>1. Determine the value of \\(k\\):</strong><br>
+                    For a valid probability density function, the total area under the curve must equal 1.
+                    \\[ \\text{Total Area} = \\text{Area}_1 + \\text{Area}_2 + \\text{Area}_3 = 1 \\]
+                </div>
+                <div class="step">
+                    Calculate the areas using geometric formulas:<br><br>
+                    <strong>Area 1 (Triangle for \\(0 \\le x < ${cfg.x1}\\)):</strong><br>
+                    \\[ \\text{Base} = ${cfg.x1}, \\quad \\text{Height} = \\frac{${cfg.x1}}{${cfg.denom1}} \\]
+                    \\[ \\text{Area}_1 = \\frac{1}{2} \\times \\text{Base} \\times \\text{Height} = \\frac{1}{2} (${cfg.x1}) \\left(\\frac{${cfg.x1}}{${cfg.denom1}}\\right) = ${area1} \\]
+                </div>
+                <div class="step">
+                    <strong>Area 3 (Rectangle for \\(${cfg.x2} \\le x < ${cfg.x3}\\)):</strong><br>
+                    \\[ \\text{Width} = ${cfg.x3} - ${cfg.x2} = ${width3}, \\quad \\text{Height} = ${cfg.const3} \\]
+                    \\[ \\text{Area}_3 = \\text{Width} \\times \\text{Height} = (${width3})(${cfg.const3}) = ${area3} \\]
+                </div>
+                <div class="step">
+                    <strong>Area 2 (Trapezium for \\(${cfg.x1} \\le x < ${cfg.x2}\\)):</strong><br>
+                    \\[ \\text{Width} = ${cfg.x2} - ${cfg.x1} = ${width2} \\]
+                    \\[ \\text{Parallel Sides} = f(${cfg.x1}) \\text{ and } f(${cfg.x2}) = \\frac{${side1_num}}{k} \\text{ and } \\frac{${side2_num}}{k} \\]
+                    \\[ \\text{Area}_2 = \\frac{1}{2} \\times \\text{Width} \\times (\\text{Sum of Parallel Sides}) \\]
+                    \\[ \\text{Area}_2 = \\frac{1}{2} (${width2}) \\left( \\frac{${side1_num}}{k} + \\frac{${side2_num}}{k} \\right) = \\frac{${trap_factor}}{k} \\]
+                </div>
+                <div class="step">
+                    Combine and solve for \\(k\\): <br>
+                    \\[ ${area1} + \\frac{${trap_factor}}{k} + ${area3} = 1 \\]
+                    \\[ \\frac{${trap_factor}}{k} = 1 - ${area1} - ${area3} \\]
+                    \\[ \\frac{${trap_factor}}{k} = ${targetArea2} \\]
+                    \\[ k = \\frac{${trap_factor}}{${targetArea2}} = ${currentK} \\]
+                </div>
+            `;
+            
+            document.getElementById('solutions-text').innerHTML = solutionHTML;
+        }
+
+        function drawGraph(cfg, k) {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const marginX = 50;
+            const marginY = 40;
+            const width = canvas.width - 2 * marginX;
+            const height = canvas.height - 2 * marginY;
+
+            // Calculate exact y-values at segment endpoints to find maxY
+            const y1 = cfg.x1 / cfg.denom1;
+            const y2a = (cfg.x1 - cfg.offset) / k;
+            const y2b = (cfg.x2 - cfg.offset) / k;
+            const y3 = cfg.const3;
+
+            const maxX = cfg.x3 + 1;
+            const maxY = Math.max(y1, y2a, y2b, y3) * 1.3; // Added 30% padding
+
+            const scaleX = width / maxX;
+            const scaleY = height / maxY;
+
+            const ox = marginX;
+            const oy = canvas.height - marginY;
+
+            // Draw Axes
+            ctx.beginPath();
+            ctx.moveTo(ox, marginY / 2); // y-axis
+            ctx.lineTo(ox, oy);
+            ctx.lineTo(canvas.width - marginX / 4, oy); // x-axis
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Arrows for Axes
+            ctx.beginPath();
+            ctx.moveTo(ox - 4, marginY / 2 + 8);
+            ctx.lineTo(ox, marginY / 2);
+            ctx.lineTo(ox + 4, marginY / 2 + 8);
+            ctx.moveTo(canvas.width - marginX / 4 - 8, oy - 4);
+            ctx.lineTo(canvas.width - marginX / 4, oy);
+            ctx.lineTo(canvas.width - marginX / 4 - 8, oy + 4);
+            ctx.stroke();
+
+            // Helper to draw segments
+            function drawSegment(xStart, yStart, xEnd, yEnd) {
+                ctx.beginPath();
+                ctx.moveTo(ox + xStart * scaleX, oy - yStart * scaleY);
+                ctx.lineTo(ox + xEnd * scaleX, oy - yEnd * scaleY);
+                ctx.strokeStyle = '#0056b3';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+
+            // Helper to draw included (filled) or not included (hollow) circles
+            function drawPoint(x, y, isIncluded) {
+                ctx.beginPath();
+                ctx.arc(ox + x * scaleX, oy - y * scaleY, 4.5, 0, 2 * Math.PI);
+                ctx.fillStyle = isIncluded ? '#0056b3' : '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#0056b3';
+                ctx.stroke();
+            }
+
+            // Draw PDF Line Segments
+            drawSegment(0, 0, cfg.x1, y1);               // Segment 1 (0 to x1)
+            drawSegment(cfg.x1, y2a, cfg.x2, y2b);       // Segment 2 (x1 to x2)
+            drawSegment(cfg.x2, y3, cfg.x3, y3);         // Segment 3 (x2 to x3)
+            drawSegment(cfg.x3, 0, maxX - 0.2, 0);       // Segment 4 (Otherwise, x >= x3)
+
+            // Draw boundary points based on function inequalities (<= vs <)
+            
+            // At x = x1 boundary
+            drawPoint(cfg.x1, y1, false);  // End of segment 1 (< x1)
+            drawPoint(cfg.x1, y2a, true);  // Start of segment 2 (>= x1)
+            
+            // At x = x2 boundary
+            drawPoint(cfg.x2, y2b, false); // End of segment 2 (< x2)
+            drawPoint(cfg.x2, y3, true);   // Start of segment 3 (>= x2)
+            
+            // At x = x3 boundary
+            drawPoint(cfg.x3, y3, false);  // End of segment 3 (< x3)
+            drawPoint(cfg.x3, 0, true);    // Start of otherwise (>= x3)
+
+            // Draw dashed guidelines
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#666';
+
+            // X-axis guides
+            const points = [
+                {x: cfg.x1, yList: [y1, y2a]},
+                {x: cfg.x2, yList: [y2b, y3]},
+                {x: cfg.x3, yList: [y3]}
+            ];
+
+            points.forEach(p => {
+                const highestY = Math.max(...p.yList);
+                ctx.moveTo(ox + p.x * scaleX, oy);
+                ctx.lineTo(ox + p.x * scaleX, oy - highestY * scaleY);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.font = '14px Arial';
+            ctx.fillStyle = 'black';
+            
+            // X-axis ticks
+            ctx.fillText('0', ox - 15, oy + 20);
+            ctx.fillText('x', canvas.width - marginX / 4, oy + 25);
+            points.forEach(p => {
+                ctx.fillText(p.x, ox + p.x * scaleX - 5, oy + 20);
+            });
+
+            // Y-axis ticks
+            ctx.fillText('f(x)', ox - 35, marginY / 2 - 10);
+            
+            const uniqueY = [...new Set([y1, y2a, y2b, y3].map(v => Number(v.toFixed(3))))];
+            uniqueY.forEach(val => {
+                ctx.beginPath();
+                ctx.moveTo(ox - 4, oy - val * scaleY);
+                ctx.lineTo(ox + 4, oy - val * scaleY);
+                ctx.stroke();
+                ctx.fillText(val, ox - 45, oy - val * scaleY + 5);
+            });
+        }
+
+        function generateQuestion() {
+            // Select a new configuration randomly
+            let newConfig;
+            do {
+                newConfig = configurations[Math.floor(Math.random() * configurations.length)];
+            } while (newConfig === currentConfig && configurations.length > 1);
+            
+            currentConfig = newConfig;
+
+            // Hide solutions on new generation
+            document.getElementById('solutions-container').style.display = 'none';
+
+            updateQuestion(currentConfig);
+            updateSolutions(currentConfig);
+            
+            // Typeset MathJax
+            MathJax.typesetPromise();
+        }
+
+        function toggleSolutions() {
+            const container = document.getElementById('solutions-container');
+            if (container.style.display === 'none' || container.style.display === '') {
+                container.style.display = 'block';
+                // Draw graph only when showing solutions so canvas sizing is fully loaded
+                drawGraph(currentConfig, currentK); 
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Initialize the first question explicitly to the Default configuration
+        window.onload = function() {
+            currentConfig = configurations[0];
+            updateQuestion(currentConfig);
+            updateSolutions(currentConfig);
+            MathJax.typesetPromise();
+        };
+    </script>
+</body>
+</html>

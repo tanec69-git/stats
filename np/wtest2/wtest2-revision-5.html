@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Question Generator</title>
+    <!-- MathJax for rendering mathematics -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            /* Centering the display */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: left;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .question-block {
+            margin: 20px 0;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .part-title {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .indent {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .sub-indent {
+            margin-left: 40px;
+            margin-bottom: 15px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #0056b3;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        #solutions-container {
+            display: none;
+            margin-top: 20px;
+            padding: 25px;
+            background-color: #f1f8ff;
+            border-left: 5px solid #0056b3;
+            border-radius: 4px;
+            line-height: 1.6;
+        }
+
+        .step {
+            margin-bottom: 20px;
+        }
+        
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #ccc;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Normal Distribution Question Generator</h2>
+        
+        <div class="question-block" id="question-text">
+            <!-- Questions injected here -->
+        </div>
+
+        <div class="buttons">
+            <button onclick="generateQuestion()">Generate New Question</button>
+            <button onclick="toggleSolutions()">Show / Hide Answers</button>
+        </div>
+
+        <div id="solutions-container">
+            <h3>Worked Solutions:</h3>
+            <div id="solutions-text">
+                <!-- Solutions injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dictionary containing exact values derived ONLY from the provided Z-table
+        const zTable = {
+            "0.25": 0.5987,
+            "0.50": 0.6915,
+            "0.81": 0.7910,
+            "2.50": 0.9938,
+            "0.40": 0.6554,
+            "1.00": 0.8413,
+            "1.25": 0.8944,
+            "2.00": 0.9772,
+            "1.50": 0.9332,
+            "2.80": 0.9974
+        };
+
+        // Configurations ensuring clean math and strict table adherence with new contexts
+        const configurations = [
+            { 
+                // New Default Scenario
+                mean: 150, sd: 40, 
+                q1_z: "0.25", q1_val: 160, 
+                q2_z1: "-0.50", q2_z1_pos: "0.50", q2_val1: 130, q2_val2: 160, 
+                q3_pct: 20.9, q3_z: "0.81", 
+                total: 1000, price: 50,
+                var_val: 16, sd_val: 4, thresh_val: 35, prob_val: 0.9938, z_val: "2.50"
+            },
+            { 
+                // Variant 1
+                mean: 200, sd: 50, 
+                q1_z: "0.40", q1_val: 220, 
+                q2_z1: "-1.00", q2_z1_pos: "1.00", q2_val1: 150, q2_val2: 220, 
+                q3_pct: 10.56, q3_z: "1.25", 
+                total: 1250, price: 100,
+                var_val: 25, sd_val: 5, thresh_val: 40, prob_val: 0.9772, z_val: "2.00"
+            },
+            { 
+                // Variant 2
+                mean: 120, sd: 30, 
+                q1_z: "1.50", q1_val: 165, 
+                q2_z1: "-0.50", q2_z1_pos: "0.50", q2_val1: 105, q2_val2: 165, 
+                q3_pct: 6.68, q3_z: "1.50", 
+                total: 2500, price: 20,
+                var_val: 4, sd_val: 2, thresh_val: 25.6, prob_val: 0.9974, z_val: "2.80"
+            }
+        ];
+
+        let currentConfig = null;
+
+        function updateContent(cfg) {
+            // Render Question Text
+            const questionHTML = `
+                <div class="part-title">(a)</div>
+                <div class="indent">
+                    The daily sales revenue generated by a network of TikTok affiliate marketers follows a normal distribution with a mean of $${cfg.mean} and a standard deviation of $${cfg.sd}.<br>
+                    (Give your answer correct to 4 decimal places for parts i & ii.)
+                </div>
+                <div class="sub-indent">
+                    (i) Find the probability that a randomly chosen account generates less than $${cfg.q1_val} in revenue.<br><br>
+                    (ii) Find the probability that a randomly chosen account generates between $${cfg.q2_val1} and $${cfg.q2_val2}.<br><br>
+                    (iii) It is found that ${cfg.q3_pct}% of the accounts are high performers and are classified as 'Premium Affiliates'. Find the minimum daily revenue required to be considered a 'Premium Affiliate'.<br><br>
+                    (iv) There are ${cfg.total} affiliate accounts in the network. Find the total bonus amount paid out if every 'Premium Affiliate' receives a flat performance bonus of $${cfg.price}.
+                </div>
+                
+                <div class="part-title">(b)</div>
+                <div class="indent">
+                    A digital marketing agency is analyzing the time taken to configure workflow automations (e.g., Make, Zapier) for new clients. The agency has deployed 300 workflows, and the random variable X is the setup time in minutes such that \\( X \\sim N(\\mu, ${cfg.var_val}) \\) and it is found that \\( P(X < ${cfg.thresh_val}) = ${cfg.prob_val} \\).<br>
+                    Find the mean setup time for these workflows.
+                </div>
+            `;
+            document.getElementById('question-text').innerHTML = questionHTML;
+
+            // Mathematical Calculations based directly on table lookup configurations
+            
+            // (a)(i)
+            const ans_a1 = zTable[cfg.q1_z].toFixed(4);
+            
+            // (a)(ii)
+            const phi_z2 = zTable[cfg.q1_z]; // Upper bound
+            const phi_z1_pos = zTable[cfg.q2_z1_pos]; // Lower bound positive table val
+            const phi_z1 = 1 - phi_z1_pos; // Lower bound actual val
+            const ans_a2 = (phi_z2 - phi_z1).toFixed(4);
+
+            // (a)(iii)
+            const min_revenue = (cfg.mean + (parseFloat(cfg.q3_z) * cfg.sd)).toFixed(2);
+
+            // (a)(iv)
+            const num_accounts = Math.round(cfg.total * (cfg.q3_pct / 100));
+            const total_bonus = num_accounts * cfg.price;
+
+            // (b)
+            const mean_time = (cfg.thresh_val - (parseFloat(cfg.z_val) * cfg.sd_val)).toFixed(2);
+
+            // Render Solutions
+            const solutionsHTML = `
+                <h4>Part (a)</h4>
+                <div class="step">
+                    Let \\(X\\) be the daily revenue of an account. \\(X \\sim N(${cfg.mean}, ${cfg.sd}^2)\\).
+                </div>
+                
+                <div class="step">
+                    <strong>(i) Find \\(P(X < ${cfg.q1_val})\\)</strong><br>
+                    \\[ Z = \\frac{${cfg.q1_val} - ${cfg.mean}}{${cfg.sd}} = ${cfg.q1_z} \\]
+                    From the Z-table, \\( \\Phi(${cfg.q1_z}) = ${ans_a1} \\).<br>
+                    <strong>Answer: ${ans_a1}</strong>
+                </div>
+
+                <div class="step">
+                    <strong>(ii) Find \\(P(${cfg.q2_val1} < X < ${cfg.q2_val2})\\)</strong><br>
+                    \\[ Z_1 = \\frac{${cfg.q2_val1} - ${cfg.mean}}{${cfg.sd}} = ${cfg.q2_z1} \\]
+                    \\[ Z_2 = \\frac{${cfg.q2_val2} - ${cfg.mean}}{${cfg.sd}} = ${cfg.q1_z} \\]
+                    \\[ P(${cfg.q2_z1} < Z < ${cfg.q1_z}) = \\Phi(${cfg.q1_z}) - \\Phi(${cfg.q2_z1}) \\]
+                    Using the property \\( \\Phi(-z) = 1 - \\Phi(z) \\):<br>
+                    \\[ \\Phi(${cfg.q2_z1}) = 1 - \\Phi(${cfg.q2_z1_pos}) = 1 - ${phi_z1_pos.toFixed(4)} = ${phi_z1.toFixed(4)} \\]
+                    \\[ P = ${phi_z2.toFixed(4)} - ${phi_z1.toFixed(4)} = ${ans_a2} \\]
+                    <strong>Answer: ${ans_a2}</strong>
+                </div>
+
+                <div class="step">
+                    <strong>(iii) Find minimum revenue for 'Premium Affiliate'</strong><br>
+                    Given top ${cfg.q3_pct}%, so \\( P(X > x) = ${cfg.q3_pct / 100} \\).<br>
+                    Therefore, \\( P(X < x) = 1 - ${cfg.q3_pct / 100} = ${(1 - (cfg.q3_pct / 100)).toFixed(4)} \\).<br>
+                    From the Z-table, the corresponding z-value for \\( \\Phi(z) = ${(1 - (cfg.q3_pct / 100)).toFixed(4)} \\) is \\( z = ${cfg.q3_z} \\).<br>
+                    \\[ \\frac{x - ${cfg.mean}}{${cfg.sd}} = ${cfg.q3_z} \\]
+                    \\[ x = ${cfg.mean} + (${cfg.q3_z})(${cfg.sd}) = ${min_revenue} \\]
+                    <strong>Answer: $${min_revenue}</strong>
+                </div>
+
+                <div class="step">
+                    <strong>(iv) Find the total bonus amount paid out</strong><br>
+                    \\[ \\text{Number of Premium Affiliates} = ${cfg.total} \\times ${(cfg.q3_pct / 100)} = ${num_accounts} \\]
+                    \\[ \\text{Amount paid} = ${num_accounts} \\times \\$${cfg.price} = \\$${total_bonus.toLocaleString()} \\]
+                    <strong>Answer: $${total_bonus.toLocaleString()}</strong>
+                </div>
+
+                <hr>
+
+                <h4>Part (b)</h4>
+                <div class="step">
+                    Given \\( X \\sim N(\\mu, ${cfg.var_val}) \\).<br>
+                    Standard Deviation \\( \\sigma = \\sqrt{${cfg.var_val}} = ${cfg.sd_val} \\).<br><br>
+                    We know \\( P(X < ${cfg.thresh_val}) = ${cfg.prob_val} \\).<br>
+                    From the Z-table, the z-value for \\( \\Phi(z) = ${cfg.prob_val} \\) is \\( z = ${cfg.z_val} \\).<br>
+                    \\[ \\frac{${cfg.thresh_val} - \\mu}{${cfg.sd_val}} = ${cfg.z_val} \\]
+                    \\[ ${cfg.thresh_val} - \\mu = (${cfg.z_val})(${cfg.sd_val}) \\]
+                    \\[ \\mu = ${cfg.thresh_val} - ${(parseFloat(cfg.z_val) * cfg.sd_val).toFixed(2)} = ${mean_time} \\]
+                    <strong>Answer: The mean setup time \\( \\mu = ${mean_time} \\text{ minutes} \\).</strong>
+                </div>
+            `;
+            document.getElementById('solutions-text').innerHTML = solutionsHTML;
+
+            // Re-render MathJax
+            MathJax.typesetPromise();
+        }
+
+        function generateQuestion() {
+            let newConfig;
+            do {
+                newConfig = configurations[Math.floor(Math.random() * configurations.length)];
+            } while (newConfig === currentConfig && configurations.length > 1);
+            
+            currentConfig = newConfig;
+            document.getElementById('solutions-container').style.display = 'none';
+            updateContent(currentConfig);
+        }
+
+        function toggleSolutions() {
+            const container = document.getElementById('solutions-container');
+            container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'block' : 'none';
+        }
+
+        // Initialize the app with the new default values on load
+        window.onload = function() {
+            currentConfig = configurations[0];
+            updateContent(currentConfig);
+        };
+    </script>
+</body>
+</html>

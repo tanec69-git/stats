@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Density Function Generator</title>
+    <!-- MathJax for rendering mathematics -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            /* Centering the display */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            text-align: left;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        canvas {
+            border: 1px solid #ffffff; /* Hidden border to maintain structure */
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #0056b3;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004494;
+        }
+
+        #solutions-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f1f8ff;
+            border-left: 5px solid #0056b3;
+            border-radius: 4px;
+        }
+
+        .question-block {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .indent {
+            margin-left: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Continuous Random Variable Question Generator</h2>
+        
+        <div class="question-block" id="question-text">
+            The graph of a function \(f(x)\) of a continuous random variable \(X\) is shown as follows:
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="graphCanvas" width="500" height="300"></canvas>
+        </div>
+
+        <div class="question-block" id="sub-questions">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <div class="buttons">
+            <button onclick="generateQuestion()">Generate New Question</button>
+            <button onclick="toggleSolutions()">Show / Hide Answers</button>
+        </div>
+
+        <div id="solutions-container">
+            <h3>Worked Solutions:</h3>
+            <div id="solutions-text">
+                <!-- Solutions will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Updated array of configurations with new values for fresh graphs
+        const configurations = [
+            { a: 2, b: 5, c: 6, h1: 0.1, k: 0.26, q1: 1, q2: 4, q0: 3, q3: 7 },    // New Default
+            { a: 1, b: 4, c: 6, h1: 0.05, k: 0.25, q1: 2, q2: 5, q0: 4.5, q3: 8 }, // Alternative 1
+            { a: 2, b: 6, c: 8, h1: 0.05, k: 0.2, q1: 1, q2: 5, q0: 4, q3: 9 },    // Alternative 2
+            { a: 3, b: 5, c: 6, h1: 0.1, k: 0.3, q1: 2, q2: 5, q0: 3.5, q3: 7 }    // Alternative 3
+        ];
+
+        let currentConfig = null;
+
+        function drawGraph(cfg) {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const marginX = 50;
+            const marginY = 40;
+            const width = canvas.width - 2 * marginX;
+            const height = canvas.height - 2 * marginY;
+
+            // Define axis maximums based on the values in the config
+            const maxX = cfg.c + 1.5;
+            const maxY = cfg.k + 0.15;
+
+            const scaleX = width / maxX;
+            const scaleY = height / maxY;
+
+            const ox = marginX;
+            const oy = canvas.height - marginY;
+
+            // Draw Axes
+            ctx.beginPath();
+            ctx.moveTo(ox, marginY / 2); // y-axis
+            ctx.lineTo(ox, oy);
+            ctx.lineTo(canvas.width - marginX / 4, oy); // x-axis
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw Arrows for Axes
+            ctx.beginPath();
+            ctx.moveTo(ox - 4, marginY / 2 + 8);
+            ctx.lineTo(ox, marginY / 2);
+            ctx.lineTo(ox + 4, marginY / 2 + 8);
+            ctx.moveTo(canvas.width - marginX / 4 - 8, oy - 4);
+            ctx.lineTo(canvas.width - marginX / 4, oy);
+            ctx.lineTo(canvas.width - marginX / 4 - 8, oy + 4);
+            ctx.stroke();
+
+            // Draw PDF Line
+            ctx.beginPath();
+            ctx.moveTo(ox, oy - cfg.h1 * scaleY);
+            ctx.lineTo(ox + cfg.a * scaleX, oy - cfg.h1 * scaleY);
+            ctx.lineTo(ox + cfg.b * scaleX, oy - cfg.k * scaleY);
+            ctx.lineTo(ox + cfg.c * scaleX, oy - cfg.k * scaleY);
+            ctx.lineTo(ox + cfg.c * scaleX, oy);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw Dashed Guide Lines
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 1;
+            
+            // h1 guide
+            ctx.moveTo(ox, oy - cfg.h1 * scaleY);
+            ctx.lineTo(ox, oy);
+            
+            // a guide
+            ctx.moveTo(ox + cfg.a * scaleX, oy);
+            ctx.lineTo(ox + cfg.a * scaleX, oy - cfg.h1 * scaleY);
+            
+            // b guide
+            ctx.moveTo(ox + cfg.b * scaleX, oy);
+            ctx.lineTo(ox + cfg.b * scaleX, oy - cfg.k * scaleY);
+            
+            // k guide to y-axis
+            ctx.moveTo(ox + cfg.b * scaleX, oy - cfg.k * scaleY);
+            ctx.lineTo(ox, oy - cfg.k * scaleY);
+
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Tick Marks & Labels
+            ctx.font = '16px Arial';
+            ctx.fillStyle = 'black';
+            
+            // X-axis ticks
+            ctx.fillText('0', ox - 15, oy + 20);
+            const xPoints = [cfg.a, cfg.b, cfg.c];
+            xPoints.forEach(pt => {
+                ctx.beginPath();
+                ctx.moveTo(ox + pt * scaleX, oy - 4);
+                ctx.lineTo(ox + pt * scaleX, oy + 4);
+                ctx.stroke();
+                ctx.fillText(pt, ox + pt * scaleX - 5, oy + 20);
+            });
+            ctx.fillText('x', canvas.width - marginX / 4, oy + 20);
+
+            // Y-axis ticks
+            ctx.fillText('f(x)', ox - 20, marginY / 2 - 10);
+            
+            ctx.beginPath();
+            ctx.moveTo(ox - 4, oy - cfg.h1 * scaleY);
+            ctx.lineTo(ox + 4, oy - cfg.h1 * scaleY);
+            ctx.stroke();
+            ctx.fillText(cfg.h1, ox - 35, oy - cfg.h1 * scaleY + 5);
+
+            ctx.beginPath();
+            ctx.moveTo(ox - 4, oy - cfg.k * scaleY);
+            ctx.lineTo(ox + 4, oy - cfg.k * scaleY);
+            ctx.stroke();
+            ctx.fillText('k', ox - 35, oy - cfg.k * scaleY + 5);
+        }
+
+        function updateContent(cfg) {
+            // Update Questions
+            const questionsHTML = `
+                <p>Figure 1: Graph of function f(x)</p>
+                <p>(i) Given that \\(f(x)\\) is a valid probability density function for \\(0 \\le x \\le ${cfg.c}\\), find the value of \\(k\\).</p>
+                <p>(ii) Evaluate the following probabilities:</p>
+                <div class="indent">
+                    <p>I. &nbsp;&nbsp;&nbsp; \\(P(X = ${cfg.q0})\\)</p>
+                    <p>II. &nbsp;&nbsp; \\(P(${cfg.q1} \\le X \\le ${cfg.q2})\\)</p>
+                    <p>III. &nbsp; \\(P(X > ${cfg.q3})\\)</p>
+                </div>
+            `;
+            document.getElementById('sub-questions').innerHTML = questionsHTML;
+
+            // Prevent JS floating point inaccuracies by wrapping intermediate calculations
+            const rect1Area = Number((cfg.a * cfg.h1).toFixed(4));
+            const rect2Width = cfg.c - cfg.b;
+            const trapWidth = cfg.b - cfg.a;
+            
+            // Calculate II answer parts
+            const part1 = Number(((cfg.a - cfg.q1) * cfg.h1).toFixed(4));
+            const part2 = Number((0.5 * (cfg.q2 - cfg.a) * (cfg.h1 + cfg.k)).toFixed(4));
+            const ansII = (part1 + part2).toFixed(3);
+
+            // Update Solutions
+            const solutionsHTML = `
+                <p><strong>(i) Find the value of \\(k\\):</strong></p>
+                <p>Since \\(f(x)\\) is a valid probability density function, the total area under the curve is 1.</p>
+                <p>\\( \\text{Area} = \\text{Area of Rectangle 1} + \\text{Area of Trapezium} + \\text{Area of Rectangle 2} = 1 \\)</p>
+                <p>\\( (${cfg.a} \\times ${cfg.h1}) + \\frac{1}{2}(${cfg.b} - ${cfg.a})(${cfg.h1} + k) + (${cfg.c} - ${cfg.b})k = 1 \\)</p>
+                <p>\\( ${rect1Area} + ${0.5 * trapWidth}(${cfg.h1} + k) + ${rect2Width}k = 1 \\)</p>
+                <p>Solving for \\(k\\) yields: <strong>\\(k = ${cfg.k}\\)</strong></p>
+                <hr>
+                <p><strong>(ii) Evaluate the probabilities:</strong></p>
+                <p><strong>I. \\(P(X = ${cfg.q0})\\)</strong></p>
+                <p>For any continuous random variable, the probability of it taking an exact single value is zero.</p>
+                <p><strong>\\(P(X = ${cfg.q0}) = 0\\)</strong></p>
+                <br>
+                <p><strong>II. \\(P(${cfg.q1} \\le X \\le ${cfg.q2})\\)</strong></p>
+                <p>This is the area under the curve from \\(x = ${cfg.q1}\\) to \\(x = ${cfg.q2}\\).</p>
+                <p>\\( \\text{Area} = \\text{Area from } ${cfg.q1} \\text{ to } ${cfg.a} + \\text{Area from } ${cfg.a} \\text{ to } ${cfg.q2} \\)</p>
+                <p>\\( = (${cfg.a} - ${cfg.q1})(${cfg.h1}) + \\frac{1}{2}(${cfg.q2} - ${cfg.a})(${cfg.h1} + ${cfg.k}) \\)</p>
+                <p>\\( = ${part1} + ${part2} \\)</p>
+                <p><strong>\\( = ${ansII} \\)</strong></p>
+                <br>
+                <p><strong>III. \\(P(X > ${cfg.q3})\\)</strong></p>
+                <p>The valid range for the PDF is \\(0 \\le x \\le ${cfg.c}\\). For \\(x > ${cfg.c}\\), \\(f(x) = 0\\).</p>
+                <p><strong>\\(P(X > ${cfg.q3}) = 0\\)</strong></p>
+            `;
+            document.getElementById('solutions-text').innerHTML = solutionsHTML;
+
+            // Re-render MathJax
+            MathJax.typesetPromise();
+        }
+
+        function generateQuestion() {
+            // Select a new configuration randomly
+            let newConfig;
+            do {
+                newConfig = configurations[Math.floor(Math.random() * configurations.length)];
+            } while (newConfig === currentConfig && configurations.length > 1);
+            
+            currentConfig = newConfig;
+
+            // Hide solutions on new generation
+            document.getElementById('solutions-container').style.display = 'none';
+
+            drawGraph(currentConfig);
+            updateContent(currentConfig);
+        }
+
+        function toggleSolutions() {
+            const container = document.getElementById('solutions-container');
+            if (container.style.display === 'none' || container.style.display === '') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Initialize the first question explicitly to the NEW default configuration
+        window.onload = function() {
+            currentConfig = configurations[0];
+            drawGraph(currentConfig);
+            updateContent(currentConfig);
+        };
+    </script>
+</body>
+</html>
