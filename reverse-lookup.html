@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Z-Values & Reverse Lookup Visualizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+        .visualization {
+            text-align: center;
+            margin-top: 30px;
+        }
+        canvas {
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f8f5;
+            border-left: 5px solid #27ae60;
+            border-radius: 5px;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Critical Regions Reverse Lookup</h1>
+    <p style="text-align: center;">Visualize common percentile thresholds and understand how to find their Z-values using the Normal Distribution Table.</p>
+
+    <div class="form-group">
+        <label for="region-select">Select a Critical Region:</label>
+        <select id="region-select">
+            <option value="bottom1">Bottom 1%</option>
+            <option value="bottom5">Bottom 5%</option>
+            <option value="bottom10">Bottom 10%</option>
+            <option value="top10">Top 10%</option>
+            <option value="top5">Top 5%</option>
+            <option value="top1">Top 1%</option>
+        </select>
+    </div>
+
+    <button onclick="visualize()">Visualize & Explain</button>
+
+    <div class="visualization" id="visualization" style="display: none;">
+        <h2 id="chart-title">Normal Curve Visualization</h2>
+        <canvas id="bellCurve" width="600" height="300"></canvas>
+        <div class="explanation" id="explanation"></div>
+    </div>
+</div>
+
+<script>
+    // Data mapped directly from image_149d97.png
+    const dataMap = {
+        'bottom1':  { tail: 0.01, z: -2.327, side: 'left',  name: 'Bottom 1%' },
+        'bottom5':  { tail: 0.05, z: -1.645, side: 'left',  name: 'Bottom 5%' },
+        'bottom10': { tail: 0.10, z: -1.28,  side: 'left',  name: 'Bottom 10%' },
+        'top10':    { tail: 0.10, z: 1.28,   side: 'right', name: 'Top 10%' },
+        'top5':     { tail: 0.05, z: 1.645,  side: 'right', name: 'Top 5%' },
+        'top1':     { tail: 0.01, z: 2.327,  side: 'right', name: 'Top 1%' }
+    };
+
+    function visualize() {
+        const selection = document.getElementById('region-select').value;
+        const data = dataMap[selection];
+        
+        document.getElementById('visualization').style.display = 'block';
+        document.getElementById('chart-title').innerText = `${data.name} Visualization`;
+        
+        generateExplanation(data);
+        
+        if (data.side === 'left') {
+            drawCurve(-4, data.z, data.z);
+        } else {
+            drawCurve(data.z, 4, data.z);
+        }
+    }
+
+    function generateExplanation(data) {
+        const areaFromMean = (0.5000 - data.tail).toFixed(4);
+        const tailPercentage = (data.tail * 100).toFixed(0);
+        const direction = data.side === 'left' ? 'left' : 'right';
+        const signText = data.side === 'left' ? 'negative' : 'positive';
+        
+        const html = `
+            <strong>Reverse Lookup Process for ${data.name}:</strong><br><br>
+            1. <strong>Identify the Target Area:</strong> The ${data.name} means we want a tail area of <strong>${data.tail.toFixed(4)}</strong> on the ${direction} side of the curve.<br>
+            2. <strong>Adjust for the Table:</strong> The normal distribution table measures the area from the mean (center) outward. The entire ${direction} half of the curve equals 0.5000.<br>
+            3. <strong>Calculate Area from Mean:</strong> Subtract the tail area from the half-curve area:<br>
+               &nbsp;&nbsp;&nbsp;0.5000 - ${data.tail.toFixed(4)} = <span class="highlight">${areaFromMean}</span><br>
+            4. <strong>Reverse Table Lookup:</strong> Look <em>inside</em> the body of the normal distribution table for the closest value to ${areaFromMean}.<br>
+            5. <strong>Determine the Z-value:</strong> The intersection of the row and column for ${areaFromMean} gives a magnitude of approximately ${Math.abs(data.z)}. Because it is on the ${direction} side, the final Z-value is ${signText}.<br><br>
+            <strong>Final Result: Z = <span class="highlight">${data.z}</span></strong>
+        `;
+        
+        document.getElementById('explanation').innerHTML = html;
+    }
+
+    function drawCurve(shadeStartZ, shadeEndZ, zValue) {
+        const canvas = document.getElementById('bellCurve');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const minZ = -4;
+        const maxZ = 4;
+        const scaleX = width / (maxZ - minZ);
+        const scaleY = height * 2; 
+        
+        const pdf = (x) => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+        const getX = (z) => (z - minZ) * scaleX;
+        const getY = (y) => height - (y * scaleY) - 30; // Shifted up for labels
+
+        // Draw Shaded Area
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(39, 174, 96, 0.4)';
+        let startX = Math.max(minZ, shadeStartZ);
+        let endX = Math.min(maxZ, shadeEndZ);
+        
+        ctx.moveTo(getX(startX), height - 30);
+        for (let z = startX; z <= endX; z += 0.05) {
+            ctx.lineTo(getX(z), getY(pdf(z)));
+        }
+        ctx.lineTo(getX(endX), height - 30);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw the Bell Curve Line
+        ctx.beginPath();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        for (let z = minZ; z <= maxZ; z += 0.05) {
+            if (z === minZ) ctx.moveTo(getX(z), getY(pdf(z)));
+            else ctx.lineTo(getX(z), getY(pdf(z)));
+        }
+        ctx.stroke();
+
+        // Draw X Axis
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, height - 30);
+        ctx.lineTo(width, height - 30);
+        ctx.stroke();
+
+        // Draw Mean Line (Z = 0)
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#7f8c8d';
+        ctx.moveTo(getX(0), height - 30);
+        ctx.lineTo(getX(0), getY(pdf(0)));
+        ctx.stroke();
+        ctx.setLineDash([]); 
+
+        // Draw Text Labels
+        ctx.fillStyle = '#000';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        
+        // Mean Label
+        ctx.fillText('0', getX(0), height - 10);
+        
+        // Z-Value Label
+        ctx.fillStyle = '#c0392b';
+        ctx.font = 'bold 15px Arial';
+        ctx.fillText(`Z = ${zValue}`, getX(zValue), height - 10);
+        
+        // Z-Value Tick mark
+        ctx.beginPath();
+        ctx.strokeStyle = '#c0392b';
+        ctx.lineWidth = 2;
+        ctx.moveTo(getX(zValue), height - 35);
+        ctx.lineTo(getX(zValue), height - 25);
+        ctx.stroke();
+    }
+    
+    // Trigger initial load
+    window.onload = visualize;
+</script>
+
+</body>
+</html>

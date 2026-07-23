@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Table Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .visualization {
+            text-align: center;
+            margin-top: 30px;
+        }
+        canvas {
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+        #z2-group {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Z-Value Probability Calculator</h1>
+    <p style="text-align: center;">Calculates P(Z) using the "Area from Mean" Normal Table methodology.</p>
+
+    <div class="form-group">
+        <label for="calc-type">Select Range Type:</label>
+        <select id="calc-type" onchange="toggleInputs()">
+            <option value="greater">Greater than: P(Z > z1)</option>
+            <option value="less">Less than: P(Z < z1)</option>
+            <option value="between">Between: P(z1 < Z < z2)</option>
+        </select>
+    </div>
+
+    <div class="form-group" id="z1-group">
+        <label for="z1">Enter z1 (e.g., 1.96 or -2.00):</label>
+        <input type="number" id="z1" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="form-group" id="z2-group">
+        <label for="z2">Enter z2 (e.g., 2.50):</label>
+        <input type="number" id="z2" step="0.01" placeholder="0.00">
+    </div>
+
+    <button onclick="calculate()">Calculate & Visualize</button>
+
+    <div class="visualization" id="visualization" style="display: none;">
+        <h2>Normal Curve Visualization</h2>
+        <canvas id="bellCurve" width="600" height="300"></canvas>
+        <div class="explanation" id="explanation"></div>
+    </div>
+</div>
+
+<script>
+    // Show/hide second input based on selected calculation type
+    function toggleInputs() {
+        const type = document.getElementById('calc-type').value;
+        document.getElementById('z2-group').style.display = type === 'between' ? 'block' : 'none';
+    }
+
+    // Approximation of standard normal CDF to simulate exact table lookup
+    function normalCDF(x) {
+        let t = 1 / (1 + 0.2316419 * Math.abs(x));
+        let d = 0.3989423 * Math.exp(-x * x / 2);
+        let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+        return x > 0 ? 1 - p : p;
+    }
+
+    // Emulates the specific Normal Distribution Table (Area from Mean 0 to Z)
+    function getTableArea(z) {
+        let absZ = Math.abs(z);
+        // Table cap as noted: For values of z above 3.09, use 0.4999
+        if (absZ > 3.09) return 0.4999;
+        let area = Math.abs(normalCDF(absZ) - 0.5);
+        return parseFloat(area.toFixed(4));
+    }
+
+    function calculate() {
+        const type = document.getElementById('calc-type').value;
+        let z1 = parseFloat(document.getElementById('z1').value);
+        let z2 = parseFloat(document.getElementById('z2').value);
+
+        if (isNaN(z1)) return alert("Please enter a valid z1 value.");
+        if (type === 'between' && isNaN(z2)) return alert("Please enter a valid z2 value.");
+
+        // Ensure z1 is smaller than z2 for the "between" calculation
+        if (type === 'between' && z1 > z2) {
+            let temp = z1; z1 = z2; z2 = temp;
+        }
+
+        document.getElementById('visualization').style.display = 'block';
+        
+        let area = 0;
+        let explanationHTML = "";
+        let area1 = getTableArea(z1);
+        
+        if (type === 'greater') {
+            if (z1 >= 0) {
+                area = 0.5 - area1;
+                explanationHTML = `
+                    <strong>Calculation for P(Z > ${z1}):</strong><br>
+                    1. The normal table provides the area between the mean (0) and z = ${z1}.<br>
+                    2. Table lookup for z = ${Math.abs(z1)} gives an area of <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. Since we want the area to the <em>right</em> of ${z1}, and the total right half of the curve is 0.5000:<br>
+                    4. Final Probability = 0.5000 - ${area1.toFixed(4)} = <strong>${area.toFixed(4)}</strong>.
+                `;
+            } else {
+                area = 0.5 + area1;
+                explanationHTML = `
+                    <strong>Calculation for P(Z > ${z1}):</strong><br>
+                    1. The normal table provides the area between the mean (0) and z = ${z1}.<br>
+                    2. Due to symmetry, the area from 0 to ${z1} is the same as 0 to ${Math.abs(z1)}. Table lookup gives <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. We want the area to the right. This includes the area from ${z1} to 0, PLUS the entire right half of the curve (0.5000).<br>
+                    4. Final Probability = ${area1.toFixed(4)} + 0.5000 = <strong>${area.toFixed(4)}</strong>.
+                `;
+            }
+            drawCurve(z1, 4); // Draw from z1 to tail
+            
+        } else if (type === 'less') {
+            if (z1 >= 0) {
+                area = 0.5 + area1;
+                explanationHTML = `
+                    <strong>Calculation for P(Z < ${z1}):</strong><br>
+                    1. The normal table provides the area between the mean (0) and z = ${z1}.<br>
+                    2. Table lookup for z = ${Math.abs(z1)} gives an area of <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. We want the area to the left. This includes the entire left half of the curve (0.5000) PLUS the area from 0 to ${z1}.<br>
+                    4. Final Probability = 0.5000 + ${area1.toFixed(4)} = <strong>${area.toFixed(4)}</strong>.
+                `;
+            } else {
+                area = 0.5 - area1;
+                explanationHTML = `
+                    <strong>Calculation for P(Z < ${z1}):</strong><br>
+                    1. The normal table provides the area between the mean (0) and z = ${z1}.<br>
+                    2. Due to symmetry, the area from 0 to ${z1} is the same as 0 to ${Math.abs(z1)}. Table lookup gives <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. Since we want the tail area to the <em>left</em> of ${z1}, and the total left half of the curve is 0.5000:<br>
+                    4. Final Probability = 0.5000 - ${area1.toFixed(4)} = <strong>${area.toFixed(4)}</strong>.
+                `;
+            }
+            drawCurve(-4, z1); // Draw from tail to z1
+            
+        } else if (type === 'between') {
+            let area2 = getTableArea(z2);
+            
+            if (Math.sign(z1) === Math.sign(z2)) {
+                // Both same side of mean
+                area = Math.abs(area2 - area1);
+                explanationHTML = `
+                    <strong>Calculation for P(${z1} < Z < ${z2}):</strong><br>
+                    1. The normal table gives areas from the mean (0). Both values are on the same side of the mean.<br>
+                    2. Table lookup for z = ${Math.abs(z1)} is <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. Table lookup for z = ${Math.abs(z2)} is <strong>${area2.toFixed(4)}</strong>.<br>
+                    4. To find the area between them, we subtract the smaller area from the larger area.<br>
+                    5. Final Probability = |${area2.toFixed(4)} - ${area1.toFixed(4)}| = <strong>${area.toFixed(4)}</strong>.
+                `;
+            } else {
+                // Opposite sides of mean
+                area = area1 + area2;
+                explanationHTML = `
+                    <strong>Calculation for P(${z1} < Z < ${z2}):</strong><br>
+                    1. The normal table gives areas from the mean (0). These values cross over the mean (one negative, one positive).<br>
+                    2. Table lookup for z = ${Math.abs(z1)} gives the area from 0 to ${z1}: <strong>${area1.toFixed(4)}</strong>.<br>
+                    3. Table lookup for z = ${Math.abs(z2)} gives the area from 0 to ${z2}: <strong>${area2.toFixed(4)}</strong>.<br>
+                    4. To find the total area, we add these two segments together.<br>
+                    5. Final Probability = ${area1.toFixed(4)} + ${area2.toFixed(4)} = <strong>${area.toFixed(4)}</strong>.
+                `;
+            }
+            drawCurve(z1, z2);
+        }
+
+        document.getElementById('explanation').innerHTML = explanationHTML;
+    }
+
+    // Function to draw the bell curve and shade area
+    function drawCurve(shadeStartZ, shadeEndZ) {
+        const canvas = document.getElementById('bellCurve');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        // Define coordinate space
+        const minZ = -4;
+        const maxZ = 4;
+        const scaleX = width / (maxZ - minZ);
+        const scaleY = height * 2; // Arbitrary scale to fit curve nicely
+        
+        // Normal distribution function
+        const pdf = (x) => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+        
+        // Helper to map Z value to Canvas X
+        const getX = (z) => (z - minZ) * scaleX;
+        // Helper to map PDF value to Canvas Y
+        const getY = (y) => height - (y * scaleY) - 20;
+
+        // Draw Shaded Area
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(52, 152, 219, 0.4)';
+        let startX = Math.max(minZ, shadeStartZ);
+        let endX = Math.min(maxZ, shadeEndZ);
+        
+        ctx.moveTo(getX(startX), height - 20);
+        for (let z = startX; z <= endX; z += 0.05) {
+            ctx.lineTo(getX(z), getY(pdf(z)));
+        }
+        ctx.lineTo(getX(endX), height - 20);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw the Bell Curve Line
+        ctx.beginPath();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        for (let z = minZ; z <= maxZ; z += 0.05) {
+            if (z === minZ) ctx.moveTo(getX(z), getY(pdf(z)));
+            else ctx.lineTo(getX(z), getY(pdf(z)));
+        }
+        ctx.stroke();
+
+        // Draw X Axis
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, height - 20);
+        ctx.lineTo(width, height - 20);
+        ctx.stroke();
+
+        // Draw Mean Line (Z = 0)
+        ctx.beginPath();
+        ctx.setLineDash([5, 5]);
+        ctx.moveTo(getX(0), height - 20);
+        ctx.lineTo(getX(0), getY(pdf(0)));
+        ctx.stroke();
+        ctx.setLineDash([]); // Reset dash
+
+        // Draw Text Labels
+        ctx.fillStyle = '#000';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('0', getX(0), height - 5);
+        
+        // Label Shade Start/End if within bounds
+        if (shadeStartZ >= minZ && shadeStartZ <= maxZ) {
+            ctx.fillText(shadeStartZ.toString(), getX(shadeStartZ), height - 5);
+            // Draw vertical tick
+            ctx.beginPath();
+            ctx.moveTo(getX(shadeStartZ), height - 25);
+            ctx.lineTo(getX(shadeStartZ), height - 15);
+            ctx.stroke();
+        }
+        if (shadeEndZ >= minZ && shadeEndZ <= maxZ && shadeEndZ !== 4) {
+            ctx.fillText(shadeEndZ.toString(), getX(shadeEndZ), height - 5);
+            ctx.beginPath();
+            ctx.moveTo(getX(shadeEndZ), height - 25);
+            ctx.lineTo(getX(shadeEndZ), height - 15);
+            ctx.stroke();
+        }
+    }
+</script>
+
+</body>
+</html>
