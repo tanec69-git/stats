@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Employee Weight App</title>
+    
+    <!-- MathJax for rendering LaTeX equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            max-width: 850px;
+            width: 100%;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 0;
+            color: #222;
+        }
+        .generate-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .generate-btn:hover {
+            background-color: #2980b9;
+        }
+        .question-box {
+            background-color: #fafafa;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #3498db;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #000; /* Explicitly black text */
+        }
+        .part-container {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .part-container:last-child {
+            border-bottom: none;
+        }
+        .question-part {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        .solution-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .solution-btn:hover {
+            background-color: #27ae60;
+        }
+        .solution-box {
+            background-color: #fdfdfe;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-left: 4px solid #2ecc71;
+            border-radius: 5px;
+            display: none;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-controls">
+        <h2>Continuous Probability App</h2>
+        <button class="generate-btn" onclick="generateNewQuestion()">Generate New Question</button>
+    </div>
+    
+    <div class="question-box" id="question-text">
+        <!-- Question injected here -->
+    </div>
+
+    <!-- Part A -->
+    <div class="part-container">
+        <div class="question-part" id="part-a-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-a', this, 'a')">Show Solution for (a)</button>
+        <div id="sol-a" class="solution-box">
+            <div id="sol-a-content"></div>
+            <canvas id="canvas-a" width="600" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Part B -->
+    <div class="part-container">
+        <div class="question-part" id="part-b-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-b', this, 'b')">Show Solution for (b)</button>
+        <div id="sol-b" class="solution-box">
+            <div id="sol-b-content"></div>
+            <canvas id="canvas-b" width="600" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Part C -->
+    <div class="part-container">
+        <div class="question-part" id="part-c-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-c', this, 'c')">Show Solution for (c)</button>
+        <div id="sol-c" class="solution-box">
+            <div id="sol-c-content"></div>
+            <canvas id="canvas-c" width="600" height="250"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Data Model ---
+    // Initialized with values from "image_486656.png"
+    let probData = {
+        mu: 70,
+        sigma: 14.5,
+        a_val: 50,
+        b_val: 70,
+        c_percent: 8
+    };
+
+    let solvedProbs = { a: 0, b: 0, c_weight: 0 };
+
+    // --- Math Functions (Simulating Exact Table Lookups) ---
+    function exactNormalCDF(z) {
+        let isNegative = z < 0;
+        z = Math.abs(z);
+        const p = 0.2316419, b1 = 0.319381530, b2 = -0.356563782, b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+        const t = 1 / (1 + p * z);
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const cdf = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
+        return isNegative ? (1 - cdf) : cdf;
+    }
+
+    // Mimics a human looking up the value in the provided Normal Table
+    function tableNormalCDF(z) {
+        let isNegative = z < 0;
+        let absZ = Math.abs(z);
+        
+        let zStr = absZ.toFixed(3);
+        let rowCol = parseFloat(zStr.substring(0, 4)); 
+        let addDigit = parseInt(zStr.substring(4, 5)); 
+        
+        let baseProb = parseFloat(exactNormalCDF(rowCol).toFixed(4));
+        let finalProb = baseProb;
+        
+        if (addDigit > 0) {
+            let nextProb = parseFloat(exactNormalCDF(rowCol + 0.01).toFixed(4));
+            let diff = Math.round((nextProb - baseProb) * 10000);
+            let addValue = Math.round((diff * addDigit) / 10);
+            finalProb += (addValue / 10000);
+        }
+        
+        if (finalProb > 0.9999) finalProb = 0.9999;
+        
+        return isNegative ? parseFloat((1 - finalProb).toFixed(4)) : parseFloat(finalProb.toFixed(4));
+    }
+
+    function normalPDF(x, mu, sigma) {
+        const factor = 1 / (sigma * Math.sqrt(2 * Math.PI));
+        const exponent = -0.5 * Math.pow((x - mu) / sigma, 2);
+        return factor * Math.exp(exponent);
+    }
+
+    function inverseNormalCDF(p) {
+        // Robust approximation for inverse CDF
+        const a1 = -3.969683028665376e+01, a2 = 2.209460984245205e+02,
+              a3 = -2.759285104469687e+02, a4 = 1.383577518672690e+02,
+              a5 = -3.066479806614716e+01, a6 = 2.506628277459239e+00;
+        const b1 = -5.447609879822406e+01, b2 = 1.615858368580409e+02,
+              b3 = -1.556989798598866e+02, b4 = 6.680131188771972e+01,
+              b5 = -1.328068155288572e+01;
+        const c1 = -7.784894002430293e-03, c2 = -3.223964580411365e-01,
+              c3 = -2.400758277161838e+00, c4 = -2.549732539343734e+00,
+              c5 = 4.374664141464968e+00,  c6 = 2.938163982698783e+00;
+        const d1 = 7.784695709041462e-03,  d2 = 3.224671290700398e-01,
+              d3 = 2.445134137142996e+00,  d4 = 3.754408661907416e+00;
+        const pLow = 0.02425;
+        const pHigh = 1 - pLow;
+        let q, r;
+        if (p < pLow) {
+            q = Math.sqrt(-2 * Math.log(p));
+            return (((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+                   ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        } else if (p <= pHigh) {
+            q = p - 0.5;
+            r = q * q;
+            return (((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * q /
+                   (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+        } else {
+            q = Math.sqrt(-2 * Math.log(1 - p));
+            return -(((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+                    ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        }
+    }
+
+    // --- Application Logic ---
+    function renderQuestion() {
+        document.getElementById('question-text').innerHTML = `
+            5. &nbsp;&nbsp;&nbsp; In a company, it was found that the weight of its employees is normally<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; distributed with an average of ${probData.mu}kg and a standard deviation of ${probData.sigma}kg.<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (a) What is the probability that a randomly selected employee will weigh below<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${probData.a_val}kg?<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (b) What is the probability that a randomly selected employee will weigh more<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; than ${probData.b_val}kg?<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (c) If the company intends to send the heaviest ${probData.c_percent}% of the employees for a<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; medical check-up, employees below what weight can be excused from the<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; check-up?
+        `;
+
+        document.getElementById('part-a-text').innerHTML = `(a) Probability employee weighs below ${probData.a_val}kg`;
+        document.getElementById('part-b-text').innerHTML = `(b) Probability employee weighs more than ${probData.b_val}kg`;
+        document.getElementById('part-c-text').innerHTML = `(c) Cutoff weight to be excused from the check-up (Heaviest ${probData.c_percent}%)`;
+
+        const parts = ['a', 'b', 'c'];
+        parts.forEach(part => {
+            const solDiv = document.getElementById(`sol-${part}`);
+            if(solDiv) {
+                solDiv.style.display = 'none';
+                const btn = solDiv.previousElementSibling;
+                btn.innerText = `Show Solution for (${part})`;
+                btn.style.backgroundColor = "#2ecc71";
+            }
+        });
+    }
+
+    function toggleSolution(divId, btn, part) {
+        const solDiv = document.getElementById(divId);
+        
+        if (solDiv.style.display === 'none' || solDiv.style.display === '') {
+            generateSolutionContent(part);
+            solDiv.style.display = 'block';
+            btn.innerText = "Hide Solution";
+            btn.style.backgroundColor = "#e74c3c";
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById(`${divId}-content`)]).then(() => {
+                    drawCanvas(part);
+                });
+            }
+        } else {
+            solDiv.style.display = 'none';
+            btn.innerText = `Show Solution for (${part})`;
+            btn.style.backgroundColor = "#2ecc71";
+        }
+    }
+
+    function generateSolutionContent(part) {
+        const contentDiv = document.getElementById(`sol-${part}-content`);
+        let html = `Let \\( X \\) be the weight of an employee. \\( X \\sim N(${probData.mu}, ${probData.sigma}^2) \\).<br><br>`;
+        
+        if (part === 'a') {
+            let zRaw = (probData.a_val - probData.mu) / probData.sigma;
+            let z = parseFloat(zRaw.toFixed(3));
+            solvedProbs.a = tableNormalCDF(z);
+            html += `
+                <strong>Find \\( P(X < ${probData.a_val}) \\)</strong><br>
+                $$ Z = \\frac{${probData.a_val} - ${probData.mu}}{${probData.sigma}} \\approx ${z.toFixed(3)} $$
+                $$ P(X < ${probData.a_val}) = P(Z < ${z.toFixed(3)}) $$
+                $$ = \\Phi(${z.toFixed(3)}) = \\mathbf{${solvedProbs.a.toFixed(4)}} $$
+            `;
+        } 
+        else if (part === 'b') {
+            let zRaw = (probData.b_val - probData.mu) / probData.sigma;
+            let z = parseFloat(zRaw.toFixed(3));
+            solvedProbs.b = parseFloat((1 - tableNormalCDF(z)).toFixed(4));
+            html += `
+                <strong>Find \\( P(X > ${probData.b_val}) \\)</strong><br>
+                $$ Z = \\frac{${probData.b_val} - ${probData.mu}}{${probData.sigma}} \\approx ${z.toFixed(3)} $$
+                $$ P(X > ${probData.b_val}) = P(Z > ${z.toFixed(3)}) = 1 - P(Z < ${z.toFixed(3)}) $$
+                $$ = 1 - \\Phi(${z.toFixed(3)}) = 1 - ${tableNormalCDF(z).toFixed(4)} = \\mathbf{${solvedProbs.b.toFixed(4)}} $$
+            `;
+        } 
+        else if (part === 'c') {
+            let topProp = probData.c_percent / 100;
+            let bottomProp = 1 - topProp;
+            
+            // Find z for the cumulative probability (bottom proportion)
+            let zRaw = inverseNormalCDF(bottomProp);
+            let z = parseFloat(zRaw.toFixed(3));
+            solvedProbs.c_weight = probData.mu + (z * probData.sigma);
+            
+            html += `
+                <strong>Find the cutoff weight \\( w \\)</strong><br>
+                The heaviest ${probData.c_percent}% are sent for a check-up. This means those in the bottom ${100 - probData.c_percent}% (or a probability of ${bottomProp.toFixed(2)}) are excused.<br>
+                We need to find \\( w \\) such that \\( P(X < w) = ${bottomProp.toFixed(2)} \\).<br>
+                Lookup Z-score for an area of ${bottomProp.toFixed(2)} to the left:<br>
+                $$ P(Z < z) = ${bottomProp.toFixed(2)} \\implies z \\approx ${z.toFixed(3)} $$
+                Un-standardize to find \\( w \\):
+                $$ w = \\mu + z\\sigma $$
+                $$ w = ${probData.mu} + (${z.toFixed(3)})(${probData.sigma}) $$
+                $$ w \\approx \\mathbf{${solvedProbs.c_weight.toFixed(1)}\\text{ kg}} $$
+            `;
+        }
+
+        contentDiv.innerHTML = html;
+    }
+
+    function drawCanvas(part) {
+        const canvas = document.getElementById(`canvas-${part}`);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        const mu = probData.mu;
+        const sigma = probData.sigma;
+        
+        const minX = mu - 4 * sigma;
+        const maxX = mu + 4 * sigma;
+        const maxY = normalPDF(mu, mu, sigma) * 1.15; 
+        const padding = 30;
+        
+        const mapX = x => padding + ((x - minX) / (maxX - minX)) * (width - 2 * padding);
+        const mapY = y => height - padding - (y / maxY) * (height - 2 * padding);
+
+        let type, val1;
+        if (part === 'a') { type = 'less'; val1 = probData.a_val; }
+        else if (part === 'b') { type = 'greater'; val1 = probData.b_val; }
+        else if (part === 'c') { type = 'less'; val1 = solvedProbs.c_weight; } // Shade the "excused" portion
+
+        ctx.fillStyle = 'rgba(52, 152, 219, 0.4)'; // Blue shading
+        ctx.beginPath();
+        ctx.moveTo(mapX(type === 'greater' ? val1 : minX), mapY(0));
+        
+        for (let x = minX; x <= maxX; x += (maxX - minX)/200) {
+            let y = normalPDF(x, mu, sigma);
+            if ((type === 'less' && x <= val1) || (type === 'greater' && x >= val1)) {
+                ctx.lineTo(mapX(x), mapY(y));
+            } else if (ctx.fillStyle !== 'rgba(0,0,0,0)') {
+                 ctx.lineTo(mapX(x), mapY(0));
+            }
+        }
+        
+        if (type === 'less') ctx.lineTo(mapX(val1), mapY(0));
+        if (type === 'greater') ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.fill();
+
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = minX; x <= maxX; x += (maxX - minX)/100) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x, mu, sigma)));
+        }
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.strokeStyle = '#7f8c8d';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(mapX(mu), mapY(0));
+        ctx.lineTo(mapX(mu), mapY(normalPDF(mu, mu, sigma)));
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#000';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`μ=${mu}`, mapX(mu), mapY(0) + 18);
+        
+        ctx.fillStyle = '#c0392b';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.fillText(val1.toFixed(1), mapX(val1), mapY(0) + 18);
+        
+        // Custom label for part C
+        if (part === 'c') {
+             ctx.fillStyle = '#2980b9';
+             ctx.fillText(`Excused (${100 - probData.c_percent}%)`, mapX(val1 - 1.5 * sigma), mapY(normalPDF(mu, mu, sigma) / 2));
+             ctx.fillText(`Check-up (${probData.c_percent}%)`, mapX(val1 + 1.2 * sigma), mapY(normalPDF(mu, mu, sigma) / 4));
+        }
+    }
+
+    function generateNewQuestion() {
+        probData.mu = Math.floor(Math.random() * 50) + 50; // Average weight 50-100kg
+        probData.sigma = +(Math.random() * 10 + 5).toFixed(1); // Stdev 5-15kg
+
+        probData.a_val = Math.floor(probData.mu - (Math.random() * 2 * probData.sigma));
+        
+        // For b_val, randomly make it the mean (like original question) or slightly higher
+        if (Math.random() > 0.5) {
+            probData.b_val = probData.mu; 
+        } else {
+            probData.b_val = Math.ceil(probData.mu + (Math.random() * 1.5 * probData.sigma));
+        }
+        
+        const percents = [5, 8, 10, 15, 20]; 
+        probData.c_percent = percents[Math.floor(Math.random() * percents.length)];
+
+        solvedProbs = { a: 0, b: 0, c_weight: 0 };
+
+        renderQuestion();
+    }
+
+    window.onload = renderQuestion;
+</script>
+
+</body>
+</html>

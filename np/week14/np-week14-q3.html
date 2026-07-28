@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inverse Normal Distribution Problem App</title>
+    
+    <!-- MathJax for rendering LaTeX equations (Polyfill removed as requested) -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 0;
+            color: #222;
+        }
+        .generate-btn {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .generate-btn:hover {
+            background-color: #732d91;
+        }
+        .question-box {
+            background-color: #fcfcfc;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-left: 5px solid #8e44ad;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+        }
+        .question-text-black {
+            color: #000;
+        }
+        .question-text-red {
+            color: #e74c3c;
+        }
+        .solution-btn {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .solution-btn:hover {
+            background-color: #2471a3;
+        }
+        .solution-box {
+            background-color: #f9ebff;
+            padding: 20px;
+            border: 1px solid #dcdcdc;
+            border-left: 4px solid #8e44ad;
+            border-radius: 5px;
+            display: none;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-controls">
+        <h2>Inverse Normal Distribution</h2>
+        <button class="generate-btn" onclick="generateNewQuestion()">Generate New Question</button>
+    </div>
+    
+    <div class="question-box" id="question-text">
+        <!-- Question content injected via JS -->
+    </div>
+
+    <div>
+        <button class="solution-btn" id="toggle-btn" onclick="toggleSolution()">Show Solution</button>
+        <div id="solution-container" class="solution-box">
+            <div id="solution-content"></div>
+            <canvas id="bell-canvas" width="600" height="300"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data Model ---
+    const scenarios = [
+        { exam: "Science Exam", head: "Head of Science Department", grade: "Distinction grade" },
+        { exam: "Mathematics Exam", head: "Head of Math Department", grade: "A* grade" },
+        { exam: "History Exam", head: "Head of Humanities", grade: "Excellence Award" },
+        { exam: "English Exam", head: "Head of English", grade: "Top Tier grade" }
+    ];
+
+    // Default data exactly matching "image_48e672.png"
+    let probData = {
+        scenario: scenarios[0],
+        mu: 58,
+        sigma: 9.5,
+        topPercent: 10
+    };
+
+    // --- Math Functions ---
+    // Approximation for Inverse Standard Normal CDF
+    function inverseNormalCDF(p) {
+        if (p <= 0 || p >= 1) return null;
+        const a1 = -3.969683028665376e+01, a2 = 2.209460984245205e+02,
+              a3 = -2.759285104469687e+02, a4 = 1.383577518672690e+02,
+              a5 = -3.066479806614716e+01, a6 = 2.506628277459239e+00;
+        const b1 = -5.447609879822406e+01, b2 = 1.615858368580409e+02,
+              b3 = -1.556989798598866e+02, b4 = 6.680131188771972e+01,
+              b5 = -1.328068155288572e+01;
+        const c1 = -7.784894002430293e-03, c2 = -3.223964580411365e-01,
+              c3 = -2.400758277161838e+00, c4 = -2.549732539343734e+00,
+              c5 = 4.374664141464968e+00,  c6 = 2.938163982698783e+00;
+        const d1 = 7.784695709041462e-03,  d2 = 3.224671290700398e-01,
+              d3 = 2.445134137142996e+00,  d4 = 3.754408661907416e+00;
+        const pLow = 0.02425;
+        const pHigh = 1 - pLow;
+        let q, r;
+        if (p < pLow) {
+            q = Math.sqrt(-2 * Math.log(p));
+            return (((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+                   ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        } else if (p <= pHigh) {
+            q = p - 0.5;
+            r = q * q;
+            return (((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * q /
+                   (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+        } else {
+            q = Math.sqrt(-2 * Math.log(1 - p));
+            return -(((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6) /
+                    ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+        }
+    }
+
+    function normalPDF(x, mu, sigma) {
+        const factor = 1 / (sigma * Math.sqrt(2 * Math.PI));
+        const exponent = -0.5 * Math.pow((x - mu) / sigma, 2);
+        return factor * Math.exp(exponent);
+    }
+
+    // --- Core UI Logic ---
+    function renderQuestion() {
+        const qBox = document.getElementById('question-text');
+        qBox.innerHTML = `
+            <span class="question-text-black">
+                3. &nbsp;&nbsp; The marks scored by students in a school for a ${probData.scenario.exam} is normally distributed with a mean of ${probData.mu} marks and a standard deviation of ${probData.sigma} marks. 
+            </span>
+            <span class="question-text-red">
+                If the ${probData.scenario.head} wants ${probData.topPercent}% of the students to score the ${probData.scenario.grade}, what is the least mark a student must score in order to get the ${probData.scenario.grade}?
+            </span>
+        `;
+
+        // Hide solution upon generating a new question
+        const solDiv = document.getElementById('solution-container');
+        const btn = document.getElementById('toggle-btn');
+        solDiv.style.display = 'none';
+        btn.innerText = "Show Solution";
+        btn.style.backgroundColor = "#2980b9";
+    }
+
+    function toggleSolution() {
+        const solDiv = document.getElementById('solution-container');
+        const btn = document.getElementById('toggle-btn');
+        
+        if (solDiv.style.display === 'none' || solDiv.style.display === '') {
+            generateSolutionContent();
+            solDiv.style.display = 'block';
+            btn.innerText = "Hide Solution";
+            btn.style.backgroundColor = "#e74c3c";
+            
+            // Typeset MathJax then draw the diagram
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('solution-content')]).then(() => {
+                    drawCanvas();
+                });
+            } else {
+                drawCanvas();
+            }
+        } else {
+            solDiv.style.display = 'none';
+            btn.innerText = "Show Solution";
+            btn.style.backgroundColor = "#2980b9";
+        }
+    }
+
+    function generateSolutionContent() {
+        const contentDiv = document.getElementById('solution-content');
+        
+        const pTail = probData.topPercent / 100;
+        const pCumulative = 1 - pTail;
+        const zScore = inverseNormalCDF(pCumulative);
+        const leastMark = probData.mu + (zScore * probData.sigma);
+        
+        let html = `
+            <p>Let \\( X \\) be the marks scored. We are given \\( X \\sim N(${probData.mu}, ${probData.sigma}^2) \\).</p>
+            <p>We want to find the mark \\( x \\) such that the top \\( ${probData.topPercent}\\% \\) of students score more than \\( x \\):</p>
+            $$ P(X > x) = ${pTail.toFixed(2)} $$
+            $$ P(X \\le x) = 1 - ${pTail.toFixed(2)} = ${pCumulative.toFixed(2)} $$
+            
+            <strong>1. Find the corresponding Z-score:</strong><br>
+            Using the inverse normal distribution for an area of \\( ${pCumulative.toFixed(4)} \\) to the left:<br>
+            $$ P(Z \\le z) = ${pCumulative.toFixed(2)} \\implies z \\approx ${zScore.toFixed(3)} $$
+            
+            <strong>2. Un-standardize to find the mark (x):</strong><br>
+            We use the standardizing formula \\( z = \\frac{x - \\mu}{\\sigma} \\) and solve for \\( x \\):<br>
+            $$ x = \\mu + z\\sigma $$
+            $$ x = ${probData.mu} + (${zScore.toFixed(3)})(${probData.sigma}) $$
+            $$ x = ${probData.mu} + ${(zScore * probData.sigma).toFixed(3)} $$
+            $$ x \\approx ${leastMark.toFixed(2)} $$
+            
+            <p><strong>Conclusion:</strong> The least mark a student must score to get the ${probData.scenario.grade} is approximately <strong>${leastMark.toFixed(1)}</strong> marks.</p>
+        `;
+        
+        // Save solved X for diagram plotting
+        probData.solvedX = leastMark;
+        contentDiv.innerHTML = html;
+    }
+
+    function drawCanvas() {
+        const canvas = document.getElementById('bell-canvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        const mu = probData.mu;
+        const sigma = probData.sigma;
+        const xVal = probData.solvedX;
+        
+        const minX = mu - 4 * sigma;
+        const maxX = mu + 4 * sigma;
+        const maxY = normalPDF(mu, mu, sigma) * 1.15; 
+        const padding = 30;
+        
+        const mapX = x => padding + ((x - minX) / (maxX - minX)) * (width - 2 * padding);
+        const mapY = y => height - padding - (y / maxY) * (height - 2 * padding);
+
+        // 1. Draw Shaded Region (Upper Tail)
+        ctx.fillStyle = 'rgba(231, 76, 60, 0.5)'; // Reddish shade matching text
+        ctx.beginPath();
+        ctx.moveTo(mapX(xVal), mapY(0));
+        
+        for (let x = xVal; x <= maxX; x += (maxX - minX)/200) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x, mu, sigma)));
+        }
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.fill();
+
+        // 2. Draw Normal Curve
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = minX; x <= maxX; x += (maxX - minX)/100) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x, mu, sigma)));
+        }
+        ctx.stroke();
+
+        // 3. Draw Axis
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 4. Mean Line & Label
+        ctx.beginPath();
+        ctx.moveTo(mapX(mu), mapY(0));
+        ctx.lineTo(mapX(mu), mapY(normalPDF(mu, mu, sigma)));
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#000';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`μ = ${mu}`, mapX(mu), mapY(0) + 20);
+        
+        // 5. Target Mark (xVal) Label
+        ctx.fillStyle = '#c0392b';
+        ctx.fillText(`x = ${xVal.toFixed(1)}`, mapX(xVal), mapY(0) + 20);
+
+        // 6. Label Percentage Area
+        // Position it reasonably inside the shaded area or above it
+        const textX = mapX(xVal + 0.5 * sigma);
+        const textY = mapY(normalPDF(xVal + 0.5 * sigma, mu, sigma) / 2);
+        ctx.fillText(`Top ${probData.topPercent}%`, textX, textY - 10);
+    }
+
+    function generateNewQuestion() {
+        probData.scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+        // Randomize mean between 45 and 75
+        probData.mu = Math.floor(Math.random() * 30) + 45; 
+        // Randomize standard deviation between 5 and 15
+        probData.sigma = Math.floor(Math.random() * 10) + 5; 
+        
+        // Pick a common percentage (5%, 10%, 15%, 20%)
+        const percentages = [5, 10, 15, 20, 25];
+        probData.topPercent = percentages[Math.floor(Math.random() * percentages.length)];
+
+        renderQuestion();
+    }
+
+    // Initialize the app
+    window.onload = renderQuestion;
+</script>
+
+</body>
+</html>

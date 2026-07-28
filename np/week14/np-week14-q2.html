@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution & Expected Value Application</title>
+    
+    <!-- MathJax for rendering LaTeX equations -->
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #555;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 0;
+            color: #222;
+        }
+        .generate-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .generate-btn:hover {
+            background-color: #357abd;
+        }
+        .question-box {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-left: 5px solid #4a90e2;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: black; /* Explicitly black as requested */
+        }
+        .part-container {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .part-container:last-child {
+            border-bottom: none;
+        }
+        .question-part {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: black;
+        }
+        .solution-btn {
+            background-color: #50c878;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+        }
+        .solution-btn:hover {
+            background-color: #3cb371;
+        }
+        .solution-box {
+            background-color: #fafafa;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            display: none;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-controls">
+        <h2>Statistics Problem App</h2>
+        <button class="generate-btn" onclick="generateNewQuestion()">Generate New Question</button>
+    </div>
+    
+    <div class="question-box" id="question-text">
+        <!-- Question injected here -->
+    </div>
+
+    <!-- Part A -->
+    <div class="part-container">
+        <div class="question-part" id="part-a-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-a', this, 'a')">Show Solution</button>
+        <div id="sol-a" class="solution-box">
+            <div id="sol-a-content"></div>
+            <canvas id="canvas-a" width="500" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Part B -->
+    <div class="part-container">
+        <div class="question-part" id="part-b-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-b', this, 'b')">Show Solution</button>
+        <div id="sol-b" class="solution-box">
+            <div id="sol-b-content"></div>
+            <canvas id="canvas-b" width="500" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Part C -->
+    <div class="part-container">
+        <div class="question-part" id="part-c-text"></div>
+        <button class="solution-btn" onclick="toggleSolution('sol-c', this, 'c')">Show Solution</button>
+        <div id="sol-c" class="solution-box">
+            <div id="sol-c-content"></div>
+            <canvas id="canvas-c" width="500" height="250"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data Model ---
+    const subjects = [
+        { worker: "milkman", action: "deliver milk to the High Street", days: 365 },
+        { worker: "postman", action: "deliver letters to the village", days: 300 },
+        { worker: "commuter", action: "drive to work", days: 250 },
+        { worker: "baker", action: "bake the morning batch of bread", days: 365 }
+    ];
+
+    // Default data exactly from the image
+    let probData = {
+        subject: subjects[0],
+        mu: 100,
+        sigma: 15,
+        a_low: 85.5,
+        a_high: 94.5,
+        b_val: 80.5,
+        c_val: 91.5
+    };
+
+    // --- Math Functions ---
+    function normalCDF(z) {
+        let isNegative = z < 0;
+        z = Math.abs(z);
+        const p = 0.2316419, b1 = 0.319381530, b2 = -0.356563782, b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+        const t = 1 / (1 + p * z);
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const cdf = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
+        return isNegative ? (1 - cdf) : cdf;
+    }
+
+    function normalPDF(x, mu, sigma) {
+        const factor = 1 / (sigma * Math.sqrt(2 * Math.PI));
+        const exponent = -0.5 * Math.pow((x - mu) / sigma, 2);
+        return factor * Math.exp(exponent);
+    }
+
+    // --- Core Logic ---
+    function renderQuestion() {
+        document.getElementById('question-text').innerHTML = `
+            2. &nbsp;&nbsp; The time taken by a ${probData.subject.worker} to ${probData.subject.action} is normally distributed with a mean of ${probData.mu} minutes and a standard deviation of ${probData.sigma} minutes. Assume that he works every day and there are ${probData.subject.days} days a year.<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Find the number of days during the year that he takes<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (a) &nbsp;&nbsp; between ${probData.a_low} and ${probData.a_high} minutes,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (b) &nbsp;&nbsp; no higher than ${probData.b_val} minutes,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (c) &nbsp;&nbsp; lower than ${probData.c_val} minutes.
+        `;
+        document.getElementById('part-a-text').innerHTML = `(a) between ${probData.a_low} and ${probData.a_high} minutes`;
+        document.getElementById('part-b-text').innerHTML = `(b) no higher than ${probData.b_val} minutes`;
+        document.getElementById('part-c-text').innerHTML = `(c) lower than ${probData.c_val} minutes`;
+
+        // Reset solutions
+        ['a', 'b', 'c'].forEach(part => {
+            document.getElementById(`sol-${part}`).style.display = 'none';
+            document.querySelector(`#sol-${part}`).previousElementSibling.innerText = "Show Solution";
+            document.querySelector(`#sol-${part}`).previousElementSibling.style.backgroundColor = "#50c878";
+        });
+    }
+
+    function toggleSolution(divId, btn, part) {
+        const solDiv = document.getElementById(divId);
+        if (solDiv.style.display === 'none' || solDiv.style.display === '') {
+            generateSolutionContent(part);
+            solDiv.style.display = 'block';
+            btn.innerText = "Hide Solution";
+            btn.style.backgroundColor = "#e74c3c";
+            
+            // Re-render MathJax
+            MathJax.typesetPromise([document.getElementById(`${divId}-content`)]).then(() => {
+                drawCanvas(part);
+            });
+        } else {
+            solDiv.style.display = 'none';
+            btn.innerText = "Show Solution";
+            btn.style.backgroundColor = "#50c878";
+        }
+    }
+
+    function generateSolutionContent(part) {
+        const contentDiv = document.getElementById(`sol-${part}-content`);
+        let html = `Let \\( X \\) be the time taken. \\( X \\sim N(${probData.mu}, ${probData.sigma}^2) \\).<br><br>`;
+        
+        let p = 0;
+        if (part === 'a') {
+            let z1 = (probData.a_low - probData.mu) / probData.sigma;
+            let z2 = (probData.a_high - probData.mu) / probData.sigma;
+            p = normalCDF(z2) - normalCDF(z1);
+            
+            html += `
+                <strong>1. Standardize the values:</strong><br>
+                $$ Z_1 = \\frac{${probData.a_low} - ${probData.mu}}{${probData.sigma}} = ${z1.toFixed(3)} $$
+                $$ Z_2 = \\frac{${probData.a_high} - ${probData.mu}}{${probData.sigma}} = ${z2.toFixed(3)} $$
+                <strong>2. Find Probability:</strong><br>
+                $$ P(${probData.a_low} < X < ${probData.a_high}) = P(${z1.toFixed(3)} < Z < ${z2.toFixed(3)}) $$
+                $$ = \\Phi(${z2.toFixed(3)}) - \\Phi(${z1.toFixed(3)}) \\approx ${normalCDF(z2).toFixed(4)} - ${normalCDF(z1).toFixed(4)} = ${p.toFixed(4)} $$
+            `;
+        } else if (part === 'b') {
+            let z = (probData.b_val - probData.mu) / probData.sigma;
+            p = normalCDF(z);
+            
+            html += `
+                <strong>1. Standardize the value:</strong><br>
+                $$ Z = \\frac{${probData.b_val} - ${probData.mu}}{${probData.sigma}} = ${z.toFixed(3)} $$
+                <strong>2. Find Probability:</strong><br>
+                $$ P(X \\le ${probData.b_val}) = P(Z \\le ${z.toFixed(3)}) = \\Phi(${z.toFixed(3)}) \\approx ${p.toFixed(4)} $$
+            `;
+        } else if (part === 'c') {
+            let z = (probData.c_val - probData.mu) / probData.sigma;
+            p = normalCDF(z);
+            
+            html += `
+                <strong>1. Standardize the value:</strong><br>
+                $$ Z = \\frac{${probData.c_val} - ${probData.mu}}{${probData.sigma}} = ${z.toFixed(3)} $$
+                <strong>2. Find Probability:</strong><br>
+                $$ P(X < ${probData.c_val}) = P(Z < ${z.toFixed(3)}) = \\Phi(${z.toFixed(3)}) \\approx ${p.toFixed(4)} $$
+            `;
+        }
+        
+        let expectedDays = p * probData.subject.days;
+        let roundedDays = Math.round(expectedDays);
+        
+        html += `
+            <strong>3. Calculate Expected Days:</strong><br>
+            $$ \\text{Expected Days} = P \\times \\text{Total Days} $$
+            $$ = ${p.toFixed(4)} \\times ${probData.subject.days} = ${expectedDays.toFixed(2)} \\text{ days} $$
+            <br>Therefore, the expected number of days is approximately <strong>${roundedDays}</strong> days.
+        `;
+        
+        contentDiv.innerHTML = html;
+    }
+
+    function drawCanvas(part) {
+        const canvas = document.getElementById(`canvas-${part}`);
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        const mu = probData.mu;
+        const sigma = probData.sigma;
+        
+        // Define axes range (-4 sigma to 4 sigma)
+        const minX = mu - 4 * sigma;
+        const maxX = mu + 4 * sigma;
+        const maxY = normalPDF(mu, mu, sigma) * 1.1; // Add 10% padding on top
+        const padding = 30;
+        
+        const mapX = x => padding + ((x - minX) / (maxX - minX)) * (width - 2 * padding);
+        const mapY = y => height - padding - (y / maxY) * (height - 2 * padding);
+
+        // Determine shaded region
+        let type = 'less', val1 = null, val2 = null;
+        if (part === 'a') { type = 'between'; val1 = probData.a_low; val2 = probData.a_high; }
+        if (part === 'b') { type = 'less'; val1 = probData.b_val; }
+        if (part === 'c') { type = 'less'; val1 = probData.c_val; }
+
+        // Draw Shaded Region
+        ctx.fillStyle = 'rgba(74, 144, 226, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        
+        for (let x = minX; x <= maxX; x += (maxX - minX)/200) {
+            let y = normalPDF(x, mu, sigma);
+            if ((type === 'less' && x <= val1) || 
+                (type === 'between' && x >= val1 && x <= val2)) {
+                ctx.lineTo(mapX(x), mapY(y));
+            } else if (ctx.fillStyle !== 'rgba(0,0,0,0)') {
+                 ctx.lineTo(mapX(x), mapY(0));
+            }
+        }
+        ctx.lineTo(mapX(type === 'between' ? val2 : (type === 'less' ? val1 : maxX)), mapY(0));
+        ctx.fill();
+
+        // Draw Normal Curve
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = minX; x <= maxX; x += (maxX - minX)/100) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x, mu, sigma)));
+        }
+        ctx.stroke();
+
+        // Draw X Axis
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Draw Mean Line
+        ctx.beginPath();
+        ctx.moveTo(mapX(mu), mapY(0));
+        ctx.lineTo(mapX(mu), mapY(normalPDF(mu, mu, sigma)));
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Labels
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(mu, mapX(mu), mapY(0) + 15);
+        
+        // Highlighted values
+        ctx.fillStyle = '#e74c3c';
+        if (type === 'between') {
+            ctx.fillText(val1, mapX(val1), mapY(0) + 15);
+            ctx.fillText(val2, mapX(val2), mapY(0) + 15);
+        } else {
+            ctx.fillText(val1, mapX(val1), mapY(0) + 15);
+        }
+    }
+
+    function generateNewQuestion() {
+        probData.subject = subjects[Math.floor(Math.random() * subjects.length)];
+        probData.mu = Math.floor(Math.random() * 80) + 40; // 40 to 120
+        probData.sigma = Math.floor(Math.random() * 10) + 5; // 5 to 15
+        
+        // Generate values around mean
+        let z1 = (Math.random() * 2) - 2; // -2 to 0
+        let z2 = (Math.random() * 2); // 0 to 2
+        
+        probData.a_low = +(probData.mu + z1 * probData.sigma).toFixed(1);
+        probData.a_high = +(probData.mu + z2 * probData.sigma).toFixed(1);
+        
+        // Ensure they aren't the same
+        if (probData.a_low === probData.a_high) probData.a_high += 1.5;
+
+        probData.b_val = +(probData.mu - (Math.random() * 2 + 0.5) * probData.sigma).toFixed(1);
+        probData.c_val = +(probData.mu - (Math.random() * 1.5) * probData.sigma).toFixed(1);
+
+        renderQuestion();
+    }
+
+    // Initialize
+    window.onload = renderQuestion;
+</script>
+
+</body>
+</html>

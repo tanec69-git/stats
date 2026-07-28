@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Z-Table Lookup Guide</title>
+
+    <!-- MathJax for rendering LaTeX equations (No Polyfill as requested) -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 700px;
+            width: 100%;
+        }
+        h2 {
+            margin-top: 0;
+            color: #212529;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .input-section {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 150px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-box {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .explanation-box {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border: 1px solid #ffeeba;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            line-height: 1.6;
+            display: none;
+        }
+        .explanation-box ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+        .explanation-box li {
+            margin-bottom: 10px;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto 0;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            max-width: 100%;
+        }
+        .table-snippet {
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Z-Table Lookup Guide</h2>
+    <p>Enter a Z-score to see exactly how to derive its probability, \(\Phi(z)\), using the standard normal distribution table.</p>
+    
+    <div class="input-section">
+        <label for="zInput"><strong>Enter Z-score:</strong></label>
+        <input type="number" id="zInput" step="0.001" placeholder="e.g., 1.543">
+        <button onclick="calculateAndExplain()">Look Up</button>
+    </div>
+
+    <div id="result" class="result-box"></div>
+    
+    <div id="explanation" class="explanation-box">
+        <div id="explanation-text"></div>
+        <canvas id="bell-curve" width="600" height="250"></canvas>
+    </div>
+</div>
+
+<script>
+    // High-precision normal CDF approximation to mimic exact table values
+    function normalCDF(z) {
+        let isNegative = z < 0;
+        z = Math.abs(z);
+        const p = 0.2316419;
+        const b1 = 0.319381530;
+        const b2 = -0.356563782;
+        const b3 = 1.781477937;
+        const b4 = -1.821255978;
+        const b5 = 1.330274429;
+        
+        const t = 1 / (1 + p * z);
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const cdf = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
+        
+        return isNegative ? (1 - cdf) : cdf;
+    }
+
+    function normalPDF(x) {
+        return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+    }
+
+    function calculateAndExplain() {
+        const zInputStr = document.getElementById('zInput').value;
+        const z = parseFloat(zInputStr);
+        
+        if (isNaN(z)) {
+            alert("Please enter a valid numeric Z-score.");
+            return;
+        }
+
+        const resultBox = document.getElementById('result');
+        const explanationBox = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanation-text');
+
+        // Calculate actual probability
+        const prob = normalCDF(z);
+        
+        // Update Result Box
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `$$ \\Phi(${z}) = P(Z \\le ${z}) \\approx ${prob.toFixed(4)} $$`;
+
+        // Generate Explanation
+        let expHTML = `<strong>How to derive this from the table:</strong><ul>`;
+        
+        // Handle negative logic
+        let lookupZ = z;
+        if (z < 0) {
+            lookupZ = Math.abs(z);
+            expHTML += `
+                <li>Because your Z-score (${z}) is negative, we must use the table's symmetry rule: <br>
+                <strong>"For negative values of z use \\(\\Phi(-z) = 1 - \\Phi(z)\\)"</strong>.</li>
+                <li>Therefore, we first need to look up the positive value, <strong>${lookupZ.toFixed(3)}</strong>, in the table.</li>
+            `;
+        }
+
+        // Parse Z for table coordinates
+        let zStr = lookupZ.toFixed(3);
+        let row = zStr.substring(0, 3); // e.g., "1.5"
+        let col = zStr.substring(3, 4); // e.g., "4"
+        let add = zStr.substring(4, 5); // e.g., "3"
+        
+        let baseProb = normalCDF(parseFloat(row + col)).toFixed(4);
+
+        expHTML += `
+            <li><strong>Row Lookup:</strong> Look down the leftmost column labelled <strong>Z</strong> to find the row for <strong>${row}</strong>.</li>
+            <li><strong>Column Lookup:</strong> Move horizontally across that row to the column headed by <strong>${col}</strong> (the second decimal place). 
+            The value here is <strong>${baseProb}</strong>.</li>
+        `;
+
+        if (add !== '0') {
+            // Calculate the exact ADD increment based on the table's linear interpolation behavior
+            let nextProb = normalCDF(parseFloat(row + col) + 0.01).toFixed(4);
+            let diff = (parseFloat(nextProb) - parseFloat(baseProb)) * 10000;
+            let addValue = Math.round((diff * parseInt(add)) / 10);
+            
+            expHTML += `
+                <li><strong>ADD Column:</strong> Because your Z-score has a third decimal place (<strong>${add}</strong>), continue moving right along the row to the <strong>ADD</strong> section. 
+                Under the column headed by <strong>${add}</strong>, you will find a small integer (approximately <strong>${addValue}</strong>).</li>
+                <li>Add this value to the last decimal places of your base probability: <br>
+                \\( ${baseProb} + 0.000${addValue} = ${(parseFloat(baseProb) + addValue/10000).toFixed(4)} \\).</li>
+            `;
+        } else {
+            expHTML += `<li>Since the third decimal place is 0, you do not need to use the <strong>ADD</strong> columns.</li>`;
+        }
+
+        if (z < 0) {
+            let finalPositiveProb = normalCDF(lookupZ).toFixed(4);
+            expHTML += `
+                <li><strong>Final Calculation:</strong> Apply the negative rule from the first step:<br>
+                $$ \\Phi(${z}) = 1 - \\Phi(${lookupZ.toFixed(3)}) $$
+                $$ \\Phi(${z}) = 1 - ${finalPositiveProb} = ${prob.toFixed(4)} $$
+                </li>
+            `;
+        }
+
+        expHTML += `</ul>`;
+        
+        explanationText.innerHTML = expHTML;
+        explanationBox.style.display = 'block';
+
+        // Re-render MathJax and draw canvas
+        if (window.MathJax) {
+            MathJax.typesetPromise([resultBox, explanationBox]).then(() => {
+                drawDiagram(z);
+            });
+        } else {
+            drawDiagram(z);
+        }
+    }
+
+    function drawDiagram(z) {
+        const canvas = document.getElementById('bell-curve');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        const minX = -4, maxX = 4;
+        const maxY = normalPDF(0) * 1.2; 
+        const padding = 30;
+        
+        const mapX = x => padding + ((x - minX) / (maxX - minX)) * (width - 2 * padding);
+        const mapY = y => height - padding - (y / maxY) * (height - 2 * padding);
+
+        // Draw Shaded Region (Z <= z)
+        ctx.fillStyle = 'rgba(0, 123, 255, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        
+        let limit = Math.max(minX, Math.min(z, maxX)); // Bound shading to visible area
+        for (let x = minX; x <= limit; x += 0.05) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x)));
+        }
+        ctx.lineTo(mapX(limit), mapY(0));
+        ctx.fill();
+
+        // Draw Curve Outline
+        ctx.strokeStyle = '#212529';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = minX; x <= maxX; x += 0.05) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x)));
+        }
+        ctx.stroke();
+
+        // Draw X-Axis
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.strokeStyle = '#6c757d';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Draw Center Line (Z=0)
+        ctx.beginPath();
+        ctx.moveTo(mapX(0), mapY(0));
+        ctx.lineTo(mapX(0), mapY(normalPDF(0)));
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Labels
+        ctx.fillStyle = '#000';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('0', mapX(0), mapY(0) + 20);
+        
+        // User's Z Label
+        if (z >= minX && z <= maxX) {
+            ctx.fillStyle = '#dc3545'; // Red
+            ctx.fillText(`z = ${z.toFixed(2)}`, mapX(z), mapY(0) + 20);
+            
+            // Draw marker
+            ctx.beginPath();
+            ctx.moveTo(mapX(z), mapY(0));
+            ctx.lineTo(mapX(z), mapY(normalPDF(z)));
+            ctx.strokeStyle = '#dc3545';
+            ctx.stroke();
+        }
+    }
+</script>
+
+</body>
+</html>

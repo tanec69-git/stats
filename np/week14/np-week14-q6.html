@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution: Solve for Mu1, Mu2, and Sigma</title>
+    
+    <!-- Configure MathJax to recognize $ for inline math -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            }
+        };
+    </script>
+    <!-- MathJax for rendering LaTeX equations -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 35px 45px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            max-width: 850px;
+            width: 100%;
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        .generate-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .generate-btn:hover {
+            background-color: #2980b9;
+        }
+        .question-box {
+            background-color: #ffffff;
+            padding: 25px;
+            border: 1px solid #dcdde1;
+            border-left: 5px solid #2c3e50;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: #000000; 
+        }
+        .solution-btn {
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .solution-btn:hover {
+            background-color: #732d91;
+        }
+        .solution-box {
+            background-color: #f9ebff;
+            padding: 25px;
+            border: 1px solid #e8daef;
+            border-left: 5px solid #8e44ad;
+            border-radius: 5px;
+            display: none;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+        .lookup-explanation {
+            background-color: #ffffff;
+            border: 1px solid #dcdde1;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+        .lookup-explanation ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+        .ans-block {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-controls">
+        <h2>Simultaneous Normal Distributions</h2>
+        <button class="generate-btn" onclick="generateNewQuestion()">Generate New Question</button>
+    </div>
+    
+    <div class="question-box" id="question-text">
+        <!-- Question injected here -->
+    </div>
+
+    <button class="solution-btn" id="toggle-btn" onclick="toggleSolution()">Show Solution</button>
+    
+    <div id="solution-container" class="solution-box">
+        <div id="solution-content"></div>
+    </div>
+</div>
+
+<script>
+    // --- Data Model ---
+    let probData = {
+        x_val: 19,
+        p_x: 0.9938,
+        y_val: 15.6,
+        p_y: 0.9332,
+        mu_diff: 3,
+        diff_is_more: true 
+    };
+
+    // --- Math Functions ---
+    // Mimics reading the table perfectly
+    function exactNormalCDF(z) {
+        let isNegative = z < 0;
+        z = Math.abs(z);
+        const p = 0.2316419, b1 = 0.319381530, b2 = -0.356563782, b3 = 1.781477937, b4 = -1.821255978, b5 = 1.330274429;
+        const t = 1 / (1 + p * z);
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const cdf = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
+        return isNegative ? (1 - cdf) : cdf;
+    }
+
+    // Searches the exact table logic to find the closest Z-score
+    function inverseNormalCDF(p) {
+        const criticalValues = {
+            0.75: 0.674, 0.90: 1.282, 0.95: 1.645, 0.975: 1.960,
+            0.99: 2.326, 0.995: 2.576, 0.9975: 2.807, 0.999: 3.090, 0.9995: 3.291
+        };
+        
+        let lookupP = p > 0.5 ? p : (1 - p);
+        lookupP = parseFloat(lookupP.toFixed(4));
+        
+        if (criticalValues[lookupP]) {
+            return p > 0.5 ? criticalValues[lookupP] : -criticalValues[lookupP];
+        }
+
+        let bestZ = 0;
+        let minDiff = Infinity;
+        
+        // Brute force search 0.000 through 3.999 simulating the exact ADD column table rules
+        for (let i = 0; i <= 3999; i++) {
+            let z = i / 1000; 
+            
+            let rowCol = Math.floor(i / 10) / 100; // E.g., 2500 -> 2.50
+            let addDigit = i % 10;                 // E.g., 2500 -> 0
+            
+            let baseProb = parseFloat(exactNormalCDF(rowCol).toFixed(4));
+            let finalProb = baseProb;
+            
+            if (addDigit > 0) {
+                let nextProb = parseFloat(exactNormalCDF(rowCol + 0.01).toFixed(4));
+                let diff = Math.round((nextProb - baseProb) * 10000);
+                let addValue = Math.round((diff * addDigit) / 10);
+                finalProb += (addValue / 10000);
+            }
+            
+            let probDiff = Math.abs(finalProb - lookupP);
+            // Strict < ensures that if 2.500 matches perfectly, 2.501 won't overwrite it
+            if (probDiff < minDiff) {
+                minDiff = probDiff;
+                bestZ = z;
+            }
+        }
+        
+        return p > 0.5 ? bestZ : -bestZ;
+    }
+
+    // Helper to explain the table lookup explicitly
+    function explainReverseLookup(p, z) {
+        let html = `<div class="lookup-explanation"><strong>How to find this using the Standard Normal Table:</strong><ul>`;
+        let absZ = Math.abs(z);
+        let pLookup = p < 0.5 ? 1 - p : p;
+        
+        if (p < 0.5) {
+            html += `<li>Since $p = ${p.toFixed(4)} < 0.5$, the expected Z-score is negative. By table rules, we look up $1 - p = ${pLookup.toFixed(4)}$ instead.</li>`;
+        }
+        
+        const criticals = {0.75: "0.674", 0.90: "1.282", 0.95: "1.645", 0.975: "1.960", 0.99: "2.326", 0.995: "2.576", 0.9975: "2.807", 0.999: "3.090", 0.9995: "3.291"};
+        
+        if (criticals[pLookup]) {
+            html += `<li>This probability exactly matches an entry in the <strong>"Critical values for the normal distribution"</strong> section at the bottom of the document.</li>`;
+            html += `<li>For $p = ${pLookup}$, the table provides exactly $z = ${criticals[pLookup]}$.</li>`;
+        } else {
+            let zStr = absZ.toFixed(3);
+            let row = zStr.substring(0, 3);
+            let col = zStr.substring(3, 4);
+            let add = zStr.substring(4, 5);
+            
+            let baseProb = exactNormalCDF(parseFloat(row + col)).toFixed(4);
+            
+            html += `<li>Scan the body of the table for the value closest to (but not exceeding) $${pLookup.toFixed(4)}$.</li>`;
+            html += `<li>We find $${baseProb}$ at row <strong>${row}</strong> and column <strong>${col}</strong>.</li>`;
+            
+            if (add !== '0') {
+                let diff = Math.round((pLookup - parseFloat(baseProb)) * 10000);
+                html += `<li>To reach $${pLookup.toFixed(4)}$, we need an additional $${diff}$ in the final decimal places.</li>`;
+                html += `<li>Moving across the same row to the <strong>ADD</strong> section, we find this matches the column for <strong>${add}</strong>.</li>`;
+                html += `<li>Combining these parts: $z = ${row}${col} + 0.00${add} = ${absZ.toFixed(3)}$.</li>`;
+            } else {
+                html += `<li>This is an exact match. No ADD column is required, giving $z = ${absZ.toFixed(2)}$.</li>`;
+            }
+        }
+        
+        if (p < 0.5) {
+            html += `<li>Applying the negative sign from step 1, our final Z-score is $z = -${absZ.toFixed(3)}$.</li>`;
+        }
+        
+        html += `</ul></div>`;
+        return html;
+    }
+
+    // --- Application Logic ---
+    function renderQuestion() {
+        let relationshipStr = probData.diff_is_more ? "more than" : "less than";
+
+        document.getElementById('question-text').innerHTML = `
+            7. &nbsp;&nbsp; Given that $X \\sim N(\\mu_1, \\sigma^2)$ & $Y \\sim N(\\mu_2, \\sigma^2)$.<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $P(X < ${probData.x_val}) = ${probData.p_x}$ , &nbsp;&nbsp;&nbsp; $P(Y < ${probData.y_val}) = ${probData.p_y}$.<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note that $\\mu_1$ is ${probData.mu_diff} ${relationshipStr} $\\mu_2$.<br><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Compute $\\mu_1, \\mu_2$ and $\\sigma$.
+        `;
+
+        const solDiv = document.getElementById('solution-container');
+        const btn = document.getElementById('toggle-btn');
+        solDiv.style.display = 'none';
+        btn.innerText = "Show Solution";
+        btn.style.backgroundColor = "#8e44ad";
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([document.getElementById('question-text')]);
+        }
+    }
+
+    function toggleSolution() {
+        const solDiv = document.getElementById('solution-container');
+        const btn = document.getElementById('toggle-btn');
+        
+        if (solDiv.style.display === 'none' || solDiv.style.display === '') {
+            generateSolutionContent();
+            solDiv.style.display = 'block';
+            btn.innerText = "Hide Solution";
+            btn.style.backgroundColor = "#c0392b";
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('solution-content')]);
+            }
+        } else {
+            solDiv.style.display = 'none';
+            btn.innerText = `Show Solution`;
+            btn.style.backgroundColor = "#8e44ad";
+        }
+    }
+
+    function generateSolutionContent() {
+        const contentDiv = document.getElementById('solution-content');
+        
+        let z1_raw = inverseNormalCDF(probData.p_x);
+        let z_x = parseFloat(z1_raw.toFixed(3));
+        
+        let z2_raw = inverseNormalCDF(probData.p_y);
+        let z_y = parseFloat(z2_raw.toFixed(3));
+
+        let sign = probData.diff_is_more ? "+" : "-";
+        let sub_expr = `\\mu_2 ${sign} ${probData.mu_diff}`;
+        let sub_val = probData.diff_is_more ? probData.mu_diff : -probData.mu_diff;
+
+        let const1 = probData.x_val - sub_val;
+        let z_diff = z_x - z_y;
+        let const_diff = const1 - probData.y_val;
+        
+        let sigma = const_diff / z_diff;
+        let mu2 = probData.y_val - (z_y * sigma);
+        let mu1 = probData.diff_is_more ? (mu2 + probData.mu_diff) : (mu2 - probData.mu_diff);
+
+        let html = `
+            <strong>Step 1: Standardize both variables using the Normal Table.</strong><br>
+            For $X \\sim N(\\mu_1, \\sigma^2)$:<br>
+            $P(X < ${probData.x_val}) = ${probData.p_x} \\implies P(Z < Z_x) = ${probData.p_x}$<br>
+            ${explainReverseLookup(probData.p_x, z_x)}
+            So, $\\frac{${probData.x_val} - \\mu_1}{\\sigma} = ${z_x.toFixed(3)} \\implies \\mathbf{\\mu_1 + ${z_x.toFixed(3)}\\sigma = ${probData.x_val}} \\quad \\text{--- (Eq 1)}$<br><br>
+
+            For $Y \\sim N(\\mu_2, \\sigma^2)$:<br>
+            $P(Y < ${probData.y_val}) = ${probData.p_y} \\implies P(Z < Z_y) = ${probData.p_y}$<br>
+            ${explainReverseLookup(probData.p_y, z_y)}
+            So, $\\frac{${probData.y_val} - \\mu_2}{\\sigma} = ${z_y.toFixed(3)} \\implies \\mathbf{\\mu_2 + ${z_y.toFixed(3)}\\sigma = ${probData.y_val}} \\quad \\text{--- (Eq 2)}$<br><br>
+
+            <strong>Step 2: Express $\\mu_1$ in terms of $\\mu_2$ and substitute.</strong><br>
+            We are given that $\\mu_1$ is ${probData.mu_diff} ${probData.diff_is_more ? "more" : "less"} than $\\mu_2$:<br>
+            $\\mu_1 = ${sub_expr}$<br>
+            Substitute this into (Eq 1):<br>
+            $(${sub_expr}) + ${z_x.toFixed(3)}\\sigma = ${probData.x_val}$<br>
+            $\\mathbf{\\mu_2 + ${z_x.toFixed(3)}\\sigma = ${const1.toFixed(4)}} \\quad \\text{--- (Eq 3)}$<br><br>
+
+            <strong>Step 3: Solve the simultaneous equations (Eq 3 and Eq 2).</strong><br>
+            Subtract (Eq 2) from (Eq 3):<br>
+            $$(\\mu_2 + ${z_x.toFixed(3)}\\sigma) - (\\mu_2 + ${z_y.toFixed(3)}\\sigma) = ${const1.toFixed(4)} - ${probData.y_val}$$
+            $$(${z_x.toFixed(3)} - ${z_y.toFixed(3)})\\sigma = ${const_diff.toFixed(4)}$$
+            $$${z_diff.toFixed(3)}\\sigma = ${const_diff.toFixed(4)}$$
+            $$\\sigma = \\frac{${const_diff.toFixed(4)}}{${z_diff.toFixed(3)}} = \\mathbf{${sigma.toFixed(3)}}$$
+
+            Substitute $\\sigma$ into (Eq 2):<br>
+            $$\\mu_2 + (${z_y.toFixed(3)})(${sigma.toFixed(3)}) = ${probData.y_val}$$
+            $$\\mu_2 + ${(z_y * sigma).toFixed(3)} = ${probData.y_val}$$
+            $$\\mu_2 = ${probData.y_val} - ${(z_y * sigma).toFixed(3)} = \\mathbf{${mu2.toFixed(3)}}$$
+
+            Finally, find $\\mu_1$:<br>
+            $$\\mu_1 = \\mu_2 ${sign} ${probData.mu_diff} = ${mu2.toFixed(3)} ${sign} ${probData.mu_diff} = \\mathbf{${mu1.toFixed(3)}}$$
+
+            <div class="ans-block">
+                Ans: $\\mu_1 = ${mu1.toFixed(1)}$, $\\mu_2 = ${mu2.toFixed(1)}$, $\\sigma = ${sigma.toFixed(1)}$
+            </div>
+        `;
+
+        contentDiv.innerHTML = html;
+    }
+
+    function generateNewQuestion() {
+        const possibleSigmas = [0.2, 0.4, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0];
+        let target_sigma = possibleSigmas[Math.floor(Math.random() * possibleSigmas.length)];
+        let target_mu2 = Math.floor(Math.random() * 40) + 10; 
+        
+        probData.mu_diff = Math.floor(Math.random() * 8) + 2; 
+        probData.diff_is_more = Math.random() > 0.5;
+        let target_mu1 = probData.diff_is_more ? (target_mu2 + probData.mu_diff) : (target_mu2 - probData.mu_diff);
+
+        // Generate clean Z-scores with up to 3 decimal places to showcase the table's ADD lookup logic
+        let z_x = Math.round((Math.random() * 1.5 + 1.0) * 1000) / 1000; 
+        let z_y = Math.round((Math.random() * 1.5 + 0.2) * 1000) / 1000; 
+        
+        if (Math.abs(z_x - z_y) < 0.3) {
+            z_x += 0.5;
+        }
+
+        probData.x_val = parseFloat((target_mu1 + (z_x * target_sigma)).toFixed(4));
+        probData.y_val = parseFloat((target_mu2 + (z_y * target_sigma)).toFixed(4));
+
+        probData.p_x = parseFloat(exactNormalCDF(z_x).toFixed(4));
+        probData.p_y = parseFloat(exactNormalCDF(z_y).toFixed(4));
+
+        renderQuestion();
+    }
+
+    // Initialize the app
+    window.onload = renderQuestion;
+</script>
+
+</body>
+</html>

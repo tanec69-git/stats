@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Z-Score Region Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-width: 100%;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f8f5;
+            border-left: 4px solid #1abc9c;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fcf3cf;
+            border-left: 4px solid #f1c40f;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Visual Z-Score Calculator</h2>
+    <p style="font-size: 0.9rem; color: #666; text-align: center;">Based on "3 Standard Normal Table_A4size.pdf"</p>
+    
+    <label for="regionType">Select Region:</label>
+    <select id="regionType" onchange="toggleInputs()">
+        <option value="less">Less than (Z < a)</option>
+        <option value="greater">Greater than (Z > a)</option>
+        <option value="between">Between (a < Z < b)</option>
+    </select>
+
+    <div id="inputA_container">
+        <label for="inputA" id="labelA">Value for a:</label>
+        <input type="number" id="inputA" step="0.01" placeholder="e.g., 1.96" value="1.00">
+    </div>
+
+    <div id="inputB_container" class="hidden">
+        <label for="inputB">Value for b:</label>
+        <input type="number" id="inputB" step="0.01" placeholder="e.g., 2.58">
+    </div>
+
+    <button onclick="calculateAndDraw()">Calculate & Visualize</button>
+
+    <div id="resultBox" class="result"></div>
+    <canvas id="bellCurve" width="500" height="250"></canvas>
+    <div id="explanationBox" class="explanation"></div>
+</div>
+
+<script>
+    // Initial draw
+    window.onload = () => drawCurve(null, null, 'none');
+
+    // Math Functions
+    function normalPDF(x) {
+        return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+    }
+
+    function normalCDF(z) {
+        let isNegative = z < 0;
+        z = Math.abs(z);
+        const p = 0.2316419;
+        const b1 = 0.319381530;
+        const b2 = -0.356563782;
+        const b3 = 1.781477937;
+        const b4 = -1.821255978;
+        const b5 = 1.330274429;
+        
+        const t = 1 / (1 + p * z);
+        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
+        const cdf = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
+        
+        return isNegative ? (1 - cdf) : cdf;
+    }
+
+    // UI Toggles
+    function toggleInputs() {
+        const type = document.getElementById('regionType').value;
+        const inputBContainer = document.getElementById('inputB_container');
+        const labelA = document.getElementById('labelA');
+
+        if (type === 'between') {
+            inputBContainer.classList.remove('hidden');
+            labelA.innerText = "Value for a (lower bound):";
+        } else {
+            inputBContainer.classList.add('hidden');
+            labelA.innerText = type === 'less' ? "Value for a (Z < a):" : "Value for a (Z > a):";
+        }
+    }
+
+    // Canvas Drawing Function
+    function drawCurve(a, b, type) {
+        const canvas = document.getElementById('bellCurve');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        const padding = 30;
+        const graphWidth = width - 2 * padding;
+        const graphHeight = height - 2 * padding;
+        
+        // Define coordinates mapping
+        const minX = -4, maxX = 4;
+        const maxY = 0.45; // Max height of PDF is ~0.3989
+        
+        function mapX(x) {
+            return padding + ((x - minX) / (maxX - minX)) * graphWidth;
+        }
+        
+        function mapY(y) {
+            return height - padding - (y / maxY) * graphHeight;
+        }
+
+        // 1. Draw Shaded Region
+        ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        
+        for (let x = minX; x <= maxX; x += 0.05) {
+            let y = normalPDF(x);
+            let drawX = mapX(x);
+            let drawY = mapY(y);
+            
+            // Condition to fill path
+            let shouldFill = false;
+            if (type === 'less' && x <= a) shouldFill = true;
+            if (type === 'greater' && x >= a) shouldFill = true;
+            if (type === 'between' && x >= a && x <= b) shouldFill = true;
+
+            if (shouldFill) {
+                ctx.lineTo(drawX, drawY);
+            } else if (ctx.fillStyle !== 'rgba(0,0,0,0)') {
+                 ctx.lineTo(drawX, mapY(0));
+            }
+        }
+        
+        // Close the shading path
+        if (type === 'less') {
+             ctx.lineTo(mapX(a > maxX ? maxX : a), mapY(0));
+             ctx.lineTo(mapX(minX), mapY(0));
+        } else if (type === 'greater') {
+             ctx.lineTo(mapX(maxX), mapY(0));
+             ctx.lineTo(mapX(a < minX ? minX : a), mapY(0));
+        } else if (type === 'between') {
+             ctx.lineTo(mapX(b > maxX ? maxX : b), mapY(0));
+             ctx.lineTo(mapX(a < minX ? minX : a), mapY(0));
+        }
+        ctx.fill();
+
+        // 2. Draw Curve Outline
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = minX; x <= maxX; x += 0.05) {
+            ctx.lineTo(mapX(x), mapY(normalPDF(x)));
+        }
+        ctx.stroke();
+
+        // 3. Draw Axis
+        ctx.beginPath();
+        ctx.moveTo(mapX(minX), mapY(0));
+        ctx.lineTo(mapX(maxX), mapY(0));
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 4. Draw Center (0) line and ticks
+        ctx.beginPath();
+        ctx.moveTo(mapX(0), mapY(0));
+        ctx.lineTo(mapX(0), mapY(normalPDF(0)));
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText("0", mapX(0), mapY(0) + 15);
+
+        // Label inputs on graph
+        if (a !== null && type !== 'none') {
+             ctx.fillStyle = '#e74c3c';
+             ctx.fillText(a.toFixed(2), mapX(a), mapY(0) + 15);
+             ctx.beginPath();
+             ctx.arc(mapX(a), mapY(0), 4, 0, 2 * Math.PI);
+             ctx.fill();
+        }
+        if (b !== null && type === 'between') {
+             ctx.fillStyle = '#e74c3c';
+             ctx.fillText(b.toFixed(2), mapX(b), mapY(0) + 15);
+             ctx.beginPath();
+             ctx.arc(mapX(b), mapY(0), 4, 0, 2 * Math.PI);
+             ctx.fill();
+        }
+    }
+
+    // Explanation Generation
+    function explainLookup(z) {
+        let explanation = "";
+        let absZ = Math.abs(z);
+        let zStr = absZ.toFixed(3); // Looking up to 3 decimals
+        
+        let row = zStr.substring(0, 3); // e.g. 1.5
+        let col = zStr.substring(3, 4); // e.g. 4
+        let add = zStr.substring(4, 5); // e.g. 0 (third decimal)
+        
+        explanation += `<ul>`;
+        
+        if (z < 0) {
+            explanation += `<li>Because ${z} is negative, we refer to the rule from the table text: <strong>"For negative values of z use Φ(-z) = 1 - Φ(z)"</strong>. First, we look up the positive value ${absZ}.</li>`;
+        }
+        
+        explanation += `<li>In "3 Standard Normal Table_A4size.pdf", find the row for <strong>${row}</strong> in the leftmost column.</li>`;
+        explanation += `<li>Move across that row to the column headed by <strong>${col}</strong> (the second decimal place). This gives you a base probability.</li>`;
+        
+        if (add !== '0') {
+             explanation += `<li>Since your value has a third decimal place (${add}), you move further across the row to the <strong>"ADD"</strong> column headed by <strong>${add}</strong>. You add this tiny decimal value to your base probability.</li>`;
+        }
+        
+        if (z < 0) {
+             explanation += `<li>Subtract this final looked-up value from 1 to get Φ(${z}).</li>`;
+        }
+        
+        explanation += `</ul>`;
+        return explanation;
+    }
+
+    function calculateAndDraw() {
+        const type = document.getElementById('regionType').value;
+        const a = parseFloat(document.getElementById('inputA').value);
+        const resultBox = document.getElementById('resultBox');
+        const explanationBox = document.getElementById('explanationBox');
+        
+        if (isNaN(a)) {
+            alert("Please enter a valid number for 'a'.");
+            return;
+        }
+
+        let area = 0;
+        let resultText = "";
+        let b = null;
+        let explanationHTML = `<p><strong>How this is derived from the table:</strong></p>`;
+        
+        // The table defines Φ(z) as P(Z ≤ z)
+        explanationHTML += `<p>The standard normal table provides <strong>Φ(z)</strong>, which is defined as <strong>Φ(z) = P(Z ≤ z)</strong> for a normal distribution with mean 0 and variance 1.</p>`;
+
+        if (type === 'less') {
+            area = normalCDF(a);
+            resultText = `P(Z < ${a}) = ${area.toFixed(4)}`;
+            
+            explanationHTML += `<p>You are looking for the region to the left of ${a}. This is exactly what the table provides directly.</p>`;
+            explanationHTML += explainLookup(a);
+
+        } else if (type === 'greater') {
+            area = 1 - normalCDF(a);
+            resultText = `P(Z > ${a}) = ${area.toFixed(4)}`;
+            
+            explanationHTML += `<p>You are looking for the region to the right of ${a}. Since the total area under the curve is 1, you calculate <strong>1 - Φ(${a})</strong>.</p>`;
+            explanationHTML += explainLookup(a);
+
+        } else if (type === 'between') {
+            b = parseFloat(document.getElementById('inputB').value);
+            if (isNaN(b)) {
+                alert("Please enter a valid number for 'b'.");
+                return;
+            }
+            if (a >= b) {
+                alert("Lower bound 'a' must be less than upper bound 'b'.");
+                return;
+            }
+            area = normalCDF(b) - normalCDF(a);
+            resultText = `P(${a} < Z < ${b}) = ${area.toFixed(4)}`;
+            
+            explanationHTML += `<p>You are looking for the region between ${a} and ${b}. You must find the cumulative area up to ${b} and subtract the cumulative area up to ${a}: <strong>Φ(${b}) - Φ(${a})</strong>.</p>`;
+            explanationHTML += `<p><strong>Step 1: Look up ${b}</strong></p>` + explainLookup(b);
+            explanationHTML += `<p><strong>Step 2: Look up ${a}</strong></p>` + explainLookup(a);
+            explanationHTML += `<p>Finally, subtract the value from Step 2 from the value in Step 1.</p>`;
+        }
+
+        // Update UI
+        resultBox.innerText = resultText;
+        resultBox.style.display = 'block';
+        
+        explanationBox.innerHTML = explanationHTML;
+        explanationBox.style.display = 'block';
+
+        // Draw graph
+        drawCurve(a, b, type);
+    }
+</script>
+
+</body>
+</html>
