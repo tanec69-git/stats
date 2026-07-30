@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivative Practice Generator</title>
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams']} // Load AMS math packages for the align* environment
+            },
+            startup: {
+                typeset: false
+            }
+        };
+    </script>
+    <!-- MathJax Library (No Polyfill) -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        .math-box {
+            font-size: 1.25rem;
+            margin: 2rem 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: auto; /* Allows scrolling if equations get too long */
+        }
+        #answer-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #e2e8f0;
+            color: #0f172a;
+            text-align: left;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        #btn-reveal {
+            background-color: #475569;
+        }
+        #btn-reveal:hover {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>First Derivative Generator</h1>
+        <p class="subtitle">Practice logarithmic, exponential, chain, and quotient rules.</p>
+
+        <div>
+            <strong>Find the first derivative of the following function:</strong>
+            <div id="question-container" class="math-box">
+                <!-- Question will be injected here -->
+            </div>
+        </div>
+
+        <div id="answer-container">
+            <strong>Step-by-step Solution:</strong>
+            <div id="answer-math" class="math-box">
+                <!-- Answer will be injected here -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-generate" onclick="generateProblem()">Generate New Question</button>
+            <button id="btn-reveal" onclick="toggleAnswer()">Show Answer</button>
+        </div>
+    </div>
+
+    <script>
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function formatTerm(coeff, power) {
+            if (power === 0) return `${coeff}`;
+            if (power === 1) return `${coeff}x`;
+            return `${coeff}x^{${power}}`;
+        }
+
+        function generateProblem() {
+            const type = randInt(1, 4);
+            let questionTex = "";
+            let answerTex = "";
+
+            if (type === 1) {
+                // Logarithmic Rule
+                const a = randInt(2, 8);
+                const n = randInt(2, 5);
+                const b = randInt(1, 10);
+                
+                questionTex = `f(x) = \\ln(${a}x^{${n}} + ${b})`;
+                
+                const derivInnerCoeff = a * n;
+                const derivInnerPower = n - 1;
+                const topTerm = formatTerm(derivInnerCoeff, derivInnerPower);
+                
+                answerTex = `
+                \\begin{align*}
+                f'(x) &= \\frac{1}{${a}x^{${n}} + ${b}} \\cdot \\frac{d}{dx}[${a}x^{${n}} + ${b}] \\\\
+                &= \\frac{1}{${a}x^{${n}} + ${b}} \\cdot (${topTerm}) \\\\
+                &= \\frac{${topTerm}}{${a}x^{${n}} + ${b}}
+                \\end{align*}`;
+            } 
+            else if (type === 2) {
+                // Exponential Rule
+                const c = randInt(2, 9);
+                const a = randInt(2, 7);
+                const b = randInt(1, 9);
+                
+                questionTex = `f(x) = ${c}e^{${a}x + ${b}}`;
+                
+                answerTex = `
+                \\begin{align*}
+                f'(x) &= ${c}e^{${a}x + ${b}} \\cdot \\frac{d}{dx}[${a}x + ${b}] \\\\
+                &= ${c}e^{${a}x + ${b}} \\cdot (${a}) \\\\
+                &= ${c * a}e^{${a}x + ${b}}
+                \\end{align*}`;
+            } 
+            else if (type === 3) {
+                // Chain Rule / General Power Rule
+                const a = randInt(2, 6);
+                const n = randInt(2, 4);
+                const b = randInt(1, 8);
+                const m = randInt(3, 7);
+                const sign = Math.random() > 0.5 ? '+' : '-';
+                
+                questionTex = `f(x) = (${a}x^{${n}} ${sign} ${b})^{${m}}`;
+                
+                const innerDerivCoeff = a * n;
+                const innerDerivPower = n - 1;
+                const innerDerivTerm = formatTerm(innerDerivCoeff, innerDerivPower);
+                const leadingCoeff = a * n * m;
+                const outerPower = m - 1;
+                const finalXTerm = formatTerm(leadingCoeff, innerDerivPower);
+                
+                answerTex = `
+                \\begin{align*}
+                f'(x) &= ${m}(${a}x^{${n}} ${sign} ${b})^{${outerPower}} \\cdot \\frac{d}{dx}[${a}x^{${n}} ${sign} ${b}] \\\\
+                &= ${m}(${a}x^{${n}} ${sign} ${b})^{${outerPower}} \\cdot (${innerDerivTerm}) \\\\
+                &= ${finalXTerm}(${a}x^{${n}} ${sign} ${b})^{${outerPower}}
+                \\end{align*}`;
+            } 
+            else if (type === 4) {
+                // Quotient Rule
+                const a = randInt(2, 6);
+                const n = randInt(2, 5);
+                
+                questionTex = `f(x) = \\frac{e^{${a}x}}{x^{${n}}}`;
+                
+                const bottomPower = n + 1;
+                const bottomSquared = 2 * n;
+                const nMinusOne = n - 1;
+                
+                answerTex = `
+                \\begin{align*}
+                f'(x) &= \\frac{x^{${n}} \\cdot \\frac{d}{dx}[e^{${a}x}] - e^{${a}x} \\cdot \\frac{d}{dx}[x^{${n}}]}{(x^{${n}})^2} \\\\
+                &= \\frac{x^{${n}}(${a}e^{${a}x}) - e^{${a}x}(${n}x^{${nMinusOne}})}{x^{${bottomSquared}}} \\\\
+                &= \\frac{x^{${nMinusOne}}e^{${a}x}(${a}x - ${n})}{x^{${bottomSquared}}} \\\\
+                &= \\frac{e^{${a}x}(${a}x - ${n})}{x^{${bottomPower}}}
+                \\end{align*}`;
+            }
+
+            // Inject LaTeX into the DOM
+            document.getElementById('question-container').innerHTML = `$$ ${questionTex} $$`;
+            document.getElementById('answer-math').innerHTML = `$$ ${answerTex} $$`;
+
+            // Hide the answer container and reset button text
+            document.getElementById('answer-container').style.display = 'none';
+            document.getElementById('btn-reveal').innerText = 'Show Answer';
+
+            // Command MathJax to typeset the newly injected math
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([
+                    document.getElementById('question-container'),
+                    document.getElementById('answer-math')
+                ]).catch((err) => console.log('MathJax typeset failed: ' + err.message));
+            }
+        }
+
+        function toggleAnswer() {
+            const answerContainer = document.getElementById('answer-container');
+            const btnReveal = document.getElementById('btn-reveal');
+            
+            if (answerContainer.style.display === 'none' || answerContainer.style.display === '') {
+                answerContainer.style.display = 'block';
+                btnReveal.innerText = 'Hide Answer';
+            } else {
+                answerContainer.style.display = 'none';
+                btnReveal.innerText = 'Show Answer';
+            }
+        }
+
+        // Generate the first problem when the page loads
+        window.onload = () => {
+            if (window.MathJax) {
+                MathJax.startup.promise.then(() => {
+                    generateProblem();
+                });
+            } else {
+                generateProblem();
+            }
+        };
+    </script>
+</body>
+</html>
