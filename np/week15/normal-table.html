@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accurate Normal Distribution Table Lookup</title>
+    
+    <!-- MathJax Configuration (No Polyfill) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 { color: #2c3e50; }
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .interactive-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 150px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #0056b3; }
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #eef7ff;
+            border-left: 4px solid #007bff;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.6;
+        }
+        .image-panel {
+            flex: 1.2;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        .image-panel img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+        }
+        
+        .hl-row { font-weight: bold; color: #d32f2f; }
+        .hl-col { font-weight: bold; color: #1976d2; }
+        .hl-add { font-weight: bold; color: #388e3c; }
+        
+        @media (max-width: 900px) {
+            .container { flex-direction: column; }
+            .image-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Accurate Standard Normal Table Lookup Tool</h1>
+    <p>This tool utilizes the <strong>exact values</strong> hardcoded from the provided legacy table image to prevent rounding discrepancies.</p>
+
+    <div class="container">
+        <!-- Interactive Tools Panel -->
+        <div class="interactive-panel">
+            
+            <!-- Z to Probability -->
+            <div class="card">
+                <h2>1. Lookup Probability from Z-Value</h2>
+                <p>Find the area to the left: $P(Z < z)$</p>
+                <div class="form-group">
+                    <label for="z-input">Enter $z$ (0.000 to 2.999):</label><br><br>
+                    <input type="number" id="z-input" step="0.001" min="0" max="2.999" placeholder="e.g. 1.234">
+                    <button onclick="calculateZtoP()">Lookup Table</button>
+                </div>
+                <div id="z-result" class="result-box"></div>
+            </div>
+
+            <!-- Probability to Z -->
+            <div class="card">
+                <h2>2. Inverse Lookup (Prob to Z-Value)</h2>
+                <p>Find $z$ given an area: $P(Z < z) = p$</p>
+                <div class="form-group">
+                    <label for="p-input">Enter Probability $p$ (0.5000 to 0.9986):</label><br><br>
+                    <input type="number" id="p-input" step="0.0001" min="0.5" max="0.9986" placeholder="e.g. 0.8914">
+                    <button onclick="calculatePtoZ()">Inverse Lookup</button>
+                </div>
+                <div id="p-result" class="result-box"></div>
+            </div>
+
+        </div>
+
+        <!-- Table Reference Image Panel -->
+        <div class="image-panel">
+            <h2>Reference Table</h2>
+            <img src="normal-table.png" alt="normal-table.png">
+        </div>
+    </div>
+
+    <script>
+        // EXACT values extracted from the provided image
+        const mainTable = [
+            [0.5, 0.504, 0.508, 0.512, 0.516, 0.5199, 0.5239, 0.5279, 0.5319, 0.5359], [0.5398, 0.5438, 0.5478, 0.5517, 0.5557, 0.5596, 0.5636, 0.5675, 0.5714, 0.5753], 
+            [0.5793, 0.5832, 0.5871, 0.591, 0.5948, 0.5987, 0.6026, 0.6064, 0.6103, 0.6141], [0.6179, 0.6217, 0.6255, 0.6293, 0.6331, 0.6368, 0.6406, 0.6443, 0.648, 0.6517], 
+            [0.6554, 0.6591, 0.6628, 0.6664, 0.67, 0.6736, 0.6772, 0.6808, 0.6844, 0.6879], [0.6915, 0.695, 0.6985, 0.7019, 0.7054, 0.7088, 0.7123, 0.7157, 0.719, 0.7224], 
+            [0.7257, 0.7291, 0.7324, 0.7357, 0.7389, 0.7422, 0.7454, 0.7486, 0.7517, 0.7549], [0.758, 0.7611, 0.7642, 0.7673, 0.7704, 0.7734, 0.7764, 0.7794, 0.7823, 0.7852], 
+            [0.7881, 0.791, 0.7939, 0.7967, 0.7995, 0.8023, 0.8051, 0.8078, 0.8106, 0.8133], [0.8159, 0.8186, 0.8212, 0.8238, 0.8264, 0.8289, 0.8315, 0.834, 0.8365, 0.8389], 
+            [0.8413, 0.8438, 0.8461, 0.8485, 0.8508, 0.8531, 0.8554, 0.8577, 0.8599, 0.8621], [0.8643, 0.8665, 0.8686, 0.8708, 0.8729, 0.8749, 0.877, 0.879, 0.881, 0.883], 
+            [0.8849, 0.8869, 0.8888, 0.8907, 0.8925, 0.8944, 0.8962, 0.898, 0.8997, 0.9015], [0.9032, 0.9049, 0.9066, 0.9082, 0.9099, 0.9115, 0.9131, 0.9147, 0.9162, 0.9177], 
+            [0.9192, 0.9207, 0.9222, 0.9236, 0.9251, 0.9265, 0.9279, 0.9292, 0.9306, 0.9319], [0.9332, 0.9345, 0.9357, 0.937, 0.9382, 0.9394, 0.9406, 0.9418, 0.9429, 0.9441], 
+            [0.9452, 0.9463, 0.9474, 0.9484, 0.9495, 0.9505, 0.9515, 0.9525, 0.9535, 0.9545], [0.9554, 0.9564, 0.9573, 0.9582, 0.9591, 0.9599, 0.9608, 0.9616, 0.9625, 0.9633], 
+            [0.9641, 0.9649, 0.9656, 0.9664, 0.9671, 0.9678, 0.9686, 0.9693, 0.9699, 0.9706], [0.9713, 0.9719, 0.9726, 0.9732, 0.9738, 0.9744, 0.975, 0.9756, 0.9761, 0.9767], 
+            [0.9772, 0.9778, 0.9783, 0.9788, 0.9793, 0.9798, 0.9803, 0.9808, 0.9812, 0.9817], [0.9821, 0.9826, 0.983, 0.9834, 0.9838, 0.9842, 0.9846, 0.985, 0.9854, 0.9857], 
+            [0.9861, 0.9864, 0.9868, 0.9871, 0.9875, 0.9878, 0.9881, 0.9884, 0.9887, 0.989], [0.9893, 0.9896, 0.9898, 0.9901, 0.9904, 0.9906, 0.9909, 0.9911, 0.9913, 0.9916], 
+            [0.9918, 0.992, 0.9922, 0.9925, 0.9927, 0.9929, 0.9931, 0.9932, 0.9934, 0.9936], [0.9938, 0.994, 0.9941, 0.9943, 0.9945, 0.9946, 0.9948, 0.9949, 0.9951, 0.9952], 
+            [0.9953, 0.9955, 0.9956, 0.9957, 0.9959, 0.996, 0.9961, 0.9962, 0.9963, 0.9964], [0.9965, 0.9966, 0.9967, 0.9968, 0.9969, 0.997, 0.9971, 0.9972, 0.9973, 0.9974], 
+            [0.9974, 0.9975, 0.9976, 0.9977, 0.9977, 0.9978, 0.9979, 0.9979, 0.998, 0.9981], [0.9981, 0.9982, 0.9982, 0.9983, 0.9984, 0.9984, 0.9985, 0.9985, 0.9986, 0.9986]
+        ];
+
+        const addTable = [
+            [4, 8, 12, 16, 20, 24, 28, 32, 36], [4, 8, 12, 16, 20, 24, 28, 32, 36], [4, 8, 12, 15, 19, 23, 27, 31, 35], [4, 7, 11, 15, 19, 22, 26, 30, 34], 
+            [4, 7, 11, 14, 18, 22, 25, 29, 32], [3, 7, 10, 14, 17, 20, 24, 27, 31], [3, 7, 10, 13, 16, 19, 23, 26, 29], [3, 6, 9, 12, 15, 18, 21, 24, 27], 
+            [3, 5, 8, 11, 14, 16, 19, 22, 25], [3, 5, 8, 10, 13, 15, 18, 20, 23], [2, 5, 7, 9, 12, 14, 16, 19, 21], [2, 4, 6, 8, 10, 12, 14, 16, 18], 
+            [2, 4, 6, 7, 9, 11, 13, 15, 17], [2, 3, 5, 6, 8, 10, 11, 13, 14], [1, 3, 4, 6, 7, 8, 10, 11, 13], [1, 2, 4, 5, 6, 7, 8, 10, 11], 
+            [1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 4, 5, 6, 7, 8], [1, 1, 2, 3, 4, 4, 5, 6, 6], [1, 1, 2, 2, 3, 4, 4, 5, 5], [0, 1, 1, 2, 2, 3, 3, 4, 4], 
+            [0, 1, 1, 2, 2, 2, 3, 3, 4], [0, 1, 1, 1, 2, 2, 2, 3, 3], [0, 1, 1, 1, 1, 2, 2, 2, 2], [0, 0, 1, 1, 1, 1, 1, 2, 2], [0, 0, 0, 1, 1, 1, 1, 1, 1], 
+            [0, 0, 0, 0, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ];
+
+        function calculateZtoP() {
+            let z_input = document.getElementById('z-input').value;
+            if (!z_input || z_input < 0 || z_input > 2.999) {
+                alert("Please enter a valid Z-value between 0.000 and 2.999.");
+                return;
+            }
+
+            let z_float = parseFloat(z_input);
+            let z_str = z_float.toFixed(3);
+            
+            // Extract components
+            let row_idx = Math.floor(z_float * 10);
+            let col_idx = Math.floor((z_float * 100).toFixed(1)) % 10;
+            let add_idx = Math.round(z_float * 1000) % 10;
+
+            let row_str = z_str.substring(0, 3); // "X.X"
+            let col_str = col_idx.toString(); 
+            let add_str = add_idx.toString();
+
+            // Direct Table Lookups
+            let base_p = mainTable[row_idx][col_idx];
+            let base_p_str = base_p.toFixed(4);
+            
+            let add_val = 0;
+            if (add_idx > 0) {
+                add_val = addTable[row_idx][add_idx - 1];
+            }
+
+            let final_p = base_p + (add_val / 10000);
+            let final_p_str = final_p.toFixed(4);
+
+            let html = `
+                <h3>How to read the table for $z = ${z_str}$:</h3>
+                <ol>
+                    <li>First, look down the far-left column to find the row <span class="hl-row">${row_str}</span>.</li>
+                    <li>Move across to the main column labeled <span class="hl-col">${col_str}</span>. The base probability here is <strong>${base_p_str}</strong>.</li>
+                    ${add_idx > 0 ? `
+                        <li>Since your third decimal is <span class="hl-add">${add_str}</span>, continue moving right to the <strong>ADD</strong> columns.</li>
+                        <li>In row <span class="hl-row">${row_str}</span>, under the ADD column <span class="hl-add">${add_str}</span>, you will find the value <strong>${add_val}</strong>.</li>
+                        <li>Add this value to the last decimal places of your base probability: <br>
+                        $$ ${base_p_str} + 0.00${add_val < 10 ? '0' + add_val : add_val} = ${final_p_str} $$</li>
+                    ` : `
+                        <li>Because your third decimal is 0, you don't need to use the ADD columns.</li>
+                    `}
+                </ol>
+                <hr>
+                <p><strong>Result:</strong> $P(Z < ${z_str}) = ${final_p_str}$</p>
+            `;
+
+            let resBox = document.getElementById('z-result');
+            resBox.innerHTML = html;
+            resBox.style.display = 'block';
+            MathJax.typesetPromise();
+        }
+
+        function calculatePtoZ() {
+            let p_input = document.getElementById('p-input').value;
+            if (!p_input || p_input < 0.5000 || p_input > 0.9986) {
+                alert("Please enter a valid probability between 0.5000 and 0.9986.");
+                return;
+            }
+
+            let p_target = parseFloat(p_input);
+            
+            // 1. Scan the main body of the table for the largest value <= p_target
+            let best_p = -1, best_r = -1, best_c = -1;
+            for(let r=0; r<30; r++){
+                for(let c=0; c<10; c++){
+                    if (mainTable[r][c] <= p_target) {
+                        if (mainTable[r][c] > best_p) {
+                            best_p = mainTable[r][c];
+                            best_r = r;
+                            best_c = c;
+                        }
+                    }
+                }
+            }
+
+            let best_p_str = best_p.toFixed(4);
+            let row_str = (best_r / 10).toFixed(1);
+            let col_str = best_c.toString();
+            let z_base_str = row_str + col_str; // e.g. "1.2" + "3" = "1.23"
+            
+            // 2. Scan the ADD table for the best remainder
+            let rem = Math.round((p_target - best_p) * 10000);
+            let add_digit = 0;
+            let add_val_found = 0;
+
+            if (rem > 0) {
+                let min_diff = 9999;
+                for (let a = 0; a < 9; a++) {
+                    let current_add = addTable[best_r][a];
+                    let diff = Math.abs(current_add - rem);
+                    if (diff < min_diff) {
+                        min_diff = diff;
+                        add_digit = a + 1;
+                        add_val_found = current_add;
+                    }
+                }
+            }
+
+            let final_z = z_base_str + (add_digit > 0 ? add_digit.toString() : "");
+            // Standardize format if it ends exactly on a 2-decimal number
+            if(add_digit === 0) final_z = (parseFloat(final_z)).toFixed(2);
+
+            let html = `
+                <h3>How to perform Inverse Lookup for $p = ${p_target.toFixed(4)}$:</h3>
+                <ol>
+                    <li>Scan the main body of the table for the value closest to, but <em>not exceeding</em>, ${p_target.toFixed(4)}.</li>
+                    <li>The closest matching base probability is <strong>${best_p_str}</strong>.</li>
+                    <li>Look horizontally left to find the row <span class="hl-row">${row_str}</span>, and vertically up to find the main column <span class="hl-col">${col_str}</span>. This gives a base $z = ${z_base_str}$.</li>
+                    ${rem > 0 ? `
+                        <li>Calculate the remaining difference required: <br>
+                        $$ ${p_target.toFixed(4)} - ${best_p_str} = 0.00${rem < 10 ? '0' + rem : rem} \\text{ (or } ${rem} \\text{ units)} $$</li>
+                        <li>Stay in row <span class="hl-row">${row_str}</span> and look horizontally across the <strong>ADD</strong> columns for the value closest to ${rem}.</li>
+                        <li>The closest value is <strong>${add_val_found}</strong>, located in ADD column <span class="hl-add">${add_digit}</span>.</li>
+                        <li>Append this digit to your base z-value.</li>
+                    ` : `
+                        <li>Since the value matches exactly, no ADD column is needed.</li>
+                    `}
+                </ol>
+                <hr>
+                <p><strong>Result:</strong> $z \\approx ${final_z}$</p>
+            `;
+
+            let resBox = document.getElementById('p-result');
+            resBox.innerHTML = html;
+            resBox.style.display = 'block';
+            MathJax.typesetPromise();
+        }
+    </script>
+
+</body>
+</html>
