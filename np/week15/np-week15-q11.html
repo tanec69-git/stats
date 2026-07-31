@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Juice Cartons Problem</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 40px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #8e44ad;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.2em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #8e44ad;
+            font-size: 1.1em; 
+        }
+        .sol-step {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Normal Distribution Application Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Abramowitz and Stegun approximation for standard normal CDF to simulate table lookup
+    function getZProb(z) {
+        let sign = z < 0 ? -1 : 1;
+        z = Math.abs(z);
+        let t = 1 / (1 + 0.2316419 * z);
+        let d = 0.39894228 * Math.exp(-z * z / 2);
+        let p = d * t * (0.31938153 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+        return sign === 1 ? 1 - p : p;
+    }
+
+    // Returns a probability rounded to 4 decimal places given a Z score rounded to 2 decimal places
+    function tableLookup(z) {
+        let zRound = Math.round(z * 100) / 100;
+        let p = getZProb(zRound);
+        return (Math.round(p * 10000) / 10000).toFixed(4);
+    }
+
+    // Finds the Z score (to 2 decimal places) that corresponds to the closest probability in the standard normal table
+    function invTableLookup(targetP) {
+        let bestZ = 0;
+        let minDiff = 1;
+        // Search exclusively positive half since standard tables typically show Phi(z) for z > 0
+        for (let z = 0.00; z <= 4.00; z += 0.01) {
+            let p = parseFloat(tableLookup(z));
+            let diff = Math.abs(p - targetP);
+            if (diff < minDiff) {
+                minDiff = diff;
+                bestZ = z;
+            }
+        }
+        return Math.round(bestZ * 100) / 100;
+    }
+
+    // Initial values matching the original problem
+    let mu = 1010;
+    let sigma = 7;
+    let val1 = 1030;
+    let val2 = 1000;
+    let batch_size = 2000;
+    let reject_pct = 8;
+
+    function renderContent() {
+        // --- Calculate variables ---
+        // Part (i)
+        let z1_raw = (val1 - mu) / sigma;
+        let z1 = (Math.round(z1_raw * 100) / 100).toFixed(2);
+        let phi_z1 = tableLookup(parseFloat(z1));
+        let prob_i = (1 - parseFloat(phi_z1)).toFixed(4);
+
+        // Part (ii)
+        let z2_raw = (val2 - mu) / sigma;
+        let z2 = (Math.round(z2_raw * 100) / 100).toFixed(2);
+        let z2_abs = Math.abs(parseFloat(z2)).toFixed(2);
+        let phi_z2_abs = tableLookup(parseFloat(z2_abs));
+        let prob_ii = (1 - parseFloat(phi_z2_abs)).toFixed(4);
+
+        // Part (iii)
+        let expected_raw = batch_size * parseFloat(prob_ii);
+        let expected_cartons = Math.round(expected_raw);
+
+        // Part (iv)
+        let accept_prob = (1 - (reject_pct / 100)).toFixed(4);
+        let z_max = invTableLookup(parseFloat(accept_prob)).toFixed(2);
+        let max_vol_exact = mu + (parseFloat(z_max) * sigma);
+        let max_vol = Math.round(max_vol_exact);
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">11.</div>
+                <div class="q-text">
+                    Cartons of apple juice are such that the volume of contents are normally distributed with mean ${mu} ml and standard deviation ${sigma} ml.
+                    <br><br>
+                    Find the probability that a particular carton contains
+                    <div class="q-sub">(i) &nbsp; more than ${val1} ml,</div>
+                    <div class="q-sub">(ii) &nbsp;less than ${val2} ml,</div>
+                    <br>
+                    The label on the carton states that the carton must contain 1 litre of apple juice. How many cartons in a batch of ${batch_size} would be expected to contain less than this amount?
+                    <br><br>
+                    Given that ${reject_pct}% of the cartons are rejected for containing too much apple juice, find the maximum volume, to the nearest ml, that a carton must contain if it is to be accepted.
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML ---
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-step">
+                Let $X$ be the volume of a carton of apple juice.<br>
+                $X \\sim N(\\mu, \\sigma^2)$ where $\\mu = ${mu}$ and $\\sigma = ${sigma}$.<br>
+                We standardize using $Z = \\frac{X - \\mu}{\\sigma}$.
+            </div>
+            
+            <div class="sol-step">
+                <strong>(i) More than ${val1} ml</strong><br>
+                $P(X > ${val1}) = P\\left(Z > \\frac{${val1} - ${mu}}{${sigma}}\\right)$<br>
+                $P(X > ${val1}) = P(Z > ${z1})$<br>
+                Using the Standard Normal Table:<br>
+                $P(Z > ${z1}) = 1 - \\Phi(${z1})$<br>
+                $P(Z > ${z1}) = 1 - ${phi_z1} = \\mathbf{${prob_i}}$
+            </div>
+            
+            <div class="sol-step">
+                <strong>(ii) Less than ${val2} ml</strong><br>
+                $P(X < ${val2}) = P\\left(Z < \\frac{${val2} - ${mu}}{${sigma}}\\right)$<br>
+                $P(X < ${val2}) = P(Z < ${z2})$<br>
+                Using symmetry properties for standard normal tables:<br>
+                $P(Z < ${z2}) = 1 - \\Phi(${z2_abs})$<br>
+                $P(Z < ${z2}) = 1 - ${phi_z2_abs} = \\mathbf{${prob_ii}}$
+            </div>
+
+            <div class="sol-step">
+                <strong>Expected number of cartons less than 1 litre</strong><br>
+                1 litre = 1000 ml. From part (ii), the probability of a carton containing less than 1000 ml is ${prob_ii}.<br>
+                $\\text{Expected number} = \\text{Batch Size} \\times P(X < 1000)$<br>
+                $\\text{Expected number} = ${batch_size} \\times ${prob_ii} = ${expected_raw.toFixed(2)}$<br>
+                Rounding to the nearest whole carton, we expect $\\mathbf{${expected_cartons}}$ cartons.
+            </div>
+            
+            <div class="sol-step">
+                <strong>Maximum volume to be accepted</strong><br>
+                Cartons are rejected for containing too much juice, so the top ${reject_pct}% are rejected.<br>
+                Let $x_{max}$ be the maximum volume accepted. <br>
+                $P(X > x_{max}) = ${reject_pct / 100}$<br>
+                $P(X < x_{max}) = 1 - ${reject_pct / 100} = ${accept_prob}$<br>
+                Standardizing gives: $P\\left(Z < \\frac{x_{max} - ${mu}}{${sigma}}\\right) = ${accept_prob}$<br>
+                Looking up the closest probability to $${accept_prob}$ in the body of the Standard Normal Table gives a $z$-score of $${z_max}$.<br>
+                $\\frac{x_{max} - ${mu}}{${sigma}} = ${z_max}$<br>
+                $x_{max} - ${mu} = ${z_max} \\times ${sigma}$<br>
+                $x_{max} - ${mu} = ${(parseFloat(z_max) * sigma).toFixed(2)}$<br>
+                $x_{max} = ${mu} + ${(parseFloat(z_max) * sigma).toFixed(2)}$<br>
+                $x_{max} = ${max_vol_exact.toFixed(2)}$<br>
+                To the nearest ml, the maximum volume is $\\mathbf{${max_vol} \\text{ ml}}$.
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize the parameters while keeping the logic realistic for a 1 Litre container
+        mu = Math.floor(Math.random() * 21) + 1005; // 1005 to 1025
+        sigma = Math.floor(Math.random() * 8) + 4; // 4 to 11
+        
+        val1 = mu + Math.floor(Math.random() * 16) + 10; // 10 to 25 above mean
+        
+        let batch_options = [500, 1000, 2000, 2500, 5000, 10000];
+        batch_size = batch_options[Math.floor(Math.random() * batch_options.length)];
+        
+        reject_pct = Math.floor(Math.random() * 9) + 2; // 2% to 10%
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

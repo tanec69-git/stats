@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Word Problem Generator</title>
+    <!-- MathJax Configuration to use $ and $$ as requested -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #e67e22;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #d35400;
+        }
+        ol {
+            margin-bottom: 0;
+        }
+        li {
+            margin-bottom: 15px;
+        }
+        .numbering {
+            display: inline-block;
+            width: 30px;
+        }
+        .prob-table {
+            border-collapse: collapse;
+            text-align: center;
+            margin: 20px 0 20px 50px;
+        }
+        .prob-table td, .prob-table th {
+            border: 1px solid black;
+            padding: 8px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Student Probability Problem Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_fb55e1.png
+    let boys_total = 6;
+    let girls_total = 15;
+    let boys_bus = 3;
+    let girls_bus = 7;
+
+    // Helper to find greatest common divisor to simplify fractions
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    // Render the content and invoke MathJax
+    function renderContent(b_total, g_total, b_bus, g_bus) {
+        let b_no_bus = b_total - b_bus;
+        let g_no_bus = g_total - g_bus;
+        
+        let total_students = b_total + g_total;
+        let total_bus = b_bus + g_bus;
+
+        // Solution i: P(takes bus)
+        let div_i = gcd(total_bus, total_students);
+        let ans_i = total_bus === total_students ? "1" : (total_bus/div_i) + "/" + (total_students/div_i);
+        let latex_i = total_bus === total_students ? "1" : `\\frac{${total_bus/div_i}}{${total_students/div_i}}`;
+
+        // Solution ii: P(Boy | takes bus)
+        let div_ii = gcd(b_bus, total_bus);
+        let latex_ii = `\\frac{${b_bus/div_ii}}{${total_bus/div_ii}}`;
+
+        // Solution iii: P(3 take bus)
+        let num_iii = total_bus * (total_bus - 1) * (total_bus - 2);
+        let den_iii = total_students * (total_students - 1) * (total_students - 2);
+        let div_iii = gcd(num_iii, den_iii);
+        let latex_iii = `\\frac{${num_iii/div_iii}}{${den_iii/div_iii}}`;
+
+        const questionHTML = `
+            <div style="display: flex;">
+                <div class="numbering">2</div>
+                <div class="numbering">(b)</div>
+                <div>Among the ${b_total} boys and ${g_total} girls in a class, ${b_bus} boys and ${g_bus} girls take school bus.</div>
+            </div>
+            
+            <table class="prob-table">
+                <tr>
+                    <td></td>
+                    <td>Take school bus</td>
+                    <td>Does not take school bus</td>
+                </tr>
+                <tr>
+                    <td>Boys</td>
+                    <td>${b_bus}</td>
+                    <td>${b_no_bus}</td>
+                </tr>
+                <tr>
+                    <td>Girls</td>
+                    <td>${g_bus}</td>
+                    <td>${g_no_bus}</td>
+                </tr>
+            </table>
+
+            <ol type="i" style="margin-left: 50px;">
+                <li>If a student is selected from the class, find the probability that the student takes school bus.</li>
+                <li>Find the probability that a student is a boy given that the student takes school bus.</li>
+                <li>Three students are chosen from the class. Find the probability that all 3 students take school bus.</li>
+            </ol>
+        `;
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <p><strong>Total students:</strong> $${b_total} + ${g_total} = ${total_students}$<br>
+            <strong>Total taking bus:</strong> $${b_bus} + ${g_bus} = ${total_bus}$</p>
+            <ol type="i">
+                <li>
+                    $P(\\text{takes bus}) = \\frac{\\text{Total taking bus}}{\\text{Total students}} = \\frac{${total_bus}}{${total_students}}$<br>
+                    Simplified: $${latex_i}$
+                </li>
+                <li>
+                    This is conditional probability. Restrict the sample space to only students who take the school bus.<br>
+                    $P(\\text{Boy} \\mid \\text{takes bus}) = \\frac{\\text{Boys taking bus}}{\\text{Total taking bus}} = \\frac{${b_bus}}{${total_bus}}$<br>
+                    Simplified: $${latex_ii}$
+                </li>
+                <li>
+                    Selecting 3 students without replacement:<br>
+                    $P(\\text{all 3 take bus}) = \\frac{${total_bus}}{${total_students}} \\times \\frac{${total_bus - 1}}{${total_students - 1}} \\times \\frac{${total_bus - 2}}{${total_students - 2}}$<br>
+                    $P(\\text{all 3 take bus}) = \\frac{${total_bus} \\times ${total_bus - 1} \\times ${total_bus - 2}}{${total_students} \\times ${total_students - 1} \\times ${total_students - 2}} = \\frac{${num_iii}}{${den_iii}}$<br>
+                    Simplified: $${latex_iii}$
+                </li>
+            </ol>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize totals and sub-categories to ensure logical coherence
+        boys_total = Math.floor(Math.random() * 8) + 5; // 5 to 12
+        girls_total = Math.floor(Math.random() * 10) + 8; // 8 to 17
+        
+        // Ensure there are at least 3 students taking the bus in total for question (iii) to work
+        boys_bus = Math.floor(Math.random() * (boys_total - 2)) + 1; 
+        girls_bus = Math.floor(Math.random() * (girls_total - 2)) + 2; 
+
+        renderContent(boys_total, girls_total, boys_bus, girls_bus);
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent(boys_total, girls_total, boys_bus, girls_bus);
+    };
+</script>
+
+</body>
+</html>

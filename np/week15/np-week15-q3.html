@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Events Problem Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #9b59b6;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            /* Increased font size for solutions as requested */
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #8e44ad;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Events Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_fb4b5a.png exactly
+    let pX = 0.48;
+    let pY = 0.70;
+    let pXnY = 0.18;
+    let pC = 0.7;
+    let pD = 0.4;
+
+    // Helper to round numbers to prevent floating point inaccuracies
+    function roundNum(num, decimals = 4) {
+        return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    }
+
+    // Render the content and invoke MathJax
+    function renderContent(x, y, xNy, c, d) {
+        // Solution Calculations
+        let productXY = roundNum(x * y);
+        let isMutuallyExclusive = (xNy === 0);
+        let isIndependent = (productXY === xNy);
+        
+        let productCD = roundNum(c * d);
+        let unionCD = roundNum(c + d - productCD);
+
+        // Build Question HTML
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">3 .</div>
+                <div class="q-part">(a)</div>
+                <div class="q-text">
+                    For events X & Y, $P(X) = ${x}$, $P(Y) = ${y}$ and $P(X \\cap Y) = ${xNy}$.
+                    <div class="q-sub">(i) Are X & Y mutually exclusive? Explain.</div>
+                    <div class="q-sub">(ii) Are X & Y independent? Explain.</div>
+                </div>
+            </div>
+            <div class="question-row">
+                <div class="q-num"></div>
+                <div class="q-part">(b)</div>
+                <div class="q-text">
+                    Given that C and D are independent events where $P(C) = ${c}$ and $P(D) = ${d}$, calculate $P(C \\cup D)$.
+                </div>
+            </div>
+        `;
+
+        // Build Solution HTML
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-part">
+                <strong>(a) (i)</strong><br>
+                Two events are mutually exclusive if they cannot occur at the same time, meaning $P(X \\cap Y) = 0$.<br>
+                Here, $P(X \\cap Y) = ${xNy}$.<br>
+                Since $P(X \\cap Y) \\neq 0$ (unless it is exactly 0), they <strong>are ${isMutuallyExclusive ? "" : "not"}</strong> mutually exclusive.
+            </div>
+            <div class="sol-part">
+                <strong>(a) (ii)</strong><br>
+                Two events are independent if $P(X \\cap Y) = P(X) \\times P(Y)$.<br>
+                $P(X) \\times P(Y) = ${x} \\times ${y} = ${productXY}$<br>
+                $P(X \\cap Y) = ${xNy}$<br>
+                Since $P(X \\cap Y) ${isIndependent ? "=" : "\\neq"} P(X) \\times P(Y)$, events X and Y <strong>are ${isIndependent ? "" : "not"}</strong> independent.
+            </div>
+            <div class="sol-part">
+                <strong>(b)</strong><br>
+                For independent events, $P(C \\cap D) = P(C) \\times P(D)$.<br>
+                $P(C \\cap D) = ${c} \\times ${d} = ${productCD}$<br><br>
+                Using the addition rule: $P(C \\cup D) = P(C) + P(D) - P(C \\cap D)$<br>
+                $P(C \\cup D) = ${c} + ${d} - ${productCD}$<br>
+                $P(C \\cup D) = \\mathbf{${unionCD}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Generate random probabilities (0.10 to 0.90)
+        pX = roundNum((Math.floor(Math.random() * 80) + 10) / 100, 2);
+        pY = roundNum((Math.floor(Math.random() * 80) + 10) / 100, 2);
+        
+        // Decide randomly to make them mutually exclusive (10%), independent (20%), or neither (70%)
+        let scenario = Math.random();
+        if (scenario < 0.1) {
+            pXnY = 0; // Mutually exclusive
+        } else if (scenario < 0.3) {
+            pXnY = roundNum(pX * pY, 4); // Independent
+        } else {
+            // Neither: random value up to the minimum of pX and pY (so it remains statistically possible)
+            let maxOverlap = Math.min(pX, pY);
+            pXnY = roundNum(Math.random() * maxOverlap, 2);
+            // Ensure it doesn't accidentally become independent or mutually exclusive
+            if (pXnY === 0) pXnY = 0.01;
+            if (pXnY === roundNum(pX * pY, 4)) pXnY = roundNum(pXnY - 0.01, 2); 
+        }
+
+        pC = roundNum((Math.floor(Math.random() * 8) + 1) / 10, 1);
+        pD = roundNum((Math.floor(Math.random() * 8) + 1) / 10, 1);
+
+        renderContent(pX, pY, pXnY, pC, pD);
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent(pX, pY, pXnY, pC, pD);
+    };
+</script>
+
+</body>
+</html>

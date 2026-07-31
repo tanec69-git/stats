@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binomial Distribution Application</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #e74c3c;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.25em; /* Increased font size for solutions */
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #c0392b;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Promotional Campaign Probability Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching the problem definition
+    let chance_den = 10;
+    let n_packs = 20;
+    let n_boxes = 50;
+    let min_replace = 2;
+
+    function renderContent() {
+        // --- Calculations ---
+        let p_card = 1 / chance_den;
+        let q_card = 1 - p_card;
+
+        // (a) Expected cards per box
+        let expected_cards = n_packs * p_card;
+        
+        // (a) Probability of replacing a box P(X=0)
+        let prob_replace = Math.pow(q_card, n_packs);
+
+        // (b)(i) Expected boxes replaced
+        let expected_boxes = n_boxes * prob_replace;
+
+        // (b)(ii) Probability of replacing at least min_replace boxes
+        // Y ~ B(n_boxes, prob_replace)
+        // P(Y >= 2) = 1 - P(Y=0) - P(Y=1)
+        let prob_Y_0 = Math.pow(1 - prob_replace, n_boxes);
+        let prob_Y_1 = n_boxes * prob_replace * Math.pow(1 - prob_replace, n_boxes - 1);
+        let prob_at_least_min = 1 - prob_Y_0 - prob_Y_1;
+
+        // Format to 4 decimal places where applicable
+        let exp_cards_str = expected_cards % 1 === 0 ? expected_cards : expected_cards.toFixed(4);
+        let p_card_str = p_card.toPrecision(4).replace(/0+$/, "").replace(/\.$/, ""); // formatting clean decimal
+        let q_card_str = q_card.toPrecision(4).replace(/0+$/, "").replace(/\.$/, "");
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">7.</div>
+                <div class="q-text">
+                    As part of a promotional campaign, a toy company inserts a special collectible trading card into some of its toy packs. Each toy pack has a 1 in ${chance_den} chance of containing a collectible card. The toy packs are sold in boxes of ${n_packs} packs. <br>
+                    The company guarantees a replacement box if a customer does not find any collectible card in the box.
+                    
+                    <div class="q-sub" style="display: flex; margin-top: 15px;">
+                        <div class="q-part">(a)</div>
+                        <div>What is the expected number of collectible trading cards to be found in a box?<br>
+                             What is the probability that the company will have to replace a box?</div>
+                    </div>
+                    
+                    <div class="q-sub" style="display: flex; margin-top: 15px;">
+                        <div class="q-part">(b)</div>
+                        <div>
+                            If a store sells ${n_boxes} boxes of toy packs a day,
+                            <div style="margin-top: 5px;">(i) &nbsp; how many boxes is it expected to replace, and</div>
+                            <div style="margin-top: 5px;">(ii) what is the probability that it will replace at least ${min_replace} boxes in a day?</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; margin-left: 40px;">Give your answers correct to 4 decimal places.</div>
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML ---
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-part">
+                <strong>Part (a)</strong><br>
+                Let $X$ be the number of collectible cards in a box.<br>
+                $X$ follows a Binomial distribution: $X \\sim B(n, p)$ where $n = ${n_packs}$ and $p = \\frac{1}{${chance_den}} = ${p_card_str}$.<br><br>
+                
+                Expected number of cards in a box, $E(X) = np$<br>
+                $E(X) = ${n_packs} \\times ${p_card_str} = \\mathbf{${exp_cards_str}}$<br><br>
+                
+                Probability of replacing a box is the probability of finding 0 cards, $P(X = 0)$:<br>
+                $P(X = 0) = \\binom{${n_packs}}{0} (${p_card_str})^0 (${q_card_str})^{${n_packs}}$<br>
+                $P(X = 0) = (${q_card_str})^{${n_packs}} \\approx \\mathbf{${prob_replace.toFixed(4)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>Part (b)</strong><br>
+                Let $Y$ be the number of boxes replaced in a day.<br>
+                $Y \\sim B(${n_boxes}, p_{replace})$ where $p_{replace} = ${prob_replace.toFixed(5)}...$<br><br>
+                
+                <strong>(i)</strong> Expected number of boxes replaced, $E(Y) = N \\times p_{replace}$<br>
+                $E(Y) = ${n_boxes} \\times ${prob_replace.toFixed(5)}... = \\mathbf{${expected_boxes.toFixed(4)}}$<br><br>
+                
+                <strong>(ii)</strong> Probability of replacing at least ${min_replace} boxes, $P(Y \\ge ${min_replace})$:<br>
+                $P(Y \\ge ${min_replace}) = 1 - P(Y = 0) - P(Y = 1)$<br>
+                $P(Y = 0) = \\binom{${n_boxes}}{0} (p_{replace})^0 (1 - p_{replace})^{${n_boxes}} \\approx ${prob_Y_0.toFixed(4)}$<br>
+                $P(Y = 1) = \\binom{${n_boxes}}{1} (p_{replace})^1 (1 - p_{replace})^{${n_boxes - 1}} \\approx ${prob_Y_1.toFixed(4)}$<br>
+                $P(Y \\ge ${min_replace}) = 1 - ${prob_Y_0.toFixed(4)} - ${prob_Y_1.toFixed(4)}$<br>
+                $P(Y \\ge ${min_replace}) \\approx \\mathbf{${prob_at_least_min.toFixed(4)}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize the parameters logically
+        chance_den = Math.floor(Math.random() * 16) + 5; // 5 to 20
+        n_packs = Math.floor(Math.random() * 6) * 5 + 10; // 10, 15, 20, 25, 30, 35
+        n_boxes = Math.floor(Math.random() * 11) * 10 + 20; // 20 to 120 by 10s
+        min_replace = 2; // Keeping this at 2 to match the specific formula generated
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

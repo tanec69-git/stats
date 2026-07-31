@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Distribution Problem Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .prob-table {
+            border-collapse: collapse;
+            text-align: center;
+            margin: 20px 0 20px 40px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .prob-table td, .prob-table th {
+            border: 1px solid black;
+            padding: 8px;
+            min-width: 50px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #8e44ad;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            /* Increased font size for solutions */
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #8e44ad;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability & Random Variables Generator</h2>
+    <p style="font-size: 0.9em; color: #7f8c8d;"><em>Based on the structure of image_fb3516.png</em></p>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_fb3516.png
+    let faces = 4;
+    let numDice = 3;
+    
+    let muY = 4.2;
+    let varY = 1.1;
+    let coeffA = 3;
+    let constB = 5;
+    let signB = '-'; // can be '+' or '-'
+
+    // Helper formatting to 3 Significant Figures
+    function to3SF(num) {
+        if (num === 0) return "0.00";
+        return Number(num).toPrecision(3);
+    }
+
+    // Fraction simplifier
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function renderContent() {
+        // --- Calculations for Part A ---
+        let sum_k = 0;
+        let sum_x3 = 0;
+        let sum_x4 = 0;
+        let x_vals = [];
+        
+        for (let x = 1; x <= faces; x++) {
+            x_vals.push(x);
+            sum_k += (x * x);
+            sum_x3 += Math.pow(x, 3);
+            sum_x4 += Math.pow(x, 4);
+        }
+        
+        let ex_exact_num = sum_x3;
+        let ex_exact_den = sum_k;
+        let EX = ex_exact_num / ex_exact_den;
+        
+        let ex2_exact_num = sum_x4;
+        let ex2_exact_den = sum_k;
+        let EX2 = ex2_exact_num / ex2_exact_den;
+        
+        let varX = EX2 - (EX * EX);
+        
+        let expectedTotal = numDice * EX;
+
+        // --- Calculations for Part B ---
+        let mult = (signB === '-') ? -1 : 1;
+        let EY_new = (coeffA * muY) + (mult * constB);
+        let VarY_new = (coeffA * coeffA) * varY;
+
+        // --- Build Table HTML ---
+        let tableHeader = `<tr><td>$x$</td>`;
+        let tableQRow = `<tr><td>$P(X=x)$</td>`;
+        let tableSolRow = `<tr><td>$P(X=x)$</td>`;
+        
+        for (let x = 1; x <= faces; x++) {
+            tableHeader += `<td>${x}</td>`;
+            tableQRow += `<td></td>`;
+            let k_coeff = x * x;
+            tableSolRow += `<td>$${k_coeff === 1 ? '' : k_coeff}k$</td>`;
+        }
+        tableHeader += `</tr>`;
+        tableQRow += `</tr>`;
+        tableSolRow += `</tr>`;
+
+        let q_faces_str = faces === 4 ? "1, 2, 3 and 4" : `1, 2, ..., ${faces}`;
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">4.</div>
+                <div class="q-part">(a)</div>
+                <div class="q-text">
+                    A ${faces}-faced dice has face value $x$ where $x = ${q_faces_str}$. It is biased in such a way that the probability of scoring $x$, that is $P(X=x) = kx^2$.
+                    
+                    <div class="q-sub">
+                        (i) The score obtained in throwing the dice is denoted by $X$. Complete the probability distribution table below.
+                        <table class="prob-table">
+                            ${tableHeader}
+                            ${tableQRow}
+                        </table>
+                    </div>
+                    
+                    <div class="q-sub">
+                        (ii) Show that the value of $k = \\frac{1}{${sum_k}}$.
+                    </div>
+                    
+                    <div class="q-sub">
+                        (iii) Find the mean value, $E(X)$ and variance, $Var(X)$, of the score obtained in a single throw.
+                    </div>
+                    
+                    <div class="q-sub">
+                        (iv) What would the mean of a total score be if ${numDice} similar dice were used?
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question-row">
+                <div class="q-num"></div>
+                <div class="q-part">(b)</div>
+                <div class="q-text">
+                    Given $E(Y) = ${muY.toFixed(1)}$, $Var(Y) = ${varY.toFixed(1)}$.<br>
+                    Find 
+                    &nbsp;&nbsp;(i) $E(${coeffA}Y ${signB} ${constB})$<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ii) $Var(${coeffA}Y ${signB} ${constB})$
+                    <br><br>
+                    (Round off all final answers to 3 significant figures)
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML ---
+        let div_ex = gcd(ex_exact_num, ex_exact_den);
+        let ex_latex = `\\frac{${ex_exact_num/div_ex}}{${ex_exact_den/div_ex}}`;
+        if (ex_exact_num/div_ex === ex_exact_den/div_ex) ex_latex = '1';
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            
+            <div class="sol-part">
+                <strong>(a) (i)</strong><br>
+                Substitute $x$ into $P(X=x) = kx^2$ to complete the table in terms of $k$:
+                <table class="prob-table">
+                    ${tableHeader}
+                    ${tableSolRow}
+                </table>
+            </div>
+            
+            <div class="sol-part">
+                <strong>(a) (ii)</strong><br>
+                The sum of all probabilities in a distribution must equal 1.<br>
+                $\\sum P(X=x) = 1$<br>
+                $1k + 4k + 9k ${faces >= 4 ? '+ 16k' : ''} ${faces === 5 ? '+ 25k' : ''} = 1$<br>
+                $${sum_k}k = 1$<br>
+                $k = \\frac{1}{${sum_k}}$ (Shown)
+            </div>
+            
+            <div class="sol-part">
+                <strong>(a) (iii)</strong><br>
+                $E(X) = \\sum x \\cdot P(X=x) = \\sum kx^3$<br>
+                $E(X) = k(1^3 + 2^3 + 3^3 ${faces >= 4 ? '+ 4^3' : ''} ${faces === 5 ? '+ 5^3' : ''}) = k(${sum_x3})$<br>
+                $E(X) = \\frac{${sum_x3}}{${sum_k}}$<br>
+                $E(X) = ${ex_latex} \\approx \\mathbf{${to3SF(EX)}}$
+                <br><br>
+                $Var(X) = E(X^2) - [E(X)]^2$<br>
+                $E(X^2) = \\sum x^2 \\cdot P(X=x) = \\sum kx^4$<br>
+                $E(X^2) = k(1^4 + 2^4 + 3^4 ${faces >= 4 ? '+ 4^4' : ''} ${faces === 5 ? '+ 5^4' : ''}) = \\frac{${sum_x4}}{${sum_k}}$<br>
+                $Var(X) = \\frac{${sum_x4}}{${sum_k}} - \\left(\\frac{${sum_x3}}{${sum_k}}\\right)^2 = ${EX2.toFixed(4)} - ${(EX*EX).toFixed(4)}$<br>
+                $Var(X) \\approx \\mathbf{${to3SF(varX)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(a) (iv)</strong><br>
+                Let $T$ be the total score of ${numDice} dice. $T = X_1 + X_2 + ${numDice > 2 ? '...' : ''} + X_{${numDice}}$<br>
+                $E(T) = ${numDice} \\times E(X)$<br>
+                $E(T) = ${numDice} \\times \\left(\\frac{${sum_x3}}{${sum_k}}\\right) = \\frac{${numDice * sum_x3}}{${sum_k}}$<br>
+                $E(T) \\approx \\mathbf{${to3SF(expectedTotal)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(b) (i)</strong><br>
+                Using properties of expectation: $E(aY + b) = aE(Y) + b$<br>
+                $E(${coeffA}Y ${signB} ${constB}) = ${coeffA}E(Y) ${signB} ${constB}$<br>
+                $= ${coeffA}(${muY.toFixed(1)}) ${signB} ${constB}$<br>
+                $= ${(coeffA * muY).toFixed(1)} ${signB} ${constB}$<br>
+                $= \\mathbf{${to3SF(EY_new)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(b) (ii)</strong><br>
+                Using properties of variance: $Var(aY + b) = a^2Var(Y)$<br>
+                $Var(${coeffA}Y ${signB} ${constB}) = ${coeffA}^2 Var(Y)$<br>
+                $= ${coeffA * coeffA}(${varY.toFixed(1)})$<br>
+                $= \\mathbf{${to3SF(VarY_new)}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize Part A
+        faces = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5 faces
+        numDice = Math.floor(Math.random() * 4) + 2; // 2, 3, 4, or 5 dice
+        
+        // Randomize Part B
+        muY = Math.round((Math.random() * 6 + 2) * 10) / 10; // 2.0 to 8.0
+        varY = Math.round((Math.random() * 3 + 0.5) * 10) / 10; // 0.5 to 3.5
+        coeffA = Math.floor(Math.random() * 4) + 2; // 2, 3, 4, 5
+        constB = Math.floor(Math.random() * 6) + 1; // 1 to 6
+        signB = Math.random() < 0.5 ? '+' : '-';
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

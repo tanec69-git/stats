@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Random Variable Probability Distribution</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 15px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #f39c12;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.15em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #d35400;
+            font-size: 1.1em; 
+        }
+        .sol-step {
+            margin-bottom: 20px;
+        }
+        .graph-container {
+            margin: 25px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Continuous Probability Distribution Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values based on the original problem in image_fa539c.png
+    let peak_x = 4;
+    let end_x = 8;
+    let peak_y = 0.3;
+    let val_p = 2.5;
+    let prob_a = 0.85;
+    let m_val = 0.1; 
+    
+    // Formatting helper
+    function roundNum(num, dec) {
+        return Number(Math.round(num + 'e' + dec) + 'e-' + dec);
+    }
+
+    function renderContent() {
+        // --- Calculate geometric areas ---
+        let A1 = roundNum(0.5 * peak_x * peak_y, 4); // Area of triangle
+        let rect_width = end_x - peak_x;
+        
+        // Final m verification
+        m_val = roundNum((1 - A1) / rect_width, 4);
+        
+        // Solve for 'a'
+        let a_val = roundNum(peak_x + (prob_a - A1) / m_val, 4);
+
+        // --- Generate SVG Graph ---
+        const svgW = 500;
+        const svgH = 300;
+        const pad = 40;
+        const originX = pad + 20;
+        const originY = svgH - pad;
+        const xAxisLen = svgW - originX - 20;
+        const yAxisLen = originY - 20;
+        
+        let maxXDisplay = end_x + 1;
+        let maxYDisplay = Math.max(peak_y, m_val) + 0.1;
+        
+        let xScale = xAxisLen / maxXDisplay;
+        let yScale = yAxisLen / maxYDisplay;
+
+        // Coordinates for the shape
+        let px0 = originX;
+        let py0 = originY;
+        
+        let px1 = originX + peak_x * xScale;
+        let py1 = originY - peak_y * yScale;
+        
+        let px2 = originX + peak_x * xScale;
+        let py2 = originY - m_val * yScale;
+        
+        let px3 = originX + end_x * xScale;
+        let py3 = originY - m_val * yScale;
+        
+        let px4 = originX + end_x * xScale;
+        let py4 = originY;
+
+        const svgImage = `
+            <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+                <!-- Axes -->
+                <line x1="${originX - 20}" y1="${originY}" x2="${svgW - 10}" y2="${originY}" stroke="black" stroke-width="1.5" /> 
+                <line x1="${originX}" y1="${originY + 20}" x2="${originX}" y2="10" stroke="black" stroke-width="1.5" /> 
+                
+                <!-- Axis arrows -->
+                <polygon points="${svgW - 10},${originY - 4} ${svgW},${originY} ${svgW - 10},${originY + 4}" fill="black" />
+                <polygon points="${originX - 4},10 ${originX},0 ${originX + 4},10" fill="black" />
+
+                <!-- Axis Labels -->
+                <text x="${svgW - 15}" y="${originY + 15}" font-family="Arial" font-size="14">x</text>
+                <text x="${originX + 10}" y="15" font-family="Arial" font-size="14">f(x)</text>
+
+                <!-- Distribution Shape -->
+                <polyline points="${px0},${py0} ${px1},${py1} ${px2},${py2} ${px3},${py3} ${px4},${py4}" 
+                          fill="none" stroke="black" stroke-width="2.5" stroke-linejoin="round" />
+
+                <!-- Dotted lines & Tick Labels -->
+                <line x1="${originX}" y1="${py1}" x2="${px1}" y2="${py1}" stroke="black" stroke-dasharray="3,3" stroke-width="1" />
+                <line x1="${originX}" y1="${py2}" x2="${px2}" y2="${py2}" stroke="black" stroke-dasharray="3,3" stroke-width="1" />
+                <line x1="${px1}" y1="${py0}" x2="${px1}" y2="${py1}" stroke="black" stroke-dasharray="3,3" stroke-width="1" />
+
+                <text x="${originX - 30}" y="${py1 + 5}" font-family="Arial" font-size="14">${peak_y}</text>
+                <text x="${originX - 25}" y="${py2 + 5}" font-family="Arial" font-size="14">m</text>
+                
+                <text x="${px1 - 5}" y="${originY + 20}" font-family="Arial" font-size="14">${peak_x}</text>
+                <text x="${px3 - 5}" y="${originY + 20}" font-family="Arial" font-size="14">${end_x}</text>
+            </svg>
+        `;
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">9.</div>
+                <div class="q-part">(a)</div>
+                <div class="q-text">
+                    The figure below shows the graph of the probability distribution of a continuous random variable X that takes on values in the interval from 0 to ${end_x}.
+                    
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(i)</div>
+                        <div>Find $P(X < ${peak_x})$ and $P(X = ${val_p})$</div>
+                    </div>
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(ii)</div>
+                        <div>Show that $m = ${m_val}$</div>
+                    </div>
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(iii)</div>
+                        <div>If $P(0 < X < a) = ${prob_a}$, find the value of $a$.</div>
+                    </div>
+
+                    <div class="graph-container">
+                        ${svgImage}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML (Geometric approach) ---
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-step">
+                <strong>(i) Find $P(X < ${peak_x})$ and $P(X = ${val_p})$</strong><br>
+                For a continuous probability distribution, probability is found by calculating the area under the curve.<br>
+                $P(X < ${peak_x})$ is the area of the triangular section from $x = 0$ to $x = ${peak_x}$.<br>
+                $\\text{Area} = \\frac{1}{2} \\times \\text{base} \\times \\text{height}$<br>
+                $P(X < ${peak_x}) = \\frac{1}{2} \\times ${peak_x} \\times ${peak_y} = \\mathbf{${A1}}$<br><br>
+                
+                For any continuous random variable, the probability of it taking an exact, single point value is the area of a line, which is zero.<br>
+                $P(X = ${val_p}) = \\mathbf{0}$
+            </div>
+            
+            <div class="sol-step">
+                <strong>(ii) Show that $m = ${m_val}$</strong><br>
+                The total area under a probability density graph must equal 1.<br>
+                Total Area = (Area of Triangle) + (Area of Rectangle)<br>
+                $1 = A_{\\text{triangle}} + A_{\\text{rectangle}}$<br>
+                $1 = P(X < ${peak_x}) + (\\text{base} \\times \\text{height of rectangle})$<br>
+                $1 = ${A1} + (${end_x} - ${peak_x}) \\times m$<br>
+                $1 = ${A1} + ${rect_width}m$<br>
+                $${rect_width}m = 1 - ${A1}$<br>
+                $${rect_width}m = ${roundNum(1 - A1, 4)}$<br>
+                $m = \\frac{${roundNum(1 - A1, 4)}}{${rect_width}}$<br>
+                $m = \\mathbf{${m_val}}$ (Shown)
+            </div>
+
+            <div class="sol-step">
+                <strong>(iii) Find the value of $a$ if $P(0 < X < a) = ${prob_a}$</strong><br>
+                We know that $P(0 < X < ${peak_x}) = ${A1}$.<br>
+                Since $${prob_a} > ${A1}$, the value $a$ must lie in the rectangular region (between ${peak_x} and ${end_x}).<br>
+                $P(0 < X < a) = P(0 < X < ${peak_x}) + P(${peak_x} < X < a)$<br>
+                $${prob_a} = ${A1} + \\text{Area of rectangle from } ${peak_x} \\text{ to } a$<br>
+                $${prob_a} = ${A1} + (a - ${peak_x}) \\times m$<br>
+                $${prob_a} = ${A1} + (a - ${peak_x})(${m_val})$<br>
+                $(a - ${peak_x})(${m_val}) = ${prob_a} - ${A1}$<br>
+                $(a - ${peak_x})(${m_val}) = ${roundNum(prob_a - A1, 4)}$<br>
+                $a - ${peak_x} = \\frac{${roundNum(prob_a - A1, 4)}}{${m_val}}$<br>
+                $a - ${peak_x} = ${roundNum((prob_a - A1) / m_val, 4)}$<br>
+                $a = ${peak_x} + ${roundNum((prob_a - A1) / m_val, 4)}$<br>
+                $a = \\mathbf{${a_val}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        let valid = false;
+        // Loop to generate logical and mathematically clean numbers
+        while (!valid) {
+            peak_x = Math.floor(Math.random() * 4) + 2; // 2 to 5
+            
+            // Pick a clean peak_y
+            let py_options = [0.2, 0.3, 0.4, 0.5, 0.6];
+            peak_y = py_options[Math.floor(Math.random() * py_options.length)];
+            
+            let A1 = 0.5 * peak_x * peak_y;
+            
+            // Ensure the triangle area is reasonable (leaves room for rectangle)
+            if (A1 >= 0.2 && A1 <= 0.8) {
+                // Pick a rectangle width that produces a nice, clean 'm' value
+                let rw_options = [2, 4, 5, 8];
+                let rect_width = rw_options[Math.floor(Math.random() * rw_options.length)];
+                
+                end_x = peak_x + rect_width;
+                m_val = roundNum((1 - A1) / rect_width, 4);
+                
+                val_p = (Math.random() * (end_x - 1) + 0.5).toFixed(1);
+                
+                // Ensure prob_a requires finding a point in the rectangular region
+                let min_p = A1 + 0.05;
+                let max_p = 0.95;
+                prob_a = (Math.random() * (max_p - min_p) + min_p).toFixed(2);
+                
+                // Final validation check to avoid any weird infinite decimals in intermediate steps
+                if (m_val > 0.01 && m_val < 1) {
+                    valid = true;
+                }
+            }
+        }
+        
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

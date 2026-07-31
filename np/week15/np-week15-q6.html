@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binomial Distribution Problem Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #1abc9c;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            /* Increased font size for solutions */
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #16a085;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Binomial Distribution Generator</h2>
+    <p style="font-size: 0.9em; color: #7f8c8d;"><em>Based on the structure of image_facf99.png</em></p>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_facf99.png
+    let pop_success = 8;
+    let pop_total = 10;
+    let sample_size = 7;
+    let target_a1 = 4;
+    let target_a2 = 1; // "at least 1"
+    let target_a3 = 3; 
+
+    // Helper Math Functions
+    function fact(n) {
+        if (n === 0 || n === 1) return 1;
+        let result = 1;
+        for (let i = 2; i <= n; i++) result *= i;
+        return result;
+    }
+
+    function nCr(n, r) {
+        if (r > n) return 0;
+        return fact(n) / (fact(r) * fact(n - r));
+    }
+
+    function to4DP(num) {
+        return Number(num).toFixed(4);
+    }
+
+    function renderContent() {
+        // Probabilities
+        let p = pop_success / pop_total;
+        let q = 1 - p;
+        
+        // (a)(i) Exactly target_a1 wear spectacles
+        let nCr_a1 = nCr(sample_size, target_a1);
+        let prob_a1 = nCr_a1 * Math.pow(p, target_a1) * Math.pow(q, sample_size - target_a1);
+        
+        // (a)(ii) At least 1 wears spectacles
+        let prob_none = Math.pow(q, sample_size);
+        let prob_a2 = 1 - prob_none;
+
+        // (a)(iii) Exactly target_a3 have perfect eyesight
+        let nCr_a3 = nCr(sample_size, target_a3);
+        let prob_a3 = nCr_a3 * Math.pow(q, target_a3) * Math.pow(p, sample_size - target_a3);
+
+        // (b) Expected number and standard deviation
+        let expected_val = sample_size * p;
+        let variance = sample_size * p * q;
+        let std_dev = Math.sqrt(variance);
+
+        // Format terms for display
+        let p_str = p % 1 === 0 ? p : p.toFixed(1);
+        let q_str = q % 1 === 0 ? q : q.toFixed(1);
+
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">6.</div>
+                <div class="q-text">
+                    Studies show that ${pop_success} out of ${pop_total} secondary school students wear spectacles. A random sample of ${sample_size} secondary school students are selected to participate in the national television quiz "Healthy Vision Quiz".
+                    
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(a)</div>
+                        <div>
+                            Calculate the probability that
+                            <div style="margin-top: 5px;">(i) exactly ${target_a1} students in the group wear spectacles;</div>
+                            <div style="margin-top: 5px;">(ii) at least 1 student wear spectacles;</div>
+                            <div style="margin-top: 5px;">(iii) exactly ${target_a3} students have perfect eyesight.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="q-sub" style="display: flex; margin-top: 15px;">
+                        <div class="q-part">(b)</div>
+                        <div>Find the expected number of children who wear spectacles and its associated standard deviation.</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-part">
+                <strong>Preliminary Setup:</strong><br>
+                Let $X$ be the number of students who wear spectacles.<br>
+                This follows a Binomial Distribution: $X \\sim B(n, p)$<br>
+                $n = ${sample_size}$<br>
+                $p = \\frac{${pop_success}}{${pop_total}} = ${p_str}$ (probability of wearing spectacles)<br>
+                $q = 1 - p = ${q_str}$ (probability of perfect eyesight)
+            </div>
+            
+            <div class="sol-part">
+                <strong>(a) (i) Exactly ${target_a1} wear spectacles</strong><br>
+                Using the binomial formula: $P(X = x) = \\binom{n}{x} p^x q^{n-x}$<br>
+                $P(X = ${target_a1}) = \\binom{${sample_size}}{${target_a1}} (${p_str})^{${target_a1}} (${q_str})^{${sample_size - target_a1}}$<br>
+                $P(X = ${target_a1}) = ${nCr_a1} \\times ${Math.pow(p, target_a1).toPrecision(4)} \\times ${Math.pow(q, sample_size - target_a1).toPrecision(4)}$<br>
+                $P(X = ${target_a1}) \\approx \\mathbf{${to4DP(prob_a1)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(a) (ii) At least 1 wears spectacles</strong><br>
+                $P(X \\ge 1) = 1 - P(X = 0)$<br>
+                $P(X = 0) = \\binom{${sample_size}}{0} (${p_str})^0 (${q_str})^{${sample_size}}$ = $1 \\times 1 \\times ${prob_none.toPrecision(4)}$<br>
+                $P(X \\ge 1) = 1 - ${prob_none.toPrecision(4)} \\approx \\mathbf{${to4DP(prob_a2)}}$
+            </div>
+
+            <div class="sol-part">
+                <strong>(a) (iii) Exactly ${target_a3} have perfect eyesight</strong><br>
+                Let $Y$ be the number of students with perfect eyesight. $Y \\sim B(${sample_size}, ${q_str})$.<br>
+                Alternatively, if ${target_a3} have perfect eyesight, then exactly $${sample_size} - ${target_a3} = ${sample_size - target_a3}$ wear spectacles ($X = ${sample_size - target_a3}$).<br>
+                $P(Y = ${target_a3}) = \\binom{${sample_size}}{${target_a3}} (${q_str})^{${target_a3}} (${p_str})^{${sample_size - target_a3}}$<br>
+                $P(Y = ${target_a3}) = ${nCr_a3} \\times ${Math.pow(q, target_a3).toPrecision(4)} \\times ${Math.pow(p, sample_size - target_a3).toPrecision(4)}$<br>
+                $P(Y = ${target_a3}) \\approx \\mathbf{${to4DP(prob_a3)}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(b) Expected number and standard deviation</strong><br>
+                Expected Value, $E(X) = np$<br>
+                $E(X) = ${sample_size} \\times ${p_str} = \\mathbf{${expected_val.toFixed(2)}}$<br><br>
+                
+                Variance, $Var(X) = npq$<br>
+                $Var(X) = ${sample_size} \\times ${p_str} \\times ${q_str} = ${variance.toFixed(4)}$<br><br>
+                
+                Standard Deviation, $\\sigma = \\sqrt{Var(X)}$<br>
+                $\\sigma = \\sqrt{${variance.toFixed(4)}} \\approx \\mathbf{${to4DP(std_dev)}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Generate sensible random parameters
+        pop_total = Math.floor(Math.random() * 4) === 0 ? 100 : 10; // Mix between /10 and /100
+        if(pop_total === 10) {
+            pop_success = Math.floor(Math.random() * 7) + 2; // 2 to 8
+        } else {
+            pop_success = Math.floor(Math.random() * 70) + 15; // 15 to 85
+        }
+
+        sample_size = Math.floor(Math.random() * 8) + 5; // 5 to 12
+        target_a1 = Math.floor(Math.random() * (sample_size - 2)) + 1; // 1 to n-1
+        target_a3 = Math.floor(Math.random() * (sample_size - 2)) + 1; // 1 to n-1
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

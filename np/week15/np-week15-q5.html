@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Distribution & Expected Value</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 15px;
+        }
+        .prob-table {
+            border-collapse: collapse;
+            text-align: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+        .prob-table td, .prob-table th {
+            border: 1px solid black;
+            padding: 12px 8px;
+            min-width: 60px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #f39c12;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            /* Slightly increased font size for solutions as requested */
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #d35400;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Distribution Generator</h2>
+    <p style="font-size: 0.9em; color: #7f8c8d;"><em>Based on the structure of image_fad759.png</em></p>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_fad759.png exactly
+    let D = 16;
+    let n0 = 8;
+    let n1 = 4;
+    let n2 = 2;
+    let n3 = 1;
+    let coeffA = 5;
+    let constB = 3;
+    let signB = '-';
+
+    // Helper functions
+    function gcd(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function formatFrac(num, den) {
+        if (num === 0) return "0";
+        let sign = (num * den < 0) ? "-" : "";
+        num = Math.abs(num);
+        den = Math.abs(den);
+        let div = gcd(num, den);
+        num = num / div;
+        den = den / div;
+        if (den === 1) return sign + num;
+        return sign + "\\frac{" + num + "}{" + den + "}";
+    }
+
+    function renderContent() {
+        // Calculate dependent variables
+        let sum_known_n = n0 + n1 + n2 + n3;
+        let p_num = D - sum_known_n;
+        
+        let ex_num = 0*n0 + 1*n1 + 2*n2 + 3*n3 + 4*p_num;
+        let ex2_num = 0*n0 + 1*n1 + 4*n2 + 9*n3 + 16*p_num;
+        
+        let var_num = D * ex2_num - (ex_num * ex_num);
+        let var_den = D * D;
+        
+        let linear_num = (signB === '+') ? (coeffA * ex_num + constB * D) : (coeffA * ex_num - constB * D);
+        let linear_den = D;
+
+        // Decimal approx for answers
+        let ex_dec = ex_num / D;
+        let var_dec = var_num / var_den;
+        let linear_dec = linear_num / linear_den;
+
+        // Format LaTeX fractions for the table
+        let f0 = formatFrac(n0, D);
+        let f1 = formatFrac(n1, D);
+        let f2 = formatFrac(n2, D);
+        let f3 = formatFrac(n3, D);
+        let fp = formatFrac(p_num, D);
+
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">5.</div>
+                <div class="q-part">(a)</div>
+                <div class="q-text">
+                    A property management company keeps records of lift malfunctions in a building. The table below shows the probability distribution of the number of malfunctions in a year.
+                    <br><br>
+                    Let X be the random variable representing "the number of malfunctions in a year".
+                    
+                    <table class="prob-table">
+                        <tr>
+                            <td style="text-align:left;">x</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;">P(X=x)</td>
+                            <td>$${f0}$</td>
+                            <td>$${f1}$</td>
+                            <td>$${f2}$</td>
+                            <td>$${f3}$</td>
+                            <td>p</td>
+                        </tr>
+                    </table>
+
+                    <div class="q-sub">(i) &nbsp;&nbsp; Evaluate p.</div>
+                    <div class="q-sub">(ii) &nbsp; Find E(X) and Var(X).</div>
+                    <div class="q-sub">(iii) Write down the values of E(${coeffA}X ${signB} ${constB}).</div>
+                </div>
+            </div>
+        `;
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            
+            <div class="sol-part">
+                <strong>(i) Evaluate p</strong><br>
+                The sum of all probabilities in a probability distribution is exactly 1.<br>
+                $\\sum P(X=x) = 1$<br>
+                $${f0} + ${f1} + ${f2} + ${f3} + p = 1$<br>
+                To make addition easier, use a common denominator of ${D}:<br>
+                $\\frac{${n0}}{${D}} + \\frac{${n1}}{${D}} + \\frac{${n2}}{${D}} + \\frac{${n3}}{${D}} + p = 1$<br>
+                $\\frac{${sum_known_n}}{${D}} + p = 1$<br>
+                $p = 1 - \\frac{${sum_known_n}}{${D}} = \\frac{${p_num}}{${D}}$<br>
+                $p = \\mathbf{${fp}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(ii) Find E(X) and Var(X)</strong><br>
+                $E(X) = \\sum x \\cdot P(X=x)$<br>
+                $E(X) = 0(${f0}) + 1(${f1}) + 2(${f2}) + 3(${f3}) + 4(${fp})$<br>
+                $E(X) = 0 + \\frac{${1*n1}}{${D}} + \\frac{${2*n2}}{${D}} + \\frac{${3*n3}}{${D}} + \\frac{${4*p_num}}{${D}} = \\frac{${ex_num}}{${D}}$<br>
+                $E(X) = \\mathbf{${formatFrac(ex_num, D)}}$ ${ex_num % D !== 0 ? `($\\approx ${ex_dec.toPrecision(4)}$)` : ''}<br><br>
+
+                $Var(X) = E(X^2) - [E(X)]^2$<br>
+                First, find $E(X^2) = \\sum x^2 \\cdot P(X=x)$<br>
+                $E(X^2) = 0^2(${f0}) + 1^2(${f1}) + 2^2(${f2}) + 3^2(${f3}) + 4^2(${fp})$<br>
+                $E(X^2) = 0 + 1(\\frac{${n1}}{${D}}) + 4(\\frac{${n2}}{${D}}) + 9(\\frac{${n3}}{${D}}) + 16(\\frac{${p_num}}{${D}})$<br>
+                $E(X^2) = \\frac{${ex2_num}}{${D}}$ = $${formatFrac(ex2_num, D)}$<br><br>
+
+                $Var(X) = \\frac{${ex2_num}}{${D}} - \\left(\\frac{${ex_num}}{${D}}\\right)^2 = \\frac{${D * ex2_num}}{${var_den}} - \\frac{${ex_num * ex_num}}{${var_den}} = \\frac{${var_num}}{${var_den}}$<br>
+                $Var(X) = \\mathbf{${formatFrac(var_num, var_den)}}$ ${var_num % var_den !== 0 ? `($\\approx ${var_dec.toPrecision(5)}$)` : ''}
+            </div>
+            
+            <div class="sol-part">
+                <strong>(iii) Write down the values of E(${coeffA}X ${signB} ${constB})</strong><br>
+                Using the expectation properties: $E(aX + b) = aE(X) + b$<br>
+                $E(${coeffA}X ${signB} ${constB}) = ${coeffA}E(X) ${signB} ${constB}$<br>
+                $E(${coeffA}X ${signB} ${constB}) = ${coeffA} \\left(${formatFrac(ex_num, D)}\\right) ${signB} ${constB}$<br>
+                $E(${coeffA}X ${signB} ${constB}) = \\mathbf{${formatFrac(linear_num, linear_den)}}$ ${linear_num % linear_den !== 0 ? `($\\approx ${linear_dec.toPrecision(4)}$)` : ''}
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Generate a random denominator between 12 and 30
+        D = Math.floor(Math.random() * 19) + 12; 
+        
+        // Generate random integers for numerators such that their sum < D
+        n0 = Math.floor(Math.random() * (D/3)) + 1;
+        n1 = Math.floor(Math.random() * (D/4)) + 1;
+        n2 = Math.floor(Math.random() * (D/5)) + 1;
+        n3 = Math.floor(Math.random() * 2) + 1;
+        
+        // Ensure p_num > 0 and reasonable distribution
+        let sum_n = n0 + n1 + n2 + n3;
+        if (sum_n >= D) {
+            // Failsafe reset if randomization gets too large
+            n0 = 2; n1 = 2; n2 = 1; n3 = 1; 
+            D = 10;
+        }
+
+        // Randomize linear expression
+        coeffA = Math.floor(Math.random() * 6) + 2; // 2 to 7
+        constB = Math.floor(Math.random() * 8) + 1; // 1 to 8
+        signB = Math.random() < 0.5 ? '+' : '-';
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

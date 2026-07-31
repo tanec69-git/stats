@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Random Variable PDF</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-part {
+            width: 40px;
+            font-weight: bold;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #34495e;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.15em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1em; 
+        }
+        .sol-step {
+            margin-bottom: 15px;
+        }
+        .graph-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .math-block {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Density Function Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values based on the original problem
+    let xmax = 12;
+    let k = 72; // Derived from Area = 1 => 1/2 * 12 * (12/k) = 1 => 144/2k = 1 => k = 72
+    let a = 8;  // Find P(X >= 8)
+
+    // Helper functions for fractions
+    function gcd(num, den) {
+        num = Math.abs(num);
+        den = Math.abs(den);
+        return den === 0 ? num : gcd(den, num % den);
+    }
+
+    function formatFraction(num, den) {
+        if (num === 0) return "0";
+        let sign = (num * den < 0) ? "-" : "";
+        num = Math.abs(num);
+        den = Math.abs(den);
+        let div = gcd(num, den);
+        num = num / div;
+        den = den / div;
+        if (den === 1) return sign + num;
+        return sign + "\\frac{" + num + "}{" + den + "}";
+    }
+
+    function renderContent() {
+        // --- Calculate geometric areas for the solution ---
+        
+        // Method 1: Complement (1 - Area of small triangle)
+        let small_tri_num = a * a;
+        let small_tri_den = 2 * k;
+        let p_less_than_a = formatFraction(small_tri_num, small_tri_den);
+        
+        // Final Probability
+        let prob_num = (2 * k) - small_tri_num;
+        let prob_den = 2 * k;
+        let final_prob = formatFraction(prob_num, prob_den);
+
+        // Method 2: Trapezoid area
+        let width = xmax - a;
+        let sum_heights_num = a + xmax;
+        let trap_area_num = sum_heights_num * width;
+        let trap_area_den = 2 * k;
+
+        // --- Generate SVG Graph ---
+        const svgW = 450;
+        const svgH = 280;
+        const pad = 50;
+        const originX = pad;
+        const originY = svgH - pad;
+        const xAxisLen = svgW - originX - 20;
+        
+        // We will fix the visual height of the peak to 150px
+        const peakHeightVis = 150; 
+        const maxXDisplay = xmax + 2;
+        const xScale = xAxisLen / maxXDisplay;
+
+        const px0 = originX;
+        const py0 = originY;
+        const px1 = originX + (xmax * xScale);
+        const py1 = originY - peakHeightVis;
+
+        const svgImage = `
+            <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+                <!-- Axes -->
+                <line x1="${originX - 30}" y1="${originY}" x2="${svgW - 10}" y2="${originY}" stroke="black" stroke-width="1.2" /> 
+                <line x1="${originX}" y1="${originY + 30}" x2="${originX}" y2="${originY - peakHeightVis - 40}" stroke="black" stroke-width="1.2" /> 
+                
+                <!-- Axis arrows -->
+                <polygon points="${svgW - 10},${originY - 4} ${svgW},${originY} ${svgW - 10},${originY + 4}" fill="black" />
+                <polygon points="${originX - 4},${originY - peakHeightVis - 40} ${originX},${originY - peakHeightVis - 50} ${originX + 4},${originY - peakHeightVis - 40}" fill="black" />
+
+                <!-- Axis Labels -->
+                <text x="${svgW - 5}" y="${originY + 5}" font-family="Arial" font-size="14" alignment-baseline="middle">x</text>
+                <text x="${originX + 10}" y="${originY - peakHeightVis - 45}" font-family="Arial" font-size="14">f(x)</text>
+
+                <!-- PDF Line -->
+                <line x1="${px0}" y1="${py0}" x2="${px1}" y2="${py1}" stroke="black" stroke-width="2.5" />
+
+                <!-- Dotted drop line -->
+                <line x1="${px1}" y1="${py1}" x2="${px1}" y2="${originY}" stroke="black" stroke-dasharray="2,2" stroke-width="1" />
+
+                <!-- xmax label -->
+                <text x="${px1}" y="${originY + 20}" font-family="Arial" font-size="14" text-anchor="middle">${xmax}</text>
+
+                <!-- Function text next to the line -->
+                <foreignObject x="${px1 - 80}" y="${py1 - 10}" width="80" height="40">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial; font-size: 14px; text-align: right;">
+                        $f(x) = \\frac{x}{${k}}$
+                    </div>
+                </foreignObject>
+            </svg>
+        `;
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-part">(b)</div>
+                <div class="q-text">
+                    The probability density function of a continuous random variable X is f(x) and the function is defined as
+                    
+                    <div class="math-block">
+                        $$ f(x) = \\frac{x}{${k}} \\quad \\text{for} \\quad 0 \\le x \\le ${xmax} $$
+                    </div>
+                    
+                    <div class="graph-container">
+                        ${svgImage}
+                    </div>
+
+                    <div style="font-size: 1.1em; margin-top: 20px;">
+                        Find $P(X \\ge ${a})$.
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML (Geometric approach) ---
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-step">
+                To find the probability $P(X \\ge ${a})$ for a continuous random variable, we calculate the area under the probability density graph from $x = ${a}$ to the upper limit $x = ${xmax}$. Since the graph is formed by straight lines, we can use basic geometry instead of integration.
+            </div>
+
+            <div class="sol-step">
+                <strong>Method 1: Area of the Trapezoid</strong><br>
+                The region from $x = ${a}$ to $x = ${xmax}$ forms a trapezoid with parallel vertical sides (heights) and a base width.<br>
+                Height 1: $f(${a}) = \\frac{${a}}{${k}}$<br>
+                Height 2: $f(${xmax}) = \\frac{${xmax}}{${k}}$<br>
+                Base width: $w = ${xmax} - ${a} = ${width}$<br><br>
+                
+                $\\text{Area} = \\frac{1}{2} \\times (\\text{Height}_1 + \\text{Height}_2) \\times \\text{width}$<br>
+                $P(X \\ge ${a}) = \\frac{1}{2} \\times \\left(\\frac{${a}}{${k}} + \\frac{${xmax}}{${k}}\\right) \\times ${width}$<br>
+                $P(X \\ge ${a}) = \\frac{1}{2} \\times \\left(\\frac{${sum_heights_num}}{${k}}\\right) \\times ${width}$<br>
+                $P(X \\ge ${a}) = \\frac{${trap_area_num}}{${trap_area_den}} = \\mathbf{${final_prob}}$
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+
+            <div class="sol-step">
+                <strong>Method 2: Using the Complement (Total Area - Small Triangle)</strong><br>
+                The total area under the entire PDF must be $1$. The region for $X < ${a}$ is a triangle.<br>
+                $P(X \\ge ${a}) = 1 - P(X < ${a})$<br><br>
+                
+                Area of triangle for $X < ${a}$:<br>
+                $\\text{Base} = ${a}$<br>
+                $\\text{Height} = f(${a}) = \\frac{${a}}{${k}}$<br>
+                $P(X < ${a}) = \\frac{1}{2} \\times \\text{base} \\times \\text{height} = \\frac{1}{2} \\times ${a} \\times \\frac{${a}}{${k}} = \\frac{${small_tri_num}}{${small_tri_den}} = ${p_less_than_a}$<br><br>
+                
+                Therefore:<br>
+                $P(X \\ge ${a}) = 1 - ${p_less_than_a}$<br>
+                $P(X \\ge ${a}) = \\mathbf{${final_prob}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize parameters
+        // To keep numbers clean, pick an even xmax between 4 and 20
+        let possible_xmax = [4, 6, 8, 10, 12, 14, 16, 20];
+        xmax = possible_xmax[Math.floor(Math.random() * possible_xmax.length)];
+        
+        // Calculate the corresponding denominator k to ensure total area = 1
+        k = (xmax * xmax) / 2;
+        
+        // Pick a value for 'a' that is an integer between 1 and xmax - 1
+        a = Math.floor(Math.random() * (xmax - 1)) + 1;
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

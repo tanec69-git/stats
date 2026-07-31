@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dart Board Probability Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-text {
+            margin-bottom: 20px;
+        }
+        .dart-board {
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .dart-board td {
+            border: 1px solid #000;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+        }
+        .q-row {
+            display: flex;
+            margin-bottom: 15px;
+            margin-left: 20px;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-desc {
+            flex: 1;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #e74c3c;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            /* Increased font size for solutions */
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #c0392b;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Dart Board Probability Problem Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_fb4437.png
+    let board = [1, 2, 3, 2, 4, 6, 3, 6, 9];
+    let threshold1 = 11;
+    let threshold2 = 12;
+
+    // Helper to find greatest common divisor for simplifying fractions
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    // Helper to format fraction beautifully
+    function formatFraction(num, den) {
+        if (num === 0) return "0";
+        if (num === den) return "1";
+        let div = gcd(num, den);
+        return `\\frac{${num/div}}{${den/div}}`;
+    }
+
+    function renderContent(b, t1, t2) {
+        // Calculate logic
+        let evens = b.filter(x => x % 2 === 0);
+        let evenCount = evens.length;
+        
+        // (i) both throws hit an even number
+        let totalOutcomes = 81; // 9 * 9
+        let bothEvenOutcomes = evenCount * evenCount;
+        
+        // (ii) sum > t1
+        let sumGreaterOutcomes = 0;
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (b[i] + b[j] > t1) sumGreaterOutcomes++;
+            }
+        }
+
+        // (iii) sum < t2 given both even
+        let sumLessGivenEven = 0;
+        for (let i = 0; i < evenCount; i++) {
+            for (let j = 0; j < evenCount; j++) {
+                if (evens[i] + evens[j] < t2) sumLessGivenEven++;
+            }
+        }
+        let denomEvenGiven = bothEvenOutcomes;
+
+        // Build Question HTML
+        const questionHTML = `
+            <div class="question-text">
+                1. The diagram shows a dart board with 9 squares of equal size, and each square is labeled with a number.
+            </div>
+
+            <table class="dart-board">
+                <tr><td>${b[0]}</td><td>${b[1]}</td><td>${b[2]}</td></tr>
+                <tr><td>${b[3]}</td><td>${b[4]}</td><td>${b[5]}</td></tr>
+                <tr><td>${b[6]}</td><td>${b[7]}</td><td>${b[8]}</td></tr>
+            </table>
+
+            <div class="question-text">
+                When a dart is thrown at random at the dart board, it is equally likely for the dart to hit any one of the 9 squares. If a dart is thrown at random at the dart board, removed, and then thrown randomly again, what is the probability that
+            </div>
+
+            <div class="q-row">
+                <div class="q-part">(i)</div>
+                <div class="q-desc">both throws hit an even number,</div>
+            </div>
+            <div class="q-row">
+                <div class="q-part">(ii)</div>
+                <div class="q-desc">the sum of the numbers hit by the two throws is greater than ${t1},</div>
+            </div>
+            <div class="q-row">
+                <div class="q-part">(iii)</div>
+                <div class="q-desc">the sum of the numbers hit by the two throws is less than ${t2} given that both throws hit an even number?</div>
+            </div>
+        `;
+
+        // Build Solution HTML
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-part">
+                <strong>Preliminary Data:</strong><br>
+                The numbers on the board are: $S = \\{${b.join(', ')}\\}$. Total numbers = 9.<br>
+                The even numbers are: $E = \\{${evens.join(', ')}\\}$. Number of even numbers = ${evenCount}.<br>
+                Since two darts are thrown independently (with replacement), the total number of possible outcomes is $9 \\times 9 = 81$.
+            </div>
+            <div class="sol-part">
+                <strong>(i) Both throws hit an even number</strong><br>
+                Probability of hitting an even number on one throw is $P(E) = \\frac{${evenCount}}{9}$.<br>
+                Since the throws are independent:<br>
+                $P(\\text{both even}) = P(E) \\times P(E) = \\frac{${evenCount}}{9} \\times \\frac{${evenCount}}{9} = \\frac{${bothEvenOutcomes}}{81}$<br>
+                Simplified: $${formatFraction(bothEvenOutcomes, 81)}$
+            </div>
+            <div class="sol-part">
+                <strong>(ii) Sum of numbers > ${t1}</strong><br>
+                We count the pairs $(x, y)$ from the board where $x + y > ${t1}$.<br>
+                By systematically checking all 81 combinations, there are exactly ${sumGreaterOutcomes} pairs that satisfy this condition.<br>
+                $P(\\text{Sum} > ${t1}) = \\frac{\\text{Successful Outcomes}}{\\text{Total Outcomes}} = \\frac{${sumGreaterOutcomes}}{81}$<br>
+                Simplified: $${formatFraction(sumGreaterOutcomes, 81)}$
+            </div>
+            <div class="sol-part">
+                <strong>(iii) Sum < ${t2} given both throws hit an even number</strong><br>
+                The condition "given that both throws hit an even number" restricts our sample space to only the outcomes where both throws are even. <br>
+                The size of this restricted sample space is $${evenCount} \\times ${evenCount} = ${bothEvenOutcomes}$.<br>
+                We count the pairs $(x, y)$ from the restricted set $E \\times E$ where $x + y < ${t2}$.<br>
+                By checking these ${bothEvenOutcomes} combinations, ${sumLessGivenEven} pairs satisfy this condition.<br>
+                $P(\\text{Sum} < ${t2} \\mid \\text{both even}) = \\frac{${sumLessGivenEven}}{${denomEvenGiven}}$<br>
+                Simplified: $${formatFraction(sumLessGivenEven, denomEvenGiven)}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        let newBoard = [];
+        let hasEven = false;
+        
+        // Generate random board, ensure at least one even number to avoid division by zero in part iii
+        while (!hasEven) {
+            newBoard = [];
+            for(let i=0; i<9; i++) {
+                newBoard.push(Math.floor(Math.random() * 9) + 1);
+            }
+            hasEven = newBoard.some(x => x % 2 === 0);
+        }
+        
+        // Pick logical thresholds based on the generated board
+        let maxVal = Math.max(...newBoard);
+        let minVal = Math.min(...newBoard);
+        
+        // Ensure threshold 1 is somewhere in the upper middle
+        let t1 = Math.floor(Math.random() * (maxVal * 2 - minVal * 2)) + (minVal * 2) + 2; 
+        
+        // Ensure threshold 2 is logically placed relative to the evens
+        let evens = newBoard.filter(x => x % 2 === 0);
+        let maxEven = Math.max(...evens);
+        let minEven = Math.min(...evens);
+        let t2 = Math.floor(Math.random() * (maxEven * 2 - minEven * 2 + 1)) + (minEven * 2) + 1;
+
+        board = newBoard;
+        threshold1 = t1;
+        threshold2 = t2;
+
+        renderContent(board, threshold1, threshold2);
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render
+    window.onload = () => {
+        renderContent(board, threshold1, threshold2);
+    };
+</script>
+
+</body>
+</html>

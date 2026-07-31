@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Random Variable PDF</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 30px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #34495e;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.25em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.1em; 
+        }
+        .sol-part {
+            margin-bottom: 25px;
+        }
+        .graph-container {
+            margin: 20px 0;
+            text-align: left;
+            padding-left: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Density Function Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values based on image_fa69c0.png
+    let xmax = 4;
+    let val_a = 2; // For limit 0 to a
+    let val_b = 5; // For limit a to b
+    let val_d = 4; // For point exact probability
+
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function formatFraction(num, den) {
+        if (num === 0) return "0";
+        if (num === den) return "1";
+        let div = gcd(num, den);
+        return `\\frac{${num/div}}{${den/div}}`;
+    }
+
+    function renderContent() {
+        // Calculations
+        let k = (xmax * xmax) / 2; 
+        let c_num = 1;
+        let c_den = xmax / 2;
+        let c_frac_str = c_den === 1 ? "1" : `\\frac{${c_num}}{${c_den}}`;
+
+        // Limits for SVG rendering
+        const svgW = 400;
+        const svgH = 300;
+        const pad = 40;
+        const originX = pad;
+        const originY = svgH - pad;
+        const xAxisLen = svgW - 2 * pad;
+        const yAxisLen = svgH - 2 * pad;
+        
+        let maxXDisplay = xmax + 2;
+        let xScale = xAxisLen / maxXDisplay;
+        let yScale = yAxisLen; 
+
+        // Generate SVG ticks
+        let xTicks = '';
+        for (let i = 1; i <= maxXDisplay; i++) {
+            let px = originX + i * xScale;
+            xTicks += `<line x1="${px}" y1="${originY}" x2="${px}" y2="${originY - 8}" stroke="black" />`;
+            xTicks += `<text x="${px}" y="${originY + 20}" font-family="Arial" font-size="14" text-anchor="middle">${i}</text>`;
+        }
+
+        // SVG string
+        const svgImage = `
+            <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+                <!-- Axes -->
+                <line x1="${originX}" y1="${originY}" x2="${svgW - pad/2}" y2="${originY}" stroke="black" stroke-width="1.5" /> 
+                <line x1="${originX}" y1="${originY}" x2="${originX}" y2="${pad/2}" stroke="black" stroke-width="1.5" /> 
+                
+                <!-- Axis arrows -->
+                <polygon points="${svgW - pad/2},${originY - 4} ${svgW - pad/2 + 10},${originY} ${svgW - pad/2},${originY + 4}" fill="black" />
+                <polygon points="${originX - 4},${pad/2} ${originX},${pad/2 - 10} ${originX + 4},${pad/2}" fill="black" />
+
+                <!-- Origin label -->
+                <text x="${originX - 10}" y="${originY + 20}" font-family="Arial" font-size="14">0</text>
+                
+                <!-- X ticks -->
+                ${xTicks}
+                <text x="${svgW - pad/2 + 15}" y="${originY + 5}" font-family="Arial" font-size="16">x</text>
+
+                <!-- Y labels -->
+                <text x="${originX - 15}" y="${originY - yScale}" font-family="Arial" font-size="16">c</text>
+                <text x="${originX + 15}" y="${pad/2 - 10}" font-family="Arial" font-size="16">f(x)</text>
+
+                <!-- Function Line -->
+                <line x1="${originX}" y1="${originY}" x2="${originX + xmax * xScale}" y2="${originY - yScale}" stroke="black" stroke-width="1.5" />
+
+                <!-- Dotted lines -->
+                <line x1="${originX}" y1="${originY - yScale}" x2="${originX + xmax * xScale}" y2="${originY - yScale}" stroke="black" stroke-dasharray="3,3" />
+                <line x1="${originX + xmax * xScale}" y1="${originY}" x2="${originX + xmax * xScale}" y2="${originY - yScale}" stroke="black" stroke-dasharray="3,3" />
+
+                <!-- Function text -->
+                <foreignObject x="${originX + (xmax/2)*xScale - 40}" y="${originY - yScale/2 - 30}" width="100" height="50">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: Arial; font-size: 16px;">
+                        f(x) = x/${k}
+                    </div>
+                </foreignObject>
+            </svg>
+        `;
+
+        // Question HTML
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">8.</div>
+                <div class="q-text">
+                    The graph of the probability density function $f(x)$ of a continuous random variable $x$ is given in the figure shown below.
+                    
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(a)</div>
+                        <div>Show that the value of $c = ${c_frac_str}$.</div>
+                    </div>
+                    
+                    <div class="q-sub" style="display: flex;">
+                        <div class="q-part">(b)</div>
+                        <div>
+                            Find the probability that the random variable will take a value
+                            <div style="margin-top: 5px;">(i) &nbsp; between 0 and ${val_a}</div>
+                            <div style="margin-top: 5px;">(ii) &nbsp;between ${val_a} and ${val_b}</div>
+                            <div style="margin-top: 5px;">(iii) equal to ${val_d}</div>
+                        </div>
+                    </div>
+
+                    <div class="graph-container">
+                        ${svgImage}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Solution variables
+        let frac_bi_num = val_a * val_a;
+        let frac_bi_den = 2 * k;
+        let bi_latex = formatFraction(frac_bi_num, frac_bi_den);
+
+        let area_bii_num = xmax * xmax - val_a * val_a;
+        let area_bii_den = 2 * k;
+        let bii_latex = formatFraction(area_bii_num, area_bii_den);
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-part">
+                <strong>(a) Show that $c = ${c_frac_str}$</strong><br>
+                For $f(x)$ to be a valid probability density function, the total area under the graph must equal 1.<br>
+                The graph forms a triangle with base $= ${xmax}$ and height $= c$.<br>
+                Area $= \\frac{1}{2} \\times \\text{base} \\times \\text{height} = 1$<br>
+                $\\frac{1}{2} (${xmax}) (c) = 1$<br>
+                $${xmax/2} c = 1$<br>
+                $c = \\mathbf{${c_frac_str}}$ (Shown)<br><br>
+                <em>Alternative check:</em> Using the function equation $f(x) = \\frac{x}{${k}}$, at the peak where $x = ${xmax}$, $f(${xmax}) = c$.<br>
+                $c = \\frac{${xmax}}{${k}} = \\mathbf{${c_frac_str}}$
+            </div>
+            
+            <div class="sol-part">
+                <strong>(b) Find the probability...</strong><br>
+                <em>Probabilities are found by calculating the area under the curve for the given interval.</em>
+                <br><br>
+                
+                <strong>(i) between 0 and ${val_a}</strong><br>
+                The area from $x = 0$ to $x = ${val_a}$ forms a smaller triangle.<br>
+                Base $= ${val_a}$<br>
+                Height $= f(${val_a}) = \\frac{${val_a}}{${k}}$<br>
+                $P(0 < x < ${val_a}) = \\text{Area of triangle}$<br>
+                $= \\frac{1}{2} \\times \\text{base} \\times \\text{height}$<br>
+                $= \\frac{1}{2} \\times ${val_a} \\times \\frac{${val_a}}{${k}}$<br>
+                $= \\frac{${frac_bi_num}}{${frac_bi_den}}$<br>
+                Simplified: $\\mathbf{${bi_latex}}$
+                <br><br>
+                
+                <strong>(ii) between ${val_a} and ${val_b}</strong><br>
+                Since $f(x) = 0$ for $x > ${xmax}$, the probability $P(${val_a} < x < ${val_b})$ is the same as the area from $x = ${val_a}$ to $x = ${xmax}$.<br>
+                The easiest way to find this area is to take the total area of the large triangle (which is exactly 1) and subtract the area of the smaller triangle from part (i).<br>
+                $P(${val_a} < x < ${val_b}) = P(0 < x \\le ${xmax}) - P(0 < x \\le ${val_a})$<br>
+                $= 1 - \\frac{${frac_bi_num}}{${frac_bi_den}}$<br>
+                $= \\frac{${frac_bi_den}}{${frac_bi_den}} - \\frac{${frac_bi_num}}{${frac_bi_den}} = \\frac{${area_bii_num}}{${area_bii_den}}$<br>
+                Simplified: $\\mathbf{${bii_latex}}$
+                <br><br>
+                
+                <strong>(iii) equal to ${val_d}</strong><br>
+                For any continuous random variable, the probability of it taking an exact, single specific value is the area of a vertical line.<br>
+                Since a line has a width of 0, its area is 0.<br>
+                $P(x = ${val_d}) = \\mathbf{0}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Generate new logical variables for the continuous PDF problem
+        let possible_xmax = [2, 4, 6, 8, 10];
+        xmax = possible_xmax[Math.floor(Math.random() * possible_xmax.length)];
+        
+        // val_a should be inside the triangle (1 to xmax - 1)
+        val_a = Math.floor(Math.random() * (xmax - 1)) + 1;
+        
+        // val_b should be outside the right boundary (xmax + 1 to xmax + 3)
+        val_b = xmax + Math.floor(Math.random() * 3) + 1;
+        
+        // val_d can be anything
+        val_d = Math.floor(Math.random() * (xmax + 2)) + 1;
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

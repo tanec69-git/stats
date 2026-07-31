@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Solver & Generator</title>
+
+    <!-- MathJax Configuration (No Polyfill Script Used) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .app-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background-color: #fff;
+        }
+        .question-box {
+            font-size: 1.25em;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #007bff;
+            border-radius: 4px;
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+        .btn-generate {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-generate:hover { background-color: #0056b3; transform: translateY(-1px); }
+        
+        .btn-toggle {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-toggle:hover { background-color: #218838; transform: translateY(-1px); }
+
+        .solution-box {
+            display: none;
+            padding: 25px;
+            background-color: #fdfdfe;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .solution-box h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .reference-images {
+            margin-top: 50px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+        }
+        .reference-images img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .image-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h2>Normal Distribution Application</h2>
+        
+        <div class="question-box" id="question-container">
+            <!-- Question loads here -->
+        </div>
+
+        <div class="controls">
+            <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+            <button class="btn-generate" onclick="generateQuestion()">Generate New Question</button>
+        </div>
+
+        <div class="solution-box" id="solution-container">
+            <!-- Solution loads here -->
+        </div>
+    </div>
+
+
+    <script>
+        // Error function approximation to calculate standard normal CDF
+        function erf(x) {
+            let sign = (x >= 0) ? 1 : -1;
+            x = Math.abs(x);
+            let a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
+            let a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
+            let t = 1.0 / (1.0 + p * x);
+            let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return sign * y;
+        }
+
+        function stdNormCDF(z) {
+            return 0.5 * (1 + erf(z / Math.sqrt(2)));
+        }
+
+        // Load the specific values from the original attached image
+        function loadInitialQuestion() {
+            let questionHTML = `12. Given that $X \\sim N(\\mu, \\sigma^2)$, $P(X < 10) = 0.03$ and $P(X > 16) = 0.24$, compute $\\mu$ and $\\sigma$.`;
+
+            let solutionHTML = `
+                <h3>Step-by-Step Solution</h3>
+                <p>Let $Z \\sim N(0, 1)$ be the standard normal distribution.</p>
+                <hr>
+                <p><strong>Step 1: Standardise the first probability</strong></p>
+                <p>We are given $P(X < 10) = 0.03$. Converting this to a standard normal variable:</p>
+                <p>$$P\\left(Z < \\frac{10 - \\mu}{\\sigma}\\right) = 0.03$$</p>
+                <p>Using the standard normal table (or inverse CDF function) for an area of 0.03, we find the corresponding z-score is approximately -1.881:</p>
+                <p>$$\\frac{10 - \\mu}{\\sigma} = -1.881 \\quad \\text{--- (1)}$$</p>
+
+                <p><strong>Step 2: Standardise the second probability</strong></p>
+                <p>We are given $P(X > 16) = 0.24$. The complement is:</p>
+                <p>$$P\\left(Z < \\frac{16 - \\mu}{\\sigma}\\right) = 1 - 0.24 = 0.76$$</p>
+                <p>Looking up the area of 0.76 in the standard normal table, the z-score is approximately 0.706:</p>
+                <p>$$\\frac{16 - \\mu}{\\sigma} = 0.706 \\quad \\text{--- (2)}$$</p>
+                
+                <p><strong>Step 3: Solve the simultaneous equations</strong></p>
+                <p>Rearranging equations (1) and (2) gives:</p>
+                <ul>
+                    <li>$10 - \\mu = -1.881\\sigma$</li>
+                    <li>$16 - \\mu = 0.706\\sigma$</li>
+                </ul>
+                <p>Subtracting the first equation from the second eliminates $\\mu$:</p>
+                <p>$$(16 - 10) = (0.706 - (-1.881))\\sigma$$</p>
+                <p>$$6 = 2.587\\sigma$$</p>
+                <p>$$\\sigma = \\frac{6}{2.587} \\approx 2.319$$</p>
+
+                <p>Now, substitute $\\sigma$ back into equation (1) to solve for $\\mu$:</p>
+                <p>$$10 - \\mu = -1.881(2.319)$$</p>
+                <p>$$10 - \\mu = -4.362$$</p>
+                <p>$$\\mu = 10 + 4.362 \\approx 14.362$$</p>
+                
+                <hr>
+                <p><strong>Final Answer:</strong> $\\mu \\approx 14.36$, $\\sigma \\approx 2.32$</p>
+            `;
+
+            updateDOM(questionHTML, solutionHTML);
+        }
+
+        // Generate dynamic questions for practice
+        function generateQuestion() {
+            let z1 = -(Math.floor(Math.random() * 150) + 50) / 100; // between -2.00 and -0.50
+            let z2 = (Math.floor(Math.random() * 150) + 50) / 100;  // between 0.50 and 2.00
+
+            let mu = Math.floor(Math.random() * 40) + 10;
+            let sigma = Math.floor(Math.random() * 8) + 2;
+
+            let x1_val = mu + z1 * sigma;
+            let x2_val = mu + z2 * sigma;
+            let x1 = x1_val.toFixed(2);
+            let x2 = x2_val.toFixed(2);
+
+            let p1 = stdNormCDF(z1).toFixed(4);
+            let p2 = (1 - stdNormCDF(z2)).toFixed(4);
+            let p2_comp = (1 - p2).toFixed(4);
+
+            let questionHTML = `Given that $X \\sim N(\\mu, \\sigma^2)$, $P(X < ${x1}) = ${p1}$ and $P(X > ${x2}) = ${p2}$, compute $\\mu$ and $\\sigma$.`;
+
+            let solutionHTML = `
+                <h3>Step-by-Step Solution</h3>
+                <p>Let $Z \\sim N(0, 1)$ be the standard normal distribution.</p>
+                <hr>
+                <p><strong>Step 1: Standardise the first probability</strong></p>
+                <p>From $P(X < ${x1}) = ${p1}$:</p>
+                <p>$$P\\left(Z < \\frac{${x1} - \\mu}{\\sigma}\\right) = ${p1}$$</p>
+                <p>Using standard normal tables, the z-score for area ${p1} is approximately ${z1.toFixed(2)}:</p>
+                <p>$$\\frac{${x1} - \\mu}{\\sigma} = ${z1.toFixed(2)} \\quad \\text{--- (1)}$$</p>
+
+                <p><strong>Step 2: Standardise the second probability</strong></p>
+                <p>From $P(X > ${x2}) = ${p2}$:</p>
+                <p>$$P\\left(Z > \\frac{${x2} - \\mu}{\\sigma}\\right) = ${p2} \\implies P\\left(Z < \\frac{${x2} - \\mu}{\\sigma}\\right) = 1 - ${p2} = ${p2_comp}$$</p>
+                <p>Using standard normal tables, the z-score for area ${p2_comp} is approximately ${z2.toFixed(2)}:</p>
+                <p>$$\\frac{${x2} - \\mu}{\\sigma} = ${z2.toFixed(2)} \\quad \\text{--- (2)}$$</p>
+                
+                <p><strong>Step 3: Solve the simultaneous equations</strong></p>
+                <p>Rearranging (1) and (2):</p>
+                <ul>
+                    <li>$${x1} - \\mu = ${z1.toFixed(2)}\\sigma$</li>
+                    <li>$${x2} - \\mu = ${z2.toFixed(2)}\\sigma$</li>
+                </ul>
+                <p>Subtracting the first equation from the second gives:</p>
+                <p>$$(${x2} - ${x1}) = (${z2.toFixed(2)} - (${z1.toFixed(2)}))\\sigma$$</p>
+                <p>$$${(x2_val - x1_val).toFixed(2)} = ${(z2 - z1).toFixed(2)}\\sigma$$</p>
+                <p>$$\\sigma = \\frac{${(x2_val - x1_val).toFixed(2)}}{${(z2 - z1).toFixed(2)}} = ${sigma.toFixed(2)}$$</p>
+
+                <p>Substitute $\\sigma$ back into equation (1):</p>
+                <p>$$${x1} - \\mu = ${z1.toFixed(2)}(${sigma.toFixed(2)})$$</p>
+                <p>$$\\mu = ${x1} - (${z1.toFixed(2)} \\times ${sigma.toFixed(2)}) = ${mu.toFixed(2)}$$</p>
+                
+                <hr>
+                <p><strong>Final Answer:</strong> $\\mu = ${mu.toFixed(2)}$, $\\sigma = ${sigma.toFixed(2)}$</p>
+            `;
+
+            updateDOM(questionHTML, solutionHTML);
+        }
+
+        // Helper function to inject HTML and queue MathJax
+        function updateDOM(question, solution) {
+            document.getElementById('question-container').innerHTML = question;
+            document.getElementById('solution-container').innerHTML = solution;
+            
+            // Ensure solution is hidden on new generation
+            document.getElementById('solution-container').style.display = 'none';
+
+            // Instruct MathJax to render the newly injected content
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // UI Toggle for solution box
+        function toggleSolution() {
+            const solBox = document.getElementById('solution-container');
+            if (solBox.style.display === 'none' || solBox.style.display === '') {
+                solBox.style.display = 'block';
+            } else {
+                solBox.style.display = 'none';
+            }
+        }
+
+        // Load the explicit initial question on page load
+        window.onload = loadInitialQuestion;
+    </script>
+</body>
+</html>

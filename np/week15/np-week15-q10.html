@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Problem Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-num {
+            width: 40px;
+            font-weight: bold;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .q-sub {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #e67e22;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.2em; /* Increased font size for solutions */
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #d35400;
+            font-size: 1.1em; 
+        }
+        .sol-step {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Normal Distribution Generator</h2>
+    <p style="font-size: 0.9em; color: #7f8c8d;"><em>Based on the structure of image_f9f59f.png</em></p>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Hardcoded Standard Normal Table values to ensure absolute accuracy matching typical tables
+    const zTable = {
+        "0.25": "0.5987",
+        "0.50": "0.6915",
+        "0.51": "0.6950",
+        "0.84": "0.7995",
+        "1.00": "0.8413",
+        "1.28": "0.8997",
+        "1.50": "0.9332",
+        "1.64": "0.9495",
+        "1.96": "0.9750",
+        "2.00": "0.9772",
+        "2.50": "0.9938"
+    };
+
+    // Initial values matching the original problem perfectly
+    let mu = 12;
+    let sigma = 2;
+    let z1 = 1.00;
+    let z2 = 1.50;
+    let z3 = 1.00;
+    let z4 = 2.00;
+    let zb = 0.51;
+
+    function renderContent() {
+        // Calculate dependent variables
+        let x1 = mu + (z1 * sigma);
+        let x2 = mu + (z2 * sigma);
+        let x3 = mu + (z3 * sigma);
+        let x4 = mu + (z4 * sigma);
+        
+        let pb_val = parseFloat(zTable[zb.toFixed(2)]);
+        let pb_str = pb_val.toString().replace(/0+$/, ''); // Remove trailing zeros for the prompt
+        
+        let xb = mu + (zb * sigma);
+
+        // Calculate probabilities for solutions
+        let p1 = zTable[z1.toFixed(2)];
+        
+        let p2_raw = zTable[z2.toFixed(2)];
+        let p2 = (1 - parseFloat(p2_raw)).toFixed(4);
+        
+        let p3_raw = zTable[z3.toFixed(2)];
+        let p4_raw = zTable[z4.toFixed(2)];
+        let p_between = (parseFloat(p4_raw) - parseFloat(p3_raw)).toFixed(4);
+
+        // Build Question HTML
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-num">10.</div>
+                <div class="q-part">(a)</div>
+                <div class="q-text">
+                    For a large orchard, the weight of apples (in kilograms) harvested from each tree during a season is normally distributed.
+                    <br><br>
+                    If the average weight of apples harvested from a tree is ${mu} kg and the standard deviation is ${sigma} kg, find the probability that a randomly selected tree yields
+                    <div class="q-sub">(i) &nbsp; less than ${x1} kg of apples;</div>
+                    <div class="q-sub">(ii) &nbsp;at least ${x2} kg of apples;</div>
+                    <div class="q-sub">(iii) between ${x3} kg and ${x4} kg of apples.</div>
+                </div>
+            </div>
+            
+            <div class="question-row" style="margin-top: 20px;">
+                <div class="q-num"></div>
+                <div class="q-part">(b)</div>
+                <div class="q-text">
+                    If the probability that a randomly selected tree yields less than $x_a$ kg of apples is ${pb_str}, find the value of $x_a$.
+                </div>
+            </div>
+        `;
+
+        // Build Solution HTML
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-step">
+                Let $X$ be the continuous random variable representing the weight of apples.<br>
+                $X \\sim N(\\mu, \\sigma^2)$ where $\\mu = ${mu}$ and $\\sigma = ${sigma}$.<br>
+                We standardize using $Z = \\frac{X - \\mu}{\\sigma}$.
+            </div>
+            
+            <div class="sol-step">
+                <strong>(a) (i) Less than ${x1} kg</strong><br>
+                $P(X < ${x1}) = P\\left(Z < \\frac{${x1} - ${mu}}{${sigma}}\\right)$<br>
+                $P(X < ${x1}) = P(Z < ${z1.toFixed(2)})$<br>
+                From the Standard Normal Table, $\\Phi(${z1.toFixed(2)}) = \\mathbf{${p1}}$
+            </div>
+            
+            <div class="sol-step">
+                <strong>(a) (ii) At least ${x2} kg</strong><br>
+                $P(X \\ge ${x2}) = P\\left(Z \\ge \\frac{${x2} - ${mu}}{${sigma}}\\right)$<br>
+                $P(X \\ge ${x2}) = P(Z \\ge ${z2.toFixed(2)})$<br>
+                $P(X \\ge ${x2}) = 1 - P(Z < ${z2.toFixed(2)})$<br>
+                From the table, $\\Phi(${z2.toFixed(2)}) = ${p2_raw}$<br>
+                $P(X \\ge ${x2}) = 1 - ${p2_raw} = \\mathbf{${p2}}$
+            </div>
+
+            <div class="sol-step">
+                <strong>(a) (iii) Between ${x3} kg and ${x4} kg</strong><br>
+                $P(${x3} < X < ${x4}) = P\\left(\\frac{${x3} - ${mu}}{${sigma}} < Z < \\frac{${x4} - ${mu}}{${sigma}}\\right)$<br>
+                $P(${x3} < X < ${x4}) = P(${z3.toFixed(2)} < Z < ${z4.toFixed(2)})$<br>
+                $P(${x3} < X < ${x4}) = \\Phi(${z4.toFixed(2)}) - \\Phi(${z3.toFixed(2)})$<br>
+                Using the table: $\\Phi(${z4.toFixed(2)}) = ${p4_raw}$ and $\\Phi(${z3.toFixed(2)}) = ${p3_raw}$<br>
+                $P(${x3} < X < ${x4}) = ${p4_raw} - ${p3_raw} = \\mathbf{${p_between}}$
+            </div>
+            
+            <div class="sol-step">
+                <strong>(b) Find $x_a$</strong><br>
+                Given $P(X < x_a) = ${pb_str}$.<br>
+                Standardizing gives: $P\\left(Z < \\frac{x_a - ${mu}}{${sigma}}\\right) = ${pb_val.toFixed(4)}$<br>
+                Looking up the probability $${pb_val.toFixed(4)}$ in the body of the Standard Normal Table gives a z-score of $${zb.toFixed(2)}$.<br>
+                Therefore, $\\frac{x_a - ${mu}}{${sigma}} = ${zb.toFixed(2)}$<br>
+                $x_a - ${mu} = ${zb.toFixed(2)} \\times ${sigma}$<br>
+                $x_a - ${mu} = ${(zb * sigma).toFixed(2)}$<br>
+                $x_a = ${mu} + ${(zb * sigma).toFixed(2)}$<br>
+                $x_a = \\mathbf{${xb.toFixed(2)}}$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize the mean and std deviation
+        mu = Math.floor(Math.random() * 11) + 10; // 10 to 20
+        let sigma_options = [2, 4, 5, 10];
+        sigma = sigma_options[Math.floor(Math.random() * sigma_options.length)];
+        
+        // Randomize z-scores from the safe table to guarantee neat outcomes
+        let z_pool = [0.5, 1.0, 1.5, 2.0, 2.5];
+        z1 = z_pool[Math.floor(Math.random() * 4)]; // 0.5 to 2.0
+        z2 = z_pool[Math.floor(Math.random() * 4)]; // 0.5 to 2.0
+        
+        // Ensure z3 is strictly less than z4 for logical 'between' probability
+        let idx3 = Math.floor(Math.random() * 3); // 0 to 2
+        let idx4 = idx3 + 1 + Math.floor(Math.random() * (4 - idx3)); // strictly greater than idx3
+        z3 = z_pool[idx3];
+        z4 = z_pool[idx4];
+
+        // Randomize part b lookup from a distinct set of common inverse probabilities
+        let zb_pool = [0.25, 0.51, 0.84, 1.28, 1.64, 1.96];
+        zb = zb_pool[Math.floor(Math.random() * zb_pool.length)];
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>

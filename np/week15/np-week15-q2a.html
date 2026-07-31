@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Problem Generator</title>
+    <!-- MathJax for rendering equations without Polyfill -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        ol {
+            margin-bottom: 0;
+        }
+        li {
+            margin-bottom: 15px;
+        }
+        .numbering {
+            display: inline-block;
+            width: 30px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Question Generator</h2>
+    
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values matching image_05405f.png
+    let currentPA = 0.4;
+    let currentPB = 0.2;
+    let currentPC = 0.3;
+    let currentPBnC = 0.1;
+
+    // Function to calculate exact decimal values avoiding floating-point bugs
+    function roundNum(num, decimals = 4) {
+        return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    }
+
+    // Render the content and invoke MathJax
+    function renderContent(pA, pB, pC, pBnC) {
+        // Calculations
+        let pA_and_B = roundNum(pA * pB);
+        let ans1 = roundNum(pA + pB - pA_and_B);
+        let ans2 = roundNum(pBnC / pB);
+        let sumAB = roundNum(pA + pB);
+
+        // Build HTML strings
+        const questionHTML = `
+            <p><span class="numbering">2.</span> <span class="numbering">(a)</span> Events \\( A \\), \\( B \\) and \\( C \\) are such that \\( A \\) and \\( B \\) are independent, and \\( A \\) and \\( C \\) are mutually exclusive. Given that \\( P(A) = ${pA} \\), \\( P(B) = ${pB} \\), \\( P(C) = ${pC} \\) and \\( P(B \\cap C) = ${pBnC} \\), calculate</p>
+            <ol type="i" style="margin-left: 50px;">
+                <li>\\( P(A \\cup B) \\)</li>
+                <li>\\( P(C | B) \\)</li>
+                <li>\\( P(C | A) \\)</li>
+            </ol>
+        `;
+
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <ol type="i">
+                <li>
+                    Since \\( A \\) and \\( B \\) are independent, \\( P(A \\cap B) = P(A)P(B) \\).<br>
+                    \\( P(A \\cup B) = P(A) + P(B) - P(A \\cap B) \\)<br>
+                    \\( P(A \\cup B) = P(A) + P(B) - P(A)P(B) \\)<br>
+                    \\( P(A \\cup B) = ${pA} + ${pB} - (${pA})(${pB}) \\)<br>
+                    \\( P(A \\cup B) = ${sumAB} - ${pA_and_B} = \\mathbf{${ans1}} \\)
+                </li>
+                <li>
+                    Using the conditional probability formula:<br>
+                    \\( P(C | B) = \\frac{P(C \\cap B)}{P(B)} = \\frac{P(B \\cap C)}{P(B)} \\)<br>
+                    \\( P(C | B) = \\frac{${pBnC}}{${pB}} = \\mathbf{${ans2}} \\)
+                </li>
+                <li>
+                    Since \\( A \\) and \\( C \\) are mutually exclusive, they cannot happen at the same time. Therefore, \\( P(A \\cap C) = 0 \\).<br>
+                    \\( P(C | A) = \\frac{P(C \\cap A)}{P(A)} \\)<br>
+                    \\( P(C | A) = \\frac{0}{${pA}} = \\mathbf{0} \\)
+                </li>
+            </ol>
+        `;
+
+        // Update DOM
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax 3
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'), 
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    // Function to generate new valid random parameters
+    function generateNewQuestion() {
+        // Base numbers between 1 and 9 to represent 0.1 to 0.9 cleanly
+        // Constrain sizes so sums make logical probability sense (<= 1)
+        
+        let pA_int = Math.floor(Math.random() * 5) + 2; // 2 to 6 (0.2 to 0.6)
+        // Ensure mutually exclusive A and C combined probability is <= 1 (max 0.9 for safety)
+        let max_pC = 9 - pA_int; 
+        let pC_int = Math.floor(Math.random() * Math.min(4, max_pC)) + 1; // 1 to 4 (0.1 to 0.4)
+        
+        let pB_int = Math.floor(Math.random() * 5) + 2; // 2 to 6 (0.2 to 0.6)
+        
+        // P(B and C) cannot be larger than P(B) or P(C)
+        let max_pBnC = Math.min(pB_int, pC_int);
+        // Ensure we don't divide by zero and keep it realistic
+        let pBnC_int = Math.floor(Math.random() * max_pBnC) + 1; 
+
+        // Assign decimals
+        currentPA = pA_int / 10;
+        currentPB = pB_int / 10;
+        currentPC = pC_int / 10;
+        currentPBnC = pBnC_int / 10;
+
+        // Render the new values
+        renderContent(currentPA, currentPB, currentPC, currentPBnC);
+        
+        // Hide solution upon new generation
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    // Toggle Solution Visibility
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent(currentPA, currentPB, currentPC, currentPBnC);
+    };
+</script>
+
+</body>
+</html>

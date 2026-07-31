@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Density Function Problem Generator</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .question-container {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        .question-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .q-part {
+            width: 40px;
+        }
+        .q-text {
+            flex: 1;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin-right: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #3498db;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .btn-toggle {
+            background-color: #2ecc71;
+        }
+        .btn-toggle:hover {
+            background-color: #27ae60;
+        }
+        .solution-container {
+            display: none;
+            background-color: #fdfefe;
+            padding: 20px;
+            border-left: 4px solid #9b59b6;
+            border-radius: 4px;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+            font-size: 1.15em; 
+        }
+        .solution-container h3 {
+            margin-top: 0;
+            color: #8e44ad;
+            font-size: 1.1em; 
+        }
+        .sol-step {
+            margin-bottom: 15px;
+        }
+        .math-block {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Probability Density Function Generator</h2>
+    
+    <div class="controls">
+        <button onclick="generateNewQuestion()">Generate New Question</button>
+        <button class="btn-toggle" onclick="toggleSolution()">Show / Hide Solution</button>
+    </div>
+
+    <div id="question-box" class="question-container">
+        <!-- Question content injected by JS -->
+    </div>
+
+    <div id="solution-box" class="solution-container">
+        <!-- Solution content injected by JS -->
+    </div>
+</div>
+
+<script>
+    // Initial values based on the original problem
+    let param_A = 8;
+    let param_b = 3;
+    let param_c = 11;
+
+    // Helper functions for fractions
+    function gcd(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function formatFraction(num, den) {
+        if (num === 0) return "0";
+        let sign = (num * den < 0) ? "-" : "";
+        num = Math.abs(num);
+        den = Math.abs(den);
+        let div = gcd(num, den);
+        num = num / div;
+        den = den / div;
+        if (den === 1) return sign + num;
+        return sign + "\\frac{" + num + "}{" + den + "}";
+    }
+
+    function renderContent() {
+        // --- Calculate Solution Steps logically ---
+        let b_sq = param_b * param_b;
+        let c_sq = param_c * param_c;
+        let two_A = 2 * param_A;
+        
+        // Simplify Area 1 fraction: (b^2) / (2A)
+        let a1_div = gcd(b_sq, two_A);
+        let a1_num = b_sq / a1_div;
+        let a1_den = two_A / a1_div;
+        let a1_latex = formatFraction(a1_num, a1_den);
+
+        // Calculate RHS: 1 - Area1
+        let rhs_num = a1_den - a1_num;
+        let rhs_den = a1_den;
+        let rhs_latex = formatFraction(rhs_num, rhs_den);
+
+        // Calculate Area 2 Numerator: c^2 - b^2
+        let a2_num = c_sq - b_sq;
+        
+        // Final k calculation: k = (a2_num * rhs_den) / (2 * rhs_num)
+        let k_num = a2_num * rhs_den;
+        let k_den = 2 * rhs_num;
+        let final_k_latex = formatFraction(k_num, k_den);
+
+        // --- Build Question HTML ---
+        const questionHTML = `
+            <div class="question-row">
+                <div class="q-part">(c)</div>
+                <div class="q-text">
+                    If the probability density function g(x) is defined as follows for all real numbers, find the value of k.
+                    
+                    <div class="math-block" style="margin-top: 15px;">
+                        $$
+                        \\text{If } g(x) = 
+                        \\begin{cases} 
+                        \\frac{x}{${param_A}} & \\text{for } 0 \\le x < ${param_b} \\\\[10pt]
+                        \\frac{x}{k} & \\text{for } ${param_b} \\le x \\le ${param_c} \\\\[10pt]
+                        0 & \\text{for all other values of } x.
+                        \\end{cases}
+                        $$
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // --- Build Solution HTML (Geometric approach) ---
+        const solutionHTML = `
+            <h3>Solution:</h3>
+            <div class="sol-step">
+                For $g(x)$ to be a valid probability density function, the total area under the graph of $y = g(x)$ must be exactly 1. 
+                We can find this area geometrically by breaking it into two shapes based on the piecewise function.
+            </div>
+            
+            <div class="sol-step">
+                <strong>Part 1: The area from $x = 0$ to $x = ${param_b}$</strong><br>
+                The line $y = \\frac{x}{${param_A}}$ starts at $(0,0)$ and goes up to $\\left(${param_b}, \\frac{${param_b}}{${param_A}}\\right)$. 
+                This forms a triangle.<br>
+                $\\text{Base} = ${param_b}$<br>
+                $\\text{Height} = \\frac{${param_b}}{${param_A}}$<br>
+                $\\text{Area}_1 = \\frac{1}{2} \\times \\text{base} \\times \\text{height} = \\frac{1}{2} \\times ${param_b} \\times \\frac{${param_b}}{${param_A}} = \\frac{${b_sq}}{${two_A}}$<br>
+                $\\text{Area}_1 = ${a1_latex}$
+            </div>
+            
+            <div class="sol-step">
+                <strong>Part 2: The area from $x = ${param_b}$ to $x = ${param_c}$</strong><br>
+                The line $y = \\frac{x}{k}$ forms a trapezoid bounded by the x-axis, with parallel vertical sides (heights) at $x = ${param_b}$ and $x = ${param_c}$.<br>
+                $\\text{Height}_1 = \\frac{${param_b}}{k}$<br>
+                $\\text{Height}_2 = \\frac{${param_c}}{k}$<br>
+                $\\text{Width (base)} = ${param_c} - ${param_b} = ${param_c - param_b}$<br>
+                $\\text{Area}_2 = \\frac{1}{2} \\times (\\text{Height}_1 + \\text{Height}_2) \\times \\text{Width}$<br>
+                $\\text{Area}_2 = \\frac{1}{2} \\times \\left(\\frac{${param_b}}{k} + \\frac{${param_c}}{k}\\right) \\times (${param_c} - ${param_b})$<br>
+                $\\text{Area}_2 = \\frac{1}{2} \\times \\left(\\frac{${param_b + param_c}}{k}\\right) \\times ${param_c - param_b} = \\frac{${(param_b + param_c) * (param_c - param_b)}}{2k} = \\frac{${a2_num}}{2k}$
+            </div>
+
+            <div class="sol-step">
+                <strong>Equate Total Area to 1:</strong><br>
+                $\\text{Area}_1 + \\text{Area}_2 = 1$<br>
+                $$ ${a1_latex} + \\frac{${a2_num}}{2k} = 1 $$
+                $$ \\frac{${a2_num}}{2k} = 1 - ${a1_latex} $$
+                $$ \\frac{${a2_num}}{2k} = ${rhs_latex} $$
+            </div>
+
+            <div class="sol-step">
+                <strong>Solve for $k$:</strong><br>
+                Cross-multiply:<br>
+                $$ 2k \\times ${rhs_num} = ${a2_num} \\times ${rhs_den} $$
+                $$ ${2 * rhs_num}k = ${a2_num * rhs_den} $$
+                $$ k = ${final_k_latex} $$
+            </div>
+        `;
+
+        document.getElementById('question-box').innerHTML = questionHTML;
+        document.getElementById('solution-box').innerHTML = solutionHTML;
+
+        // Render equations using MathJax
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                document.getElementById('question-box'),
+                document.getElementById('solution-box')
+            ]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+    }
+
+    function generateNewQuestion() {
+        // Randomize parameters
+        param_b = Math.floor(Math.random() * 5) + 2; // 2 to 6
+        param_c = param_b + Math.floor(Math.random() * 8) + 2; // b+2 to b+9
+        
+        // Ensure that the area of the first segment is less than 1
+        // Area1 = b^2 / (2A) < 1  => 2A > b^2 => A > (b^2)/2
+        let min_A = Math.floor((param_b * param_b) / 2) + 1;
+        param_A = min_A + Math.floor(Math.random() * 6); // Add variation to A
+
+        renderContent();
+        document.getElementById('solution-box').style.display = 'none';
+    }
+
+    function toggleSolution() {
+        const solBox = document.getElementById('solution-box');
+        if (solBox.style.display === 'none' || solBox.style.display === '') {
+            solBox.style.display = 'block';
+        } else {
+            solBox.style.display = 'none';
+        }
+    }
+
+    // Initial render on page load
+    window.onload = () => {
+        renderContent();
+    };
+</script>
+
+</body>
+</html>
