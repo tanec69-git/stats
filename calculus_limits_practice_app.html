@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculus Limits Practice</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- KaTeX for Textbook-Quality Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.25rem 0;
+        }
+        .katex-display {
+            margin: 0.5em 0 !important;
+        }
+        /* Smooth accordion transition */
+        .solution-panel {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i class="ph-bold ph-function text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Calculus Limits Practice</h1>
+                    <p class="text-xs sm:text-sm text-slate-500">Interactive Step-by-Step Limit Problem Generator</p>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <button id="btn-reset-original" onclick="loadOriginalQuestions()" 
+                    class="px-3.5 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-1.5"
+                    title="Reset to the exact questions from the worksheet image">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                    <span>Original Set</span>
+                </button>
+
+                <button id="btn-toggle-all" onclick="toggleAllSolutions()" 
+                    class="px-3.5 py-2 text-xs sm:text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition flex items-center gap-1.5">
+                    <i id="icon-toggle-all" class="ph-bold ph-eye"></i>
+                    <span id="text-toggle-all">Show All Solutions</span>
+                </button>
+
+                <button onclick="generateNewQuestions()" 
+                    class="px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-sm shadow-indigo-200 transition flex items-center gap-1.5 ml-auto sm:ml-0">
+                    <i class="ph-bold ph-sparkle"></i>
+                    <span>Generate New Questions</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        
+        <!-- Intro Banner -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3.5">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 text-white font-bold text-sm shrink-0 mt-0.5">(a)</span>
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-900">Find the following limits:</h2>
+                    <p class="text-sm text-slate-600 mt-0.5">
+                        Work out each limit on paper, test your answer in the input box, or click <strong>Show Solution</strong> for a complete step-by-step breakdown.
+                    </p>
+                </div>
+            </div>
+            <div id="set-badge" class="self-start sm:self-center shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                Original Worksheet Questions
+            </div>
+        </div>
+
+        <!-- Questions Container -->
+        <div id="questions-container" class="space-y-6">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+
+        <!-- Quick Reference Cheat Sheet -->
+        <section class="mt-10 bg-slate-900 text-slate-100 rounded-2xl p-6 shadow-md">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="ph-fill ph-lightbulb text-amber-400 text-xl"></i>
+                <h3 class="font-bold text-base sm:text-lg">Quick Strategy Guide for Evaluating Limits</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-4">
+                    <div class="text-indigo-400 font-semibold mb-1">Type (i): Direct Substitution</div>
+                    <p class="text-slate-300 leading-relaxed">
+                        For polynomials and composite power functions $\lim_{x \to c} (ax + b)^n$, plug $x = c$ directly into the expression since polynomials are continuous everywhere.
+                    </p>
+                </div>
+                <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-4">
+                    <div class="text-emerald-400 font-semibold mb-1">Type (ii): Indeterminate Form $\frac{0}{0}$</div>
+                    <p class="text-slate-300 leading-relaxed">
+                        When direct substitution gives $\frac{0}{0}$, factor the numerator using the difference of squares $x^2 - c^2 = (x - c)(x + c)$, cancel the common factor, and then substitute.
+                    </p>
+                </div>
+                <div class="bg-slate-800/90 border border-slate-700 rounded-xl p-4">
+                    <div class="text-amber-400 font-semibold mb-1">Type (iii): Limits at Infinity ($x \to \infty$)</div>
+                    <p class="text-slate-300 leading-relaxed">
+                        Divide every term in the numerator and denominator by the highest power of $x$ in the denominator ($x^2$). Terms like $\frac{k}{x}$ and $\frac{k}{x^2}$ approach $0$ as $x \to \infty$.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white py-5 mt-12">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+            Designed for Calculus Limit Practice &bull; Supports exact fractions, decimals, and step-by-step mathematical explanations.
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // Store current questions state
+        let currentQuestions = [];
+        let isOriginalSet = true;
+        let practiceSetCounter = 1;
+
+        // Greatest Common Divisor helper for simplifying fractions
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            return a;
+        }
+
+        // Format a rational number num/den into clean LaTeX and string answer
+        function formatFraction(num, den) {
+            if (den < 0) {
+                num = -num;
+                den = -den;
+            }
+            const divisor = gcd(num, den);
+            const sNum = num / divisor;
+            const sDen = den / divisor;
+
+            if (sDen === 1) {
+                return {
+                    latex: `${sNum}`,
+                    text: `${sNum}`,
+                    value: sNum,
+                    isFraction: false
+                };
+            } else {
+                const sign = sNum < 0 ? '-' : '';
+                return {
+                    latex: `${sign}\\frac{${Math.abs(sNum)}}{${sDen}}`,
+                    text: `${sNum}/${sDen}`,
+                    value: sNum / sDen,
+                    isFraction: true,
+                    sNum: sNum,
+                    sDen: sDen
+                };
+            }
+        }
+
+        // Helper for random integer in [min, max]
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Helper to pick random item from array
+        function randChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // Build Question (i): \lim_{x \to c} (a x + b)^n
+        function createQuestion1(a, b, c, n) {
+            const axTerm = a === 1 ? 'x' : (a === -1 ? '-x' : `${a}x`);
+            const bTerm = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+            const prod = a * c;
+            const insideVal = prod + b;
+            const finalAns = Math.pow(insideVal, n);
+
+            const bCalcTerm = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+            const cFormatted = c < 0 ? `(${c})` : `${c}`;
+
+            return {
+                id: 'q1',
+                roman: '(i)',
+                badge: 'Direct Substitution',
+                badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                problemLatex: `\\lim_{x \\to ${c}} (${axTerm} ${bTerm})^{${n}}`,
+                answerValue: finalAns,
+                answerDisplay: `${finalAns}`,
+                solutionVisible: false,
+                steps: [
+                    {
+                        title: 'Identify the Function & Limit Strategy',
+                        explanation: `The expression $(${axTerm} ${bTerm})^{${n}}$ is a polynomial raised to a positive integer power. Because polynomial functions are continuous everywhere for all real numbers $x$, we can find the limit by **direct substitution** of $x = ${c}$.`,
+                        math: `\\lim_{x \\to ${c}} (${axTerm} ${bTerm})^{${n}} = \\left(${a}${cFormatted} ${bCalcTerm}\\right)^{${n}}`
+                    },
+                    {
+                        title: 'Evaluate the Inner Expression',
+                        explanation: `First, multiply $${a} \\times ${cFormatted} = ${prod}$ and then combine with $${b >= 0 ? b : '-' + Math.abs(b)}$ inside the parentheses:`,
+                        math: `= (${prod} ${bCalcTerm})^{${n}} = (${insideVal})^{${n}}`
+                    },
+                    {
+                        title: 'Raise to the Exponent',
+                        explanation: `Finally, compute $(${insideVal})^{${n}}$ to obtain the exact value of the limit:`,
+                        math: `(${insideVal})^{${n}} = \\mathbf{${finalAns}}`
+                    }
+                ]
+            };
+        }
+
+        // Build Question (ii): \lim_{x \to c} \frac{x^2 - c^2}{x - c} (supports positive or negative c)
+        function createQuestion2(c) {
+            const cSquared = c * c;
+            // If c > 0, denominator is x - c. If c < 0, denominator is x + |c|
+            const absC = Math.abs(c);
+            const denomLatex = c > 0 ? `x - ${absC}` : `x + ${absC}`;
+            const otherFactorLatex = c > 0 ? `x + ${absC}` : `x - ${absC}`;
+            const finalAns = 2 * c;
+            const cFormatted = c < 0 ? `(${c})` : `${c}`;
+
+            return {
+                id: 'q2',
+                roman: '(ii)',
+                badge: 'Indeterminate Form (0/0) • Factoring',
+                badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                problemLatex: `\\lim_{x \\to ${c}} \\left(\\frac{x^2 - ${cSquared}}{${denomLatex}}\\right)`,
+                answerValue: finalAns,
+                answerDisplay: `${finalAns}`,
+                solutionVisible: false,
+                steps: [
+                    {
+                        title: 'Check Direct Substitution',
+                        explanation: `First, test what happens if we substitute $x = ${c}$ directly into both the numerator and the denominator:`,
+                        math: `\\frac{${cFormatted}^2 - ${cSquared}}{${c} ${c > 0 ? '- ' + absC : '+ ' + absC}} = \\frac{${cSquared} - ${cSquared}}{0} = \\frac{0}{0} \\quad (\\text{Indeterminate Form})`
+                    },
+                    {
+                        title: 'Factor the Numerator (Difference of Squares)',
+                        explanation: `Since we obtained the indeterminate form $\\frac{0}{0}$, there is a common factor we can simplify. Recall the algebraic identity $a^2 - b^2 = (a - b)(a + b)$. Here, $x^2 - ${cSquared} = x^2 - ${absC}^2 = (x - ${absC})(x + ${absC})$:`,
+                        math: `\\lim_{x \\to ${c}} \\left(\\frac{x^2 - ${cSquared}}{${denomLatex}}\\right) = \\lim_{x \\to ${c}} \\left(\\frac{(x - ${absC})(x + ${absC})}{${denomLatex}}\\right)`
+                    },
+                    {
+                        title: 'Cancel the Common Factor',
+                        explanation: `Because taking the limit as $x \\to ${c}$ considers values of $x$ arbitrarily close to $${c}$ but **not equal** to $${c}$ ($x \\neq ${c}$), the term $(${denomLatex}) \\neq 0$. Thus, we can safely cancel $(${denomLatex})$ from the numerator and denominator:`,
+                        math: `= \\lim_{x \\to ${c}} (${otherFactorLatex})`
+                    },
+                    {
+                        title: 'Apply Direct Substitution',
+                        explanation: `Now substitute $x = ${c}$ into the simplified linear expression:`,
+                        math: `= ${c} ${c > 0 ? '+ ' + absC : '- ' + absC} = \\mathbf{${finalAns}}`
+                    }
+                ]
+            };
+        }
+
+        // Build Question (iii): \lim_{x \to \infty} \frac{a x^2 + b x}{c x^2 + d}
+        function createQuestion3(a, b, c, d) {
+            const bxTerm = b >= 0 ? `+ ${b}x` : `- ${Math.abs(b)}x`;
+            const dTerm = d >= 0 ? `+ ${d}` : `- ${Math.abs(d)}`;
+            const bSign = b >= 0 ? '+' : '-';
+            const dSign = d >= 0 ? '+' : '-';
+            const absB = Math.abs(b);
+            const absD = Math.abs(d);
+
+            const cx2Term = c === 1 ? `x^2` : `${c}x^2`;
+            const ax2Term = a === 1 ? `x^2` : `${a}x^2`;
+
+            const fracResult = formatFraction(a, c);
+
+            return {
+                id: 'q3',
+                roman: '(iii)',
+                badge: 'Limit at Infinity • Rational Function',
+                badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
+                problemLatex: `\\lim_{x \\to \\infty} \\left(\\frac{${ax2Term} ${bxTerm}}{${cx2Term} ${dTerm}}\\right)`,
+                answerValue: fracResult.value,
+                answerDisplay: fracResult.text,
+                answerLatex: fracResult.latex,
+                solutionVisible: false,
+                steps: [
+                    {
+                        title: 'Analyze the Behavior as $x \\to \\infty$',
+                        explanation: `As $x \\to \\infty$, both the numerator $(${ax2Term} ${bxTerm})$ and the denominator $(${cx2Term} ${dTerm})$ grow without bound, resulting in an indeterminate form of type $\\frac{\\infty}{\\infty}$. To resolve this, identify the **highest power of $x$** in the denominator, which is $x^2$.`,
+                        math: `\\text{Highest power of } x \\text{ in denominator} = x^2`
+                    },
+                    {
+                        title: 'Divide Numerator and Denominator by $x^2$',
+                        explanation: `Divide every term in both the numerator and the denominator by $x^2$ and simplify the algebraic fractions:`,
+                        math: `\\lim_{x \\to \\infty} \\left(\\frac{\\frac{${ax2Term}}{x^2} ${bSign} \\frac{${absB}x}{x^2}}{\\frac{${cx2Term}}{x^2} ${dSign} \\frac{${absD}}{x^2}}\\right) = \\lim_{x \\to \\infty} \\left(\\frac{${a} ${bSign} \\frac{${absB}}{x}}{${c} ${dSign} \\frac{${absD}}{x^2}}\\right)`
+                    },
+                    {
+                        title: 'Apply Limit Laws at Infinity',
+                        explanation: `Use the fundamental theorem that for any constant $k$, $\\lim_{x \\to \\infty} \\frac{k}{x} = 0$ and $\\lim_{x \\to \\infty} \\frac{k}{x^2} = 0$. Therefore, $\\frac{${absB}}{x} \\to 0$ and $\\frac{${absD}}{x^2} \\to 0$ as $x \\to \\infty$:`,
+                        math: `= \\frac{${a} ${bSign} 0}{${c} ${dSign} 0} = \\frac{${a}}{${c}}`
+                    },
+                    {
+                        title: 'Simplify the Final Ratio',
+                        explanation: `Simplify the ratio of the leading coefficients $\\frac{${a}}{${c}}$:`,
+                        math: `\\frac{${a}}{${c}} = \\mathbf{${fracResult.latex}}`
+                    }
+                ]
+            };
+        }
+
+        // Load the exact three questions from the provided worksheet image
+        function loadOriginalQuestions() {
+            isOriginalSet = true;
+            currentQuestions = [
+                createQuestion1(2, 1, -1, 3),      // \lim_{x \to -1} (2x + 1)^3
+                createQuestion2(6),                // \lim_{x \to 6} (x^2 - 36)/(x - 6)
+                createQuestion3(20, 3, 2, -3)      // \lim_{x \to \infty} (20x^2 + 3x)/(2x^2 - 3)
+            ];
+            updateHeaderBadge();
+            renderQuestions();
+        }
+
+        // Generate a fresh set of randomized questions matching the exact structure
+        function generateNewQuestions() {
+            isOriginalSet = false;
+            practiceSetCounter++;
+
+            // Randomize Question (i): \lim_{x \to c} (ax + b)^n
+            // Pick values so inside (a*c + b) is between -4 and 4 for clean mental/paper math
+            let a1, b1, c1, n1, inside;
+            do {
+                a1 = randChoice([-3, -2, 2, 3, 4]);
+                c1 = randChoice([-3, -2, -1, 1, 2, 3]);
+                inside = randChoice([-3, -2, -1, 1, 2, 3, 4]);
+                b1 = inside - a1 * c1;
+                n1 = randChoice([2, 3, 4]);
+            } while (b1 === 0 || Math.abs(b1) > 9 || (a1 === 2 && b1 === 1 && c1 === -1 && n1 === 3));
+
+            // Randomize Question (ii): \lim_{x \to c} (x^2 - c^2)/(x - c)
+            let c2;
+            do {
+                c2 = randChoice([-9, -8, -7, -5, -4, -3, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]);
+            } while (c2 === 6);
+
+            // Randomize Question (iii): \lim_{x \to \infty} (a x^2 + b x)/(c x^2 + d)
+            const c3 = randChoice([2, 3, 4, 5, 6]);
+            // Mostly integer multiples or clean halves/thirds
+            const multiplier = randChoice([2, 3, 4, 5, 6, 7, 8, 9, 1.5, 2.5]);
+            let a3 = Math.round(c3 * multiplier);
+            if (a3 === 20 && c3 === 2) a3 = 16;
+            const b3 = randChoice([-9, -7, -5, -4, -3, -2, 2, 3, 4, 5, 7, 9]);
+            const d3 = randChoice([-11, -9, -7, -5, -4, -3, -2, 2, 3, 4, 5, 7, 9]);
+
+            currentQuestions = [
+                createQuestion1(a1, b1, c1, n1),
+                createQuestion2(c2),
+                createQuestion3(a3, b3, c3, d3)
+            ];
+
+            updateHeaderBadge();
+            renderQuestions();
+        }
+
+        function updateHeaderBadge() {
+            const badge = document.getElementById('set-badge');
+            if (isOriginalSet) {
+                badge.textContent = 'Original Worksheet Questions';
+                badge.className = 'self-start sm:self-center shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200';
+            } else {
+                badge.textContent = `Generated Practice Set #${practiceSetCounter}`;
+                badge.className = 'self-start sm:self-center shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200';
+            }
+            updateToggleAllButtonUI();
+        }
+
+        // Parse user input (supports integers, decimals, and fractions like "15/2" or "-1")
+        function parseUserMathInput(rawStr) {
+            const cleaned = rawStr.trim().replace(/\s+/g, '');
+            if (!cleaned) return null;
+            if (cleaned.includes('/')) {
+                const parts = cleaned.split('/');
+                if (parts.length !== 2) return NaN;
+                const num = parseFloat(parts[0]);
+                const den = parseFloat(parts[1]);
+                if (isNaN(num) || isNaN(den) || den === 0) return NaN;
+                return num / den;
+            }
+            return parseFloat(cleaned);
+        }
+
+        // Check a student's typed answer
+        function checkAnswer(index) {
+            const q = currentQuestions[index];
+            const inputEl = document.getElementById(`input-${q.id}`);
+            const feedbackEl = document.getElementById(`feedback-${q.id}`);
+            const userVal = parseUserMathInput(inputEl.value);
+
+            feedbackEl.classList.remove('hidden');
+
+            if (userVal === null || isNaN(userVal)) {
+                feedbackEl.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-2';
+                feedbackEl.innerHTML = `<i class="ph-fill ph-warning-circle text-lg shrink-0"></i> <span>Please enter a valid number or fraction (e.g., <code>-1</code>, <code>12</code>, or <code>15/2</code>).</span>`;
+                return;
+            }
+
+            const isCorrect = Math.abs(userVal - q.answerValue) < 1e-6;
+            if (isCorrect) {
+                feedbackEl.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-between gap-2';
+                feedbackEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-lg text-emerald-600 shrink-0"></i>
+                        <span><strong>Correct!</strong> Great job—the limit is indeed $${q.answerLatex || q.answerDisplay}$.</span>
+                    </div>
+                `;
+                renderMathInElement(feedbackEl, {
+                    delimiters: [{left: '$', right: '$', display: false}]
+                });
+            } else {
+                feedbackEl.className = 'mt-3 p-3 rounded-xl text-xs sm:text-sm font-medium bg-rose-50 text-rose-800 border border-rose-200 flex items-center justify-between gap-2';
+                feedbackEl.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-x-circle text-lg text-rose-600 shrink-0"></i>
+                        <span>Not quite right. Review the strategy or click <strong>Show Solution</strong> to see the step-by-step work.</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Toggle individual solution visibility
+        function toggleSolution(index) {
+            currentQuestions[index].solutionVisible = !currentQuestions[index].solutionVisible;
+            const q = currentQuestions[index];
+            const solPanel = document.getElementById(`solution-${q.id}`);
+            const btnText = document.getElementById(`btn-text-${q.id}`);
+            const btnIcon = document.getElementById(`btn-icon-${q.id}`);
+            const btnEl = document.getElementById(`btn-sol-${q.id}`);
+
+            if (q.solutionVisible) {
+                solPanel.classList.remove('hidden');
+                btnText.textContent = 'Hide Solution';
+                btnIcon.className = 'ph-bold ph-eye-slash';
+                btnEl.className = 'px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition flex items-center gap-2 bg-slate-800 text-white hover:bg-slate-900 shadow-sm';
+            } else {
+                solPanel.classList.add('hidden');
+                btnText.textContent = 'Show Solution';
+                btnIcon.className = 'ph-bold ph-eye';
+                btnEl.className = 'px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition flex items-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200';
+            }
+
+            updateToggleAllButtonUI();
+        }
+
+        // Toggle all solutions at once
+        function toggleAllSolutions() {
+            const anyHidden = currentQuestions.some(q => !q.solutionVisible);
+            currentQuestions.forEach((q, idx) => {
+                q.solutionVisible = anyHidden;
+            });
+            renderQuestions();
+            updateToggleAllButtonUI();
+        }
+
+        function updateToggleAllButtonUI() {
+            const allVisible = currentQuestions.length > 0 && currentQuestions.every(q => q.solutionVisible);
+            const icon = document.getElementById('icon-toggle-all');
+            const text = document.getElementById('text-toggle-all');
+
+            if (allVisible) {
+                icon.className = 'ph-bold ph-eye-slash';
+                text.textContent = 'Hide All Solutions';
+            } else {
+                icon.className = 'ph-bold ph-eye';
+                text.textContent = 'Show All Solutions';
+            }
+        }
+
+        // Render all question cards and invoke KaTeX math rendering
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = currentQuestions.map((q, index) => {
+                const stepsHtml = q.steps.map((step, sIdx) => `
+                    <div class="relative pl-8 pb-5 last:pb-0">
+                        <!-- Vertical connector line -->
+                        ${sIdx < q.steps.length - 1 ? '<div class="absolute left-3 top-6 bottom-0 w-0.5 bg-indigo-200"></div>' : ''}
+                        <!-- Step number circle -->
+                        <div class="absolute left-0 top-0.5 w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                            ${sIdx + 1}
+                        </div>
+                        <div class="bg-white rounded-xl border border-slate-200/90 p-4 shadow-sm">
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900 mb-1">${step.title}</h4>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-2">${step.explanation}</p>
+                            <div class="bg-slate-50 rounded-lg px-4 py-2.5 border border-slate-200/70 math-display text-slate-900">
+                                $$${step.math}$$
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <article class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition hover:border-slate-300">
+                        <!-- Top Question Bar -->
+                        <div class="p-5 sm:p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-base sm:text-lg font-bold text-slate-900">${q.roman}</span>
+                                    <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full border ${q.badgeColor}">
+                                        ${q.badge}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Mathematical Problem Statement -->
+                            <div class="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-6 my-2 flex items-center justify-center sm:justify-start min-h-[100px] math-display text-lg sm:text-xl text-slate-900">
+                                $$${q.problemLatex}$$
+                            </div>
+
+                            <!-- Interactive Answer Input + Show/Hide Solution Controls -->
+                            <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 flex-1 max-w-md">
+                                    <div class="relative flex-1">
+                                        <input 
+                                            type="text" 
+                                            id="input-${q.id}" 
+                                            placeholder="Your answer (e.g. ${q.answerDisplay})"
+                                            onkeydown="if(event.key === 'Enter') checkAnswer(${index})"
+                                            class="w-full pl-3.5 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                                        />
+                                    </div>
+                                    <button 
+                                        onclick="checkAnswer(${index})"
+                                        class="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition shrink-0 flex items-center gap-1.5">
+                                        <i class="ph-bold ph-check"></i>
+                                        <span>Check</span>
+                                    </button>
+                                </div>
+
+                                <button 
+                                    id="btn-sol-${q.id}"
+                                    onclick="toggleSolution(${index})"
+                                    class="${q.solutionVisible 
+                                        ? 'px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2 bg-slate-800 text-white hover:bg-slate-900 shadow-sm' 
+                                        : 'px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'}">
+                                    <i id="btn-icon-${q.id}" class="ph-bold ${q.solutionVisible ? 'ph-eye-slash' : 'ph-eye'}"></i>
+                                    <span id="btn-text-${q.id}">${q.solutionVisible ? 'Hide Solution' : 'Show Solution'}</span>
+                                </button>
+                            </div>
+
+                            <!-- Answer Check Feedback Message -->
+                            <div id="feedback-${q.id}" class="hidden"></div>
+                        </div>
+
+                        <!-- Collapsible Detailed Step-by-Step Solution -->
+                        <div id="solution-${q.id}" class="${q.solutionVisible ? '' : 'hidden'} bg-indigo-50/40 border-t border-indigo-100 p-5 sm:p-6 solution-panel">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="ph-fill ph-book-open-text text-indigo-600 text-lg"></i>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-900">Detailed Step-by-Step Solution</h3>
+                                </div>
+                                <div class="px-3 py-1 rounded-lg bg-emerald-100/90 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold">
+                                    Final Answer: $${q.answerLatex || q.answerDisplay}$
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                ${stepsHtml}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            // Render all LaTeX formulas using KaTeX
+            renderMathInElement(container, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        // Initialize on page load
+        window.onload = function () {
+            loadOriginalQuestions();
+            // Also render math in the static strategy guide
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+            });
+        };
+    </script>
+</body>
+</html>
