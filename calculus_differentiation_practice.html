@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculus Differentiation Practice</title>
+    <!-- Tailwind CSS for modern academic styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Merriweather for math clarity -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        // Initial question generation once MathJax is ready
+                        if (typeof initApp === 'function') {
+                            initApp();
+                        }
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-serif {
+            font-family: 'Merriweather', serif;
+        }
+        /* Smooth accordion and card transitions */
+        .solution-panel {
+            transition: all 0.25s ease-in-out;
+        }
+        /* Custom scrollbar for horizontal math overflow on small mobile screens */
+        .math-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+        .math-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .math-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Top Navigation & Header -->
+    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800 sticky top-0 z-30">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-inner flex items-center justify-center">
+                    <span class="font-serif italic font-bold text-xl tracking-wider">f'(x)</span>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Differentiation Practice Studio</h1>
+                    <p class="text-xs sm:text-sm text-slate-300">First Derivatives: Power, Log, Quotient &amp; Chain Rules</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 self-start sm:self-auto">
+                <button id="toggleFormulaBtn" onclick="toggleFormulaSheet()" class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <span id="formulaBtnText">Show Formula Sheet</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Collapsible Formula Reference Sheet -->
+        <section id="formulaSheet" class="hidden bg-indigo-950 text-slate-100 rounded-2xl p-5 sm:p-6 shadow-md border border-indigo-800/80 transition-all">
+            <div class="flex items-center justify-between mb-4 border-b border-indigo-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h2 class="text-base sm:text-lg font-semibold text-white">Quick Reference: Standard Differentiation Rules</h2>
+                </div>
+                <button onclick="toggleFormulaSheet()" class="text-indigo-300 hover:text-white text-sm font-medium">Close ✕</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div class="bg-indigo-900/60 p-3.5 rounded-xl border border-indigo-800/60">
+                    <div class="text-indigo-300 font-semibold mb-1">(i) Power &amp; Radical Rule</div>
+                    <div class="text-xs text-slate-300 mb-2">Rewrite $\sqrt{x} = x^{1/2}$, then apply:</div>
+                    <div class="bg-indigo-950/70 p-2 rounded-lg text-center overflow-x-auto">
+                        $$\frac{d}{dx}\left(ax^n\right) = anx^{n-1}$$
+                    </div>
+                </div>
+                <div class="bg-indigo-900/60 p-3.5 rounded-xl border border-indigo-800/60">
+                    <div class="text-indigo-300 font-semibold mb-1">(ii) Natural Logarithm</div>
+                    <div class="text-xs text-slate-300 mb-2">For a differentiable function $u(x)$:</div>
+                    <div class="bg-indigo-950/70 p-2 rounded-lg text-center overflow-x-auto">
+                        $$\frac{d}{dx}\big[\ln(u)\big] = \frac{u'}{u}$$
+                    </div>
+                </div>
+                <div class="bg-indigo-900/60 p-3.5 rounded-xl border border-indigo-800/60">
+                    <div class="text-indigo-300 font-semibold mb-1">(iii) Quotient Rule</div>
+                    <div class="text-xs text-slate-300 mb-2">For $f(x) = \frac{u}{v}$ where $v \neq 0$:</div>
+                    <div class="bg-indigo-950/70 p-2 rounded-lg text-center overflow-x-auto">
+                        $$f'(x) = \frac{v u' - u v'}{v^2}$$
+                    </div>
+                </div>
+                <div class="bg-indigo-900/60 p-3.5 rounded-xl border border-indigo-800/60">
+                    <div class="text-indigo-300 font-semibold mb-1">(iv) Chain Rule (Power)</div>
+                    <div class="text-xs text-slate-300 mb-2">Multiply by inner derivative $u'$:</div>
+                    <div class="bg-indigo-950/70 p-2 rounded-lg text-center overflow-x-auto">
+                        $$\frac{d}{dx}\left[u^m\right] = m u^{m-1} \cdot u'$$
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control Bar: Mode Selection & Primary Action Buttons -->
+        <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col gap-4">
+            <!-- Mode Filter Pills -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Practice Mode:</span>
+                <div class="flex flex-wrap gap-1.5" role="group" aria-label="Question Type Filter">
+                    <button onclick="setFilterMode('all')" id="mode-all" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm">
+                        All 4 Types (Worksheet)
+                    </button>
+                    <button onclick="setFilterMode(1)" id="mode-1" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        (i) Power &amp; Radical
+                    </button>
+                    <button onclick="setFilterMode(2)" id="mode-2" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        (ii) Natural Log
+                    </button>
+                    <button onclick="setFilterMode(3)" id="mode-3" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        (iii) Quotient Rule
+                    </button>
+                    <button onclick="setFilterMode(4)" id="mode-4" class="mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200">
+                        (iv) Chain Rule
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2 text-slate-600 text-sm">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span class="font-medium">Instruction:</span>
+                    <span>Find the first derivative $f'(x)$ of the following functions:</span>
+                </div>
+
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+                    <!-- Generate Button -->
+                    <button onclick="generateQuestions()" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Generate New Question(s)
+                    </button>
+
+                    <!-- Global Show/Hide Button -->
+                    <button id="globalToggleBtn" onclick="toggleAllSolutions()" class="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400">
+                        <svg id="globalEyeIcon" class="w-4 h-4 mr-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span id="globalToggleText">Show Solutions</span>
+                    </button>
+
+                    <!-- Load Original Sample Button -->
+                    <button onclick="loadOriginalSample()" title="Load the exact 4 questions from the attached image" class="inline-flex items-center justify-center px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 transition-all">
+                        Reset to Original Sample
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Questions List Container -->
+        <div id="questionsContainer" class="space-y-4">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-5">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <div>Interactive Calculus Differentiation Trainer • Designed for clear step-by-step mastery</div>
+            <div>Tip: Work out each derivative on paper before clicking <strong>Show Solution</strong>.</div>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // --- State Management ---
+        let currentMode = 'all'; // 'all', 1, 2, 3, or 4
+        let questionsData = [];
+        let solutionVisibility = {}; // maps question index to boolean
+
+        // --- Helper Math Utilities ---
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function randChoice(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            return a || 1;
+        }
+
+        // Formats coefficient before a variable (e.g., 1x^2 -> x^2, -1x^2 -> -x^2)
+        function formatLeadingCoeff(c, variableStr) {
+            if (c === 1) return variableStr;
+            if (c === -1) return '-' + variableStr;
+            return c + variableStr;
+        }
+
+        // Formats signed constant or term (e.g., + 5, - 3)
+        function formatSignedTerm(val, termStr = '') {
+            if (val === 0) return '';
+            const sign = val > 0 ? '+' : '-';
+            const absVal = Math.abs(val);
+            if (termStr === '') {
+                return ` ${sign} ${absVal}`;
+            }
+            const coeffStr = absVal === 1 ? '' : absVal;
+            return ` ${sign} ${coeffStr}${termStr}`;
+        }
+
+        // --- Question Generators for Each Type ---
+
+        /**
+         * Type (i): f(x) = a*x^n +/- b*\sqrt{x} +/- c
+         * Original sample: f(x) = x^3 - 2\sqrt{x} + 12
+         */
+        function generateType1(useOriginal = false) {
+            let a, n, b, signB, c, signC;
+            if (useOriginal) {
+                a = 1; n = 3; b = 2; signB = -1; c = 12; signC = 1;
+            } else {
+                a = randChoice([1, 1, 2, 3, 4, 5]);
+                n = randInt(2, 5);
+                // Pick mostly even integers for b so b/2 simplifies cleanly, or occasional odd for fraction practice
+                b = randChoice([2, 4, 6, 8, 10, 1, 3]);
+                signB = randChoice([-1, 1]);
+                c = randInt(2, 25);
+                signC = randChoice([-1, 1]);
+            }
+
+            const firstTerm = formatLeadingCoeff(a, `x^{${n}}`);
+            const bCoeff = b === 1 ? '' : b;
+            const secondTerm = `${signB > 0 ? '+' : '-'} ${bCoeff}\\sqrt{x}`;
+            const thirdTerm = `${signC > 0 ? '+' : '-'} ${c}`;
+
+            const questionLatex = `f(x) = ${firstTerm} ${secondTerm} ${thirdTerm}`;
+            const rewriteLatex = `f(x) = ${firstTerm} ${signB > 0 ? '+' : '-'} ${bCoeff}x^{1/2} ${thirdTerm}`;
+
+            // Derivative calculation
+            const derivPowerCoeff = a * n;
+            const newExp = n - 1;
+            const derivFirstTerm = newExp === 1 ? `${derivPowerCoeff}x` : `${derivPowerCoeff}x^{${newExp}}`;
+
+            // Radical term derivative: signB * b * (1/2) x^{-1/2}
+            const signSymbol = signB > 0 ? '+' : '-';
+            let step2RadicalTerm = `${signSymbol} ${b}\\left(\\frac{1}{2}\\right)x^{-1/2}`;
+            
+            let negExpForm = '';
+            let radicalFracForm = '';
+
+            if (b % 2 === 0) {
+                const halfB = b / 2;
+                const halfBStr = halfB === 1 ? '' : halfB;
+                negExpForm = `${derivFirstTerm} ${signSymbol} ${halfBStr}x^{-1/2}`;
+                radicalFracForm = `${derivFirstTerm} ${signSymbol} \\frac{${halfB}}{\\sqrt{x}}`;
+            } else {
+                negExpForm = `${derivFirstTerm} ${signSymbol} \\frac{${b}}{2}x^{-1/2}`;
+                radicalFracForm = `${derivFirstTerm} ${signSymbol} \\frac{${b}}{2\\sqrt{x}}`;
+            }
+
+            const steps = [
+                {
+                    title: "Rewrite the square root term in fractional index (exponent) form:",
+                    math: `$$${rewriteLatex}$$`
+                },
+                {
+                    title: "Apply the power rule $\\frac{d}{dx}\\left(x^n\\right) = nx^{n-1}$ term by term (the derivative of constant $" + (signC > 0 ? c : -c) + "$ is $0$):",
+                    math: `$$f'(x) = ${derivFirstTerm} ${step2RadicalTerm} + 0$$`
+                },
+                {
+                    title: "Simplify and express in negative index or radical form:",
+                    math: `$$f'(x) = ${negExpForm} \\quad \\text{or} \\quad ${radicalFracForm}$$`
+                }
+            ];
+
+            return {
+                id: 1,
+                roman: "(i)",
+                badge: "Power & Radical Rule",
+                questionLatex,
+                finalAnswerLatex: `f'(x) = ${negExpForm} \\;\\text{ or }\\; ${radicalFracForm}`,
+                steps
+            };
+        }
+
+        /**
+         * Type (ii): f(x) = \ln(a*x^n +/- b)
+         * Original sample: f(x) = \ln(2x^3 + 3)
+         */
+        function generateType2(useOriginal = false) {
+            let a, n, b, signB;
+            if (useOriginal) {
+                a = 2; n = 3; b = 3; signB = 1;
+            } else {
+                a = randInt(2, 7);
+                n = randInt(2, 5);
+                b = randInt(1, 12);
+                signB = randChoice([1, 1, -1]); // mostly positive inside ln
+            }
+
+            const uTerm1 = formatLeadingCoeff(a, `x^{${n}}`);
+            const uExpr = `${uTerm1} ${signB > 0 ? '+' : '-'} ${b}`;
+            const questionLatex = `f(x) = \\ln(${uExpr})`;
+
+            const derivCoeff = a * n;
+            const newExp = n - 1;
+            const uPrime = newExp === 1 ? `${derivCoeff}x` : `${derivCoeff}x^{${newExp}}`;
+
+            // Check if fraction can be simplified (if gcd(derivCoeff, a, b) > 1)
+            const commonDiv = gcd(derivCoeff, gcd(a, b));
+            let simplifiedFinal = `\\frac{${uPrime}}{${uExpr}}`;
+            if (commonDiv > 1) {
+                const sNumCoeff = derivCoeff / commonDiv;
+                const sNum = (sNumCoeff === 1 ? '' : sNumCoeff) + (newExp === 1 ? 'x' : `x^{${newExp}}`);
+                const sDenA = a / commonDiv;
+                const sDenB = b / commonDiv;
+                const sDenTerm1 = formatLeadingCoeff(sDenA, `x^{${n}}`);
+                simplifiedFinal = `\\frac{${uPrime}}{${uExpr}} = \\frac{${sNum}}{${sDenTerm1} ${signB > 0 ? '+' : '-'} ${sDenB}}`;
+            }
+
+            const steps = [
+                {
+                    title: `Apply the logarithmic differentiation rule $\\frac{d}{dx}[\\ln(u)] = \\frac{u'}{u}$, where $u = ${uExpr}$ and $u' = ${uPrime}$:`,
+                    math: `$$f'(x) = \\frac{\\frac{d}{dx}(${uExpr})}{${uExpr}}$$`
+                },
+                {
+                    title: "Differentiate the numerator and simplify:",
+                    math: `$$f'(x) = ${simplifiedFinal}$$`
+                }
+            ];
+
+            return {
+                id: 2,
+                roman: "(ii)",
+                badge: "Logarithmic Rule",
+                questionLatex,
+                finalAnswerLatex: `f'(x) = ${simplifiedFinal}`,
+                steps
+            };
+        }
+
+        /**
+         * Type (iii): f(x) = \frac{a*x + b}{c*x + d}
+         * Original sample: f(x) = \frac{x + 1}{5x - 3}
+         */
+        function generateType3(useOriginal = false) {
+            let a, b, c, d;
+            if (useOriginal) {
+                a = 1; b = 1; c = 5; d = -3;
+            } else {
+                // Ensure ad - bc != 0 so the quotient isn't a trivial constant
+                do {
+                    a = randChoice([1, 1, 2, 3, 4]);
+                    b = randChoice([-6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6]);
+                    c = randInt(2, 7);
+                    d = randChoice([-7, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 7]);
+                } while (a * d - b * c === 0);
+            }
+
+            const uExpr = `${formatLeadingCoeff(a, 'x')}${formatSignedTerm(b)}`;
+            const vExpr = `${formatLeadingCoeff(c, 'x')}${formatSignedTerm(d)}`;
+
+            const questionLatex = `f(x) = \\frac{${uExpr}}{${vExpr}}`;
+
+            // Quotient rule numerator: v * u' - u * v'
+            // = (cx + d)(a) - (ax + b)(c)
+            // = (ac)x + ad - (ac)x - bc = ad - bc
+            const ac = a * c;
+            const ad = a * d;
+            const bc = b * c;
+            const finalNum = ad - bc;
+
+            // Format expanded terms in numerator: ac x + ad - ac x - bc
+            const acTerm = formatLeadingCoeff(ac, 'x');
+            const expanded1 = `${acTerm}${formatSignedTerm(ad)}`;
+            const expanded2 = ` - ${acTerm}${formatSignedTerm(-bc)}`;
+
+            const steps = [
+                {
+                    title: "Identify the components for the quotient rule $f'(x) = \\frac{v u' - u v'}{v^2}$:",
+                    math: `$$\\text{Let } u = ${uExpr} \\implies u' = ${a} \\qquad \\text{and} \\qquad \\text{Let } v = ${vExpr} \\implies v' = ${c}$$`
+                },
+                {
+                    title: "Substitute $u, u', v,$ and $v'$ into the quotient rule formula:",
+                    math: `$$f'(x) = \\frac{(${vExpr})(${a}) - (${uExpr})(${c})}{(${vExpr})^2}$$`
+                },
+                {
+                    title: "Expand the numerator and combine like terms:",
+                    math: `$$f'(x) = \\frac{${expanded1}${expanded2}}{(${vExpr})^2} = \\frac{${finalNum}}{(${vExpr})^2}$$`
+                }
+            ];
+
+            return {
+                id: 3,
+                roman: "(iii)",
+                badge: "Quotient Rule",
+                questionLatex,
+                finalAnswerLatex: `f'(x) = \\frac{${finalNum}}{(${vExpr})^2}`,
+                steps
+            };
+        }
+
+        /**
+         * Type (iv): f(x) = (a*x^n +/- b)^m
+         * Original sample: f(x) = (3x^2 - 2)^{10}
+         */
+        function generateType4(useOriginal = false) {
+            let a, n, b, signB, m;
+            if (useOriginal) {
+                a = 3; n = 2; b = 2; signB = -1; m = 10;
+            } else {
+                a = randInt(2, 6);
+                n = randInt(2, 4);
+                b = randInt(1, 9);
+                signB = randChoice([-1, 1]);
+                m = randInt(5, 12);
+            }
+
+            const uTerm1 = formatLeadingCoeff(a, `x^{${n}}`);
+            const uExpr = `${uTerm1} ${signB > 0 ? '+' : '-'} ${b}`;
+            const questionLatex = `f(x) = (${uExpr})^{${m}}`;
+
+            const mMinus1 = m - 1;
+            const innerDerivCoeff = a * n;
+            const innerExp = n - 1;
+            const uPrime = innerExp === 1 ? `${innerDerivCoeff}x` : `${innerDerivCoeff}x^{${innerExp}}`;
+
+            const combinedCoeff = m * innerDerivCoeff;
+            const finalOuter = innerExp === 1 ? `${combinedCoeff}x` : `${combinedCoeff}x^{${innerExp}}`;
+            const finalLatex = `${finalOuter}(${uExpr})^{${mMinus1}}`;
+
+            const steps = [
+                {
+                    title: `Apply the chain rule $\\frac{d}{dx}[u^n] = n u^{n-1} \\cdot u'$, where $u = ${uExpr}$ and $u' = ${uPrime}$:`,
+                    math: `$$f'(x) = ${m}(${uExpr})^{${mMinus1}} \\cdot \\frac{d}{dx}(${uExpr})$$`
+                },
+                {
+                    title: "Differentiate the inner expression and simplify by multiplying the outer factors:",
+                    math: `$$f'(x) = ${m}(${uExpr})^{${mMinus1}}(${uPrime}) = ${finalLatex}$$`
+                }
+            ];
+
+            return {
+                id: 4,
+                roman: "(iv)",
+                badge: "Chain Rule",
+                questionLatex,
+                finalAnswerLatex: `f'(x) = ${finalLatex}`,
+                steps
+            };
+        }
+
+        // --- Core UI & Rendering Functions ---
+
+        function buildQuestionSet(useOriginal = false) {
+            questionsData = [];
+            solutionVisibility = {};
+
+            if (currentMode === 'all') {
+                questionsData = [
+                    generateType1(useOriginal),
+                    generateType2(useOriginal),
+                    generateType3(useOriginal),
+                    generateType4(useOriginal)
+                ];
+            } else if (currentMode === 1) {
+                questionsData = [generateType1(useOriginal)];
+            } else if (currentMode === 2) {
+                questionsData = [generateType2(useOriginal)];
+            } else if (currentMode === 3) {
+                questionsData = [generateType3(useOriginal)];
+            } else if (currentMode === 4) {
+                questionsData = [generateType4(useOriginal)];
+            }
+
+            questionsData.forEach((_, idx) => {
+                solutionVisibility[idx] = false;
+            });
+
+            renderQuestions();
+            updateGlobalToggleButton();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const isVisible = !!solutionVisibility[idx];
+
+                const stepsHtml = q.steps.map((step, sIdx) => `
+                    <div class="flex items-start space-x-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center mt-0.5">
+                            ${sIdx + 1}
+                        </span>
+                        <div class="flex-grow min-w-0">
+                            <p class="text-sm text-slate-700 font-medium leading-relaxed">${step.title}</p>
+                            <div class="math-scroll my-1.5 px-3 py-2 bg-white rounded-xl border border-slate-200/80 text-slate-900 shadow-2xs">
+                                ${step.math}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                const card = document.createElement('article');
+                card.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:border-slate-300";
+                card.innerHTML = `
+                    <!-- Question Header & Prompt -->
+                    <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4 min-w-0">
+                            <span class="text-lg sm:text-xl font-bold text-slate-700 math-serif select-none w-9 flex-shrink-0">
+                                ${q.roman}
+                            </span>
+                            <div class="min-w-0 flex-grow">
+                                <div class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 mb-1.5">
+                                    ${q.badge}
+                                </div>
+                                <div class="math-scroll text-lg sm:text-xl text-slate-900 py-1">
+                                    $$${q.questionLatex}$$
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Individual Show/Hide Button -->
+                        <div class="flex items-center self-end sm:self-center flex-shrink-0">
+                            <button onclick="toggleSingleSolution(${idx})" id="btn-sol-${idx}" class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${isVisible ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'}">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    ${isVisible 
+                                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>'
+                                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>'
+                                    }
+                                </svg>
+                                <span id="btn-text-${idx}">${isVisible ? 'Hide Solution' : 'Show Solution'}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step-by-Step Solution Drawer -->
+                    <div id="sol-panel-${idx}" class="${isVisible ? 'block' : 'hidden'} bg-slate-50/90 border-t border-slate-200/80 p-5 sm:p-6 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Step-by-Step Worked Solution</span>
+                        </div>
+                        <div class="space-y-4">
+                            ${stepsHtml}
+                        </div>
+                        <!-- Final Answer Highlight Box -->
+                        <div class="mt-4 pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-emerald-50/70 border border-emerald-200 rounded-xl px-4 py-2.5">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Final Derivative:</span>
+                            <div class="math-scroll text-emerald-950 font-semibold">
+                                $$${q.finalAnswerLatex}$$
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            typesetMath();
+        }
+
+        // Safely trigger MathJax v3 typesetting
+        function typesetMath() {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                window.MathJax.typesetPromise().catch((err) => console.warn('MathJax typeset warning:', err));
+            }
+        }
+
+        // --- Interactive Event Handlers ---
+
+        function generateQuestions() {
+            buildQuestionSet(false);
+        }
+
+        function loadOriginalSample() {
+            currentMode = 'all';
+            updateModeFilterUI();
+            buildQuestionSet(true);
+        }
+
+        function setFilterMode(mode) {
+            currentMode = mode;
+            updateModeFilterUI();
+            buildQuestionSet(false);
+        }
+
+        function updateModeFilterUI() {
+            const modes = ['all', 1, 2, 3, 4];
+            modes.forEach(m => {
+                const btn = document.getElementById(`mode-${m}`);
+                if (!btn) return;
+                if (m === currentMode) {
+                    btn.className = "mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-sm";
+                } else {
+                    btn.className = "mode-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200";
+                }
+            });
+        }
+
+        function toggleSingleSolution(idx) {
+            solutionVisibility[idx] = !solutionVisibility[idx];
+            const isVisible = solutionVisibility[idx];
+
+            const panel = document.getElementById(`sol-panel-${idx}`);
+            const btn = document.getElementById(`btn-sol-${idx}`);
+
+            if (panel && btn) {
+                if (isVisible) {
+                    panel.classList.remove('hidden');
+                    panel.classList.add('block');
+                    btn.className = "inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100";
+                    btn.innerHTML = `
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                        <span>Hide Solution</span>
+                    `;
+                } else {
+                    panel.classList.remove('block');
+                    panel.classList.add('hidden');
+                    btn.className = "inline-flex items-center px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200";
+                    btn.innerHTML = `
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <span>Show Solution</span>
+                    `;
+                }
+            }
+
+            updateGlobalToggleButton();
+        }
+
+        function toggleAllSolutions() {
+            const anyHidden = questionsData.some((_, idx) => !solutionVisibility[idx]);
+            const targetState = anyHidden; // If any are hidden, show all; otherwise hide all
+
+            questionsData.forEach((_, idx) => {
+                if (solutionVisibility[idx] !== targetState) {
+                    toggleSingleSolution(idx);
+                }
+            });
+            updateGlobalToggleButton();
+        }
+
+        function updateGlobalToggleButton() {
+            const allShown = questionsData.length > 0 && questionsData.every((_, idx) => solutionVisibility[idx]);
+            const textSpan = document.getElementById('globalToggleText');
+            const btn = document.getElementById('globalToggleBtn');
+
+            if (allShown) {
+                textSpan.textContent = "Hide Solutions";
+                btn.className = "flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400";
+            } else {
+                textSpan.textContent = "Show Solutions";
+                btn.className = "flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 border border-slate-300 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400";
+            }
+        }
+
+        function toggleFormulaSheet() {
+            const sheet = document.getElementById('formulaSheet');
+            const btnText = document.getElementById('formulaBtnText');
+            const isHidden = sheet.classList.contains('hidden');
+
+            if (isHidden) {
+                sheet.classList.remove('hidden');
+                btnText.textContent = 'Hide Formula Sheet';
+                typesetMath();
+            } else {
+                sheet.classList.add('hidden');
+                btnText.textContent = 'Show Formula Sheet';
+            }
+        }
+
+        // Initialize app on startup (starts with the original sample questions loaded)
+        function initApp() {
+            loadOriginalSample();
+        }
+
+        // Fallback initialization if MathJax loads before/after DOMContentLoaded
+        window.addEventListener('DOMContentLoaded', () => {
+            if (questionsData.length === 0) {
+                initApp();
+            }
+        });
+    </script>
+</body>
+</html>
