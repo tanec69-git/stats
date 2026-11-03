@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Distribution Critical Regions & Hypothesis Test Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background: linear-gradient(90deg, #fecdd3 0%, #a7f3d0 50%, #fecdd3 100%);
+            height: 0.55rem;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #1e293b;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 50%;
+            border: 2.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background-color: #4f46e5;
+        }
+
+        .preset-btn-active {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+        }
+
+        .tail-btn-active {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.25);
+        }
+
+        .table-cell-active {
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-weight: 700;
+            box-shadow: inset 0 0 0 2px #ef4444;
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-mono font-bold text-xl shadow-xs">
+                    Z*
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                        Standard Normal (<i>Z</i>) Critical Regions Explorer
+                    </h1>
+                    <p class="text-xs text-slate-500">
+                        Visualize Confidence Levels (1 &minus; &alpha;), Rejection Regions (&alpha;), Critical Values (<i>z</i>*), and Hypothesis Decisions
+                    </p>
+                </div>
+            </div>
+
+            <!-- Live Decision Badge in Header -->
+            <div class="flex items-center gap-3 self-start md:self-auto">
+                <div id="headerDecisionBadge" class="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border transition-all duration-200">
+                    <i id="headerDecisionIcon" class="fa-solid fa-circle-check"></i>
+                    <span id="headerDecisionText">Fail to Reject H₀</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Control Bar: Confidence Level & Tail Selector -->
+        <section class="bg-white rounded-2xl shadow-xs border border-slate-200 p-4 sm:p-5">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+                
+                <!-- 1. Confidence Level / Alpha Selector (7 Cols) -->
+                <div class="lg:col-span-7">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i>
+                            1. Select Confidence Level (1 &minus; &alpha;) &amp; Significance (&alpha;)
+                        </label>
+                        <span class="text-xs font-mono text-slate-400">Click preset to update</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-2" id="levelButtonsContainer">
+                        <button onclick="setConfidenceLevel(80)" data-level="80" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">80%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.20</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(90)" data-level="90" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">90%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.10</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(95)" data-level="95" class="level-btn preset-btn-active flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">95%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.05</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(98)" data-level="98" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">98%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.02</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(99)" data-level="99" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">99%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.01</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Tail Direction Selector (5 Cols) -->
+                <div class="lg:col-span-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-code-branch text-indigo-600"></i>
+                            2. Select Test Tail Type (H₁)
+                        </label>
+                        <span id="tailSplitLabel" class="text-xs font-mono font-semibold text-rose-600">Two-Tailed (&alpha;/2 each)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setTailType('two')" data-tail="two" class="tail-btn tail-btn-active py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Two-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &ne; &mu;₀</span>
+                        </button>
+                        <button onclick="setTailType('left')" data-tail="left" class="tail-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Left-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &lt; &mu;₀</span>
+                        </button>
+                        <button onclick="setTailType('right')" data-tail="right" class="tail-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Right-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &gt; &mu;₀</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid: Canvas Visualization (Left 8 Cols) + Live Breakdown (Right 4 Cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: High-Precision Z-Curve Canvas & Test Statistic Control (8 Cols) -->
+            <div class="lg:col-span-8 flex flex-col gap-5">
+                
+                <!-- Graph Card -->
+                <div class="bg-white rounded-2xl shadow-xs border border-slate-200 p-4 sm:p-5 flex flex-col">
+                    <!-- Graph Legend Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-2 border-b border-slate-100 text-xs">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded-xs bg-emerald-500/25 border border-emerald-600 inline-block"></span>
+                                <span class="font-semibold text-slate-700" id="legendAcceptText">Non-Rejection Region (95.0%)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded-xs bg-rose-500/35 border border-rose-600 inline-block"></span>
+                                <span class="font-semibold text-slate-700" id="legendRejectText">Critical / Rejection Region (&alpha; = 5.0%)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span>
+                                <span class="font-semibold text-indigo-700" id="legendZStatText">Test Statistic (z = 1.20)</span>
+                            </div>
+                        </div>
+                        <div class="text-slate-400 font-medium hidden sm:flex items-center gap-1">
+                            <i class="fa-solid fa-arrows-left-right"></i> Drag along axis to move <i>z</i><sub>stat</sub>
+                        </div>
+                    </div>
+
+                    <!-- Responsive Canvas Container -->
+                    <div class="relative w-full h-[360px] sm:h-[420px] select-none">
+                        <canvas id="zCanvas" class="w-full h-full cursor-ew-resize"></canvas>
+                    </div>
+
+                    <!-- Interactive Test Statistic Slider Bar -->
+                    <div class="mt-4 pt-4 border-t border-slate-100 bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/60">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    3. Test Observed Sample Statistic (<i>z</i><sub>stat</sub>):
+                                </span>
+                                <span id="zStatBadge" class="px-2.5 py-0.5 rounded-md font-mono font-bold text-sm bg-indigo-600 text-white shadow-2xs">
+                                    z = +1.20
+                                </span>
+                            </div>
+
+                            <!-- Quick Test Statistic Buttons -->
+                            <div class="flex items-center gap-1.5 text-xs">
+                                <span class="text-slate-400 mr-1 hidden sm:inline">Try:</span>
+                                <button onclick="setZStat(0)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition">0.00</button>
+                                <button onclick="setZStat(-1.50)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition">-1.50</button>
+                                <button onclick="setZStat(1.80)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition">+1.80</button>
+                                <button onclick="setZStat(2.40)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition">+2.40</button>
+                                <button onclick="setZStat(-2.75)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition">-2.75</button>
+                            </div>
+                        </div>
+
+                        <input id="zStatSlider" type="range" min="-3.80" max="3.80" step="0.01" value="1.20" class="w-full" oninput="handleZStatSlider(this.value)">
+                        
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1 px-1">
+                            <span>-3.80</span>
+                            <span>-2.00</span>
+                            <span>-1.00</span>
+                            <span>0 (Mean)</span>
+                            <span>+1.00</span>
+                            <span>+2.00</span>
+                            <span>+3.80</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Live Statistical Breakdown & Formula Panel (4 Cols) -->
+            <div class="lg:col-span-4 flex flex-col gap-5">
+
+                <!-- Hypothesis Decision & P-Value Card -->
+                <div id="decisionCard" class="rounded-2xl p-5 border transition-colors duration-200 bg-emerald-50/70 border-emerald-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Conclusion at &alpha; = <span id="cardAlphaText">0.05</span></span>
+                        <span id="cardStatusPill" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                            Non-Rejection Region
+                        </span>
+                    </div>
+                    <h2 id="cardDecisionHeadline" class="text-xl font-extrabold text-emerald-950 mb-1">
+                        Fail to Reject H₀
+                    </h2>
+                    <p id="cardDecisionReason" class="text-xs text-slate-700 leading-relaxed mb-4">
+                        Since the test statistic <strong>z = +1.20</strong> lies inside the non-rejection region (between <strong>-1.960</strong> and <strong>+1.960</strong>), the result is not statistically significant.
+                    </p>
+
+                    <!-- P-value vs Alpha Comparison Box -->
+                    <div class="bg-white/90 rounded-xl p-3 border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
+                        <div class="border-r border-slate-100 pr-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Observed p-value</span>
+                            <span id="statPValue" class="font-mono text-base font-bold text-indigo-700">0.2301</span>
+                        </div>
+                        <div class="pl-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Significance &alpha;</span>
+                            <span id="statAlphaCompare" class="font-mono text-base font-bold text-rose-600">0.0500</span>
+                        </div>
+                    </div>
+                    <div id="pValComparisonNote" class="mt-2 text-center font-mono text-xs font-semibold text-emerald-800">
+                        p-value (0.2301) &gt; &alpha; (0.0500) &rarr; Fail to Reject H₀
+                    </div>
+                </div>
+
+                <!-- Detailed Parameters & Z-Table Guide Card -->
+                <div class="bg-white rounded-2xl shadow-xs border border-slate-200 p-5 flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2.5 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-indigo-600"></i>
+                            Critical Region Breakdown
+                        </h3>
+
+                        <dl class="divide-y divide-slate-100 text-xs sm:text-sm">
+                            <div class="py-2.5 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Confidence Level (1 &minus; &alpha;)</dt>
+                                <dd id="bkConfidence" class="font-mono font-bold text-emerald-700">95% (0.9500)</dd>
+                            </div>
+                            <div class="py-2.5 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Significance Level (&alpha;)</dt>
+                                <dd id="bkAlpha" class="font-mono font-bold text-rose-600">5% (0.0500)</dd>
+                            </div>
+                            <div class="py-2.5 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Area per Critical Tail</dt>
+                                <dd id="bkTailArea" class="font-mono font-bold text-rose-600">&alpha;/2 = 0.0250 (2.5%)</dd>
+                            </div>
+                            <div class="py-2.5 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Critical Value(s) <i>z</i>*</dt>
+                                <dd id="bkCritVal" class="font-mono font-extrabold text-slate-900 text-base">&plusmn;1.960</dd>
+                            </div>
+                            <div class="py-2.5">
+                                <dt class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Decision Rule</dt>
+                                <dd id="bkDecisionRule" class="font-mono text-xs bg-rose-50 text-rose-900 border border-rose-200 px-3 py-2 rounded-lg font-semibold">
+                                    Reject H₀ if |z| &ge; 1.960 (i.e. z &le; -1.960 or z &ge; +1.960)
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- Cumulative Z-Table Lookup Helper -->
+                    <div class="mt-4 pt-3.5 border-t border-slate-100">
+                        <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-indigo-950 mb-1">
+                                <i class="fa-solid fa-table-cells text-indigo-600"></i>
+                                How to find <i>z</i>* in a Cumulative Z-Table:
+                            </div>
+                            <p id="zTableTip" class="text-xs text-indigo-900/90 leading-relaxed">
+                                A standard cumulative Z-table gives area to the <strong>left</strong>: look up <span class="font-mono font-bold">P(Z &lt; z*) = 1 &minus; 0.0250 = 0.9750</span> inside the table body to find <span class="font-mono font-bold">z* = +1.960</span>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Master Interactive Reference Table for All 5 Levels -->
+        <section class="bg-white rounded-2xl shadow-xs border border-slate-200 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-indigo-600"></i>
+                        Complete Critical Values (<i>z</i>*) Reference Table
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Click any cell in the table below to immediately load that confidence level and tail configuration onto the graph.
+                    </p>
+                </div>
+                <span class="text-xs font-mono text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg font-semibold self-start sm:self-auto">
+                    Highlighted cell = Active Selection
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="border-b-2 border-slate-200 text-slate-500 uppercase text-[11px] font-bold tracking-wider bg-slate-50/80">
+                            <th class="py-3 px-3 rounded-tl-lg">Confidence Level (1 &minus; &alpha;)</th>
+                            <th class="py-3 px-3">Significance (&alpha;)</th>
+                            <th class="py-3 px-3 text-center">Two-Tailed (H₁: &mu; &ne; &mu;₀)<br><span class="text-[10px] font-mono font-normal text-slate-400">Area in each tail = &alpha;/2</span></th>
+                            <th class="py-3 px-3 text-center">Left-Tailed (H₁: &mu; &lt; &mu;₀)<br><span class="text-[10px] font-mono font-normal text-slate-400">Left tail area = &alpha;</span></th>
+                            <th class="py-3 px-3 text-center rounded-tr-lg">Right-Tailed (H₁: &mu; &gt; &mu;₀)<br><span class="text-[10px] font-mono font-normal text-slate-400">Right tail area = &alpha;</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="referenceTableBody" class="divide-y divide-slate-100 font-mono">
+                        <!-- Dynamically populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ============================================================================
+        // 1. EXACT STATISTICAL DATA & FUNCTIONS FOR THE Z-DISTRIBUTION
+        // ============================================================================
+        const Z_PRESETS = {
+            80: {
+                confidence: 80,
+                alpha: 0.20,
+                two:   { crit: 1.282, label: '±1.282', cumArea: '0.9000' },
+                left:  { crit: -0.842, label: '-0.842', cumArea: '0.2000' },
+                right: { crit: 0.842, label: '+0.842', cumArea: '0.8000' }
+            },
+            90: {
+                confidence: 90,
+                alpha: 0.10,
+                two:   { crit: 1.645, label: '±1.645', cumArea: '0.9500' },
+                left:  { crit: -1.282, label: '-1.282', cumArea: '0.1000' },
+                right: { crit: 1.282, label: '+1.282', cumArea: '0.9000' }
+            },
+            95: {
+                confidence: 95,
+                alpha: 0.05,
+                two:   { crit: 1.960, label: '±1.960', cumArea: '0.9750' },
+                left:  { crit: -1.645, label: '-1.645', cumArea: '0.0500' },
+                right: { crit: 1.645, label: '+1.645', cumArea: '0.9500' }
+            },
+            98: {
+                confidence: 98,
+                alpha: 0.02,
+                two:   { crit: 2.326, label: '±2.326', cumArea: '0.9900' },
+                left:  { crit: -2.054, label: '-2.054', cumArea: '0.0200' },
+                right: { crit: 2.054, label: '+2.054', cumArea: '0.9800' }
+            },
+            99: {
+                confidence: 99,
+                alpha: 0.01,
+                two:   { crit: 2.576, label: '±2.576', cumArea: '0.9950' },
+                left:  { crit: -2.326, label: '-2.326', cumArea: '0.0100' },
+                right: { crit: 2.326, label: '+2.326', cumArea: '0.9900' }
+            }
+        };
+
+        // Standard Normal PDF: f(z) = (1 / sqrt(2*pi)) * e^(-0.5 * z^2)
+        function normalPDF(z) {
+            return Math.exp(-0.5 * z * z) / Math.sqrt(2 * Math.PI);
+        }
+
+        // High-precision Standard Normal Cumulative Distribution Function P(Z <= z)
+        function normalCDF(z) {
+            if (z < -8.0) return 0.0;
+            if (z > 8.0) return 1.0;
+            const sign = z < 0 ? -1 : 1;
+            const x = Math.abs(z) / Math.sqrt(2);
+            // Abramowitz and Stegun formula 7.1.26 approximation for erf(x)
+            const t = 1.0 / (1.0 + 0.3275911 * x);
+            const a1 =  0.254829592;
+            const a2 = -0.284496736;
+            const a3 =  1.421413741;
+            const a4 = -1.453152027;
+            const a5 =  1.061405429;
+            const erf = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1.0 + sign * erf);
+        }
+
+        // ============================================================================
+        // 2. APPLICATION STATE
+        // ============================================================================
+        let currentLevel = 95;       // 80, 90, 95, 98, 99
+        let currentTail = 'two';     // 'two', 'left', 'right'
+        let zStat = 1.20;            // Observed test statistic (-3.80 to +3.80)
+        let isDraggingCanvas = false;
+
+        const canvas = document.getElementById('zCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const Z_MIN = -4.0;
+        const Z_MAX = 4.0;
+        const Y_MAX = 0.45;
+
+        // ============================================================================
+        // 3. CANVAS VISUALIZATION ENGINE
+        // ============================================================================
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawPlot();
+        }
+
+        function drawPlot() {
+            const width = canvas.parentElement.clientWidth;
+            const height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0, 0, width, height);
+
+            const padLeft = 44;
+            const padRight = 32;
+            const padTop = 38;
+            const padBottom = 54;
+
+            const plotW = width - padLeft - padRight;
+            const plotH = height - padTop - padBottom;
+
+            const toScreenX = (z) => padLeft + ((z - Z_MIN) / (Z_MAX - Z_MIN)) * plotW;
+            const toScreenY = (y) => padTop + plotH - (y / Y_MAX) * plotH;
+            const baseY = toScreenY(0);
+
+            const preset = Z_PRESETS[currentLevel];
+            const critAbs = preset[currentTail].crit;
+
+            // 1. Subtle horizontal grid lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+
+            for (let yTick = 0.1; yTick <= 0.4; yTick += 0.1) {
+                const sy = toScreenY(yTick);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, sy);
+                ctx.lineTo(width - padRight, sy);
+                ctx.stroke();
+                ctx.fillText(yTick.toFixed(1), padLeft - 8, sy + 4);
+            }
+
+            // 2. Shade Regions (Non-Rejection in Emerald/Teal vs Critical Rejection in Coral/Red)
+            const acceptFill = 'rgba(16, 185, 129, 0.18)';
+            const rejectFill = 'rgba(244, 63, 94, 0.36)';
+
+            if (currentTail === 'two') {
+                const c = Math.abs(critAbs);
+                shadeUnderCurve(toScreenX, toScreenY, Z_MIN, -c, rejectFill);
+                shadeUnderCurve(toScreenX, toScreenY, -c, c, acceptFill);
+                shadeUnderCurve(toScreenX, toScreenY, c, Z_MAX, rejectFill);
+            } else if (currentTail === 'left') {
+                const c = critAbs; // negative value
+                shadeUnderCurve(toScreenX, toScreenY, Z_MIN, c, rejectFill);
+                shadeUnderCurve(toScreenX, toScreenY, c, Z_MAX, acceptFill);
+            } else if (currentTail === 'right') {
+                const c = critAbs; // positive value
+                shadeUnderCurve(toScreenX, toScreenY, Z_MIN, c, acceptFill);
+                shadeUnderCurve(toScreenX, toScreenY, c, Z_MAX, rejectFill);
+            }
+
+            // 3. Draw Mean Line at z = 0
+            const zeroX = toScreenX(0);
+            ctx.save();
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(zeroX, toScreenY(normalPDF(0)));
+            ctx.lineTo(zeroX, baseY);
+            ctx.stroke();
+            ctx.restore();
+
+            // 4. Draw Standard Normal Bell Curve Outline
+            ctx.save();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.75;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            const steps = 360;
+            const dz = (Z_MAX - Z_MIN) / steps;
+            for (let i = 0; i <= steps; i++) {
+                const z = Z_MIN + i * dz;
+                const sx = toScreenX(z);
+                const sy = toScreenY(normalPDF(z));
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // 5. Draw Critical Value Dashed Lines & Callout Badges
+            if (currentTail === 'two') {
+                const c = Math.abs(critAbs);
+                const halfAlphaPct = ((preset.alpha / 2) * 100).toFixed(1) + '%';
+                drawCriticalBoundary(toScreenX(-c), baseY, toScreenY(normalPDF(-c)), `-z* = -${c.toFixed(3)}`, `&alpha;/2 = ${halfAlphaPct}`, 'left');
+                drawCriticalBoundary(toScreenX(c), baseY, toScreenY(normalPDF(c)), `+z* = +${c.toFixed(3)}`, `&alpha;/2 = ${halfAlphaPct}`, 'right');
+            } else if (currentTail === 'left') {
+                const c = critAbs;
+                const alphaPct = (preset.alpha * 100).toFixed(0) + '%';
+                drawCriticalBoundary(toScreenX(c), baseY, toScreenY(normalPDF(c)), `z* = ${c.toFixed(3)}`, `&alpha; = ${alphaPct}`, 'left');
+            } else if (currentTail === 'right') {
+                const c = critAbs;
+                const alphaPct = (preset.alpha * 100).toFixed(0) + '%';
+                drawCriticalBoundary(toScreenX(c), baseY, toScreenY(normalPDF(c)), `z* = +${c.toFixed(3)}`, `&alpha; = ${alphaPct}`, 'right');
+            }
+
+            // 6. Draw Center Area Confidence Badge inside the Bell Curve
+            const centerLabelX = currentTail === 'left' ? toScreenX(0.45) : (currentTail === 'right' ? toScreenX(-0.45) : zeroX);
+            const centerLabelY = toScreenY(0.16);
+            drawPillLabel(centerLabelX, centerLabelY, `1 - α = ${preset.confidence}%`, '#065f46', '#d1fae5', '#10b981');
+
+            // 7. Draw X-Axis Baseline & Z-Score Ticks
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.75;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, baseY);
+            ctx.lineTo(width - padRight, baseY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#475569';
+            ctx.font = '600 12px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            for (let zTick = -4; zTick <= 4; zTick++) {
+                const sx = toScreenX(zTick);
+                ctx.beginPath();
+                ctx.moveTo(sx, baseY);
+                ctx.lineTo(sx, baseY + 6);
+                ctx.stroke();
+                ctx.fillText(zTick === 0 ? '0' : (zTick > 0 ? `+${zTick}` : `${zTick}`), sx, baseY + 21);
+            }
+
+            // Axis title
+            ctx.font = '600 12px "Inter", sans-serif';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('Standard Normal Score (Z)', zeroX, height - 8);
+
+            // 8. Draw User's Observed Test Statistic (z_stat) Pin & Flag
+            drawTestStatisticMarker(toScreenX(zStat), baseY, toScreenY(normalPDF(zStat)), isRejected(zStat));
+        }
+
+        function shadeUnderCurve(toScreenX, toScreenY, zStart, zEnd, fillStyle) {
+            ctx.save();
+            ctx.fillStyle = fillStyle;
+            ctx.beginPath();
+            const steps = 100;
+            const dz = (zEnd - zStart) / steps;
+            ctx.moveTo(toScreenX(zStart), toScreenY(0));
+            for (let i = 0; i <= steps; i++) {
+                const z = zStart + i * dz;
+                ctx.lineTo(toScreenX(z), toScreenY(normalPDF(z)));
+            }
+            ctx.lineTo(toScreenX(zEnd), toScreenY(0));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawCriticalBoundary(sx, baseY, curveY, critText, areaText, side) {
+            ctx.save();
+            // Red dashed vertical line from baseline to top badge
+            const topY = Math.min(curveY - 28, baseY - 125);
+            ctx.strokeStyle = '#e11d48';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(sx, baseY);
+            ctx.lineTo(sx, topY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Critical Value Pill Badge
+            drawPillLabel(sx, topY - 10, critText, '#ffffff', '#e11d48', '#be123c');
+
+            // Tail Area Label pointing to the tail
+            const offsetX = side === 'left' ? -36 : 36;
+            ctx.fillStyle = '#be123c';
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            const cleanArea = areaText.replace('&alpha;', 'α');
+            ctx.fillText(cleanArea, sx + offsetX, baseY - 14);
+            ctx.restore();
+        }
+
+        function drawPillLabel(x, y, text, textColor, bgColor, borderColor) {
+            ctx.save();
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            const paddingX = 8;
+            const textW = ctx.measureText(text).width;
+            const boxW = textW + paddingX * 2;
+            const boxH = 22;
+            const rx = x - boxW / 2;
+            const ry = y - boxH / 2;
+
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, boxW, boxH, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y + 0.5);
+            ctx.restore();
+        }
+
+        function drawTestStatisticMarker(sx, baseY, curveY, rejected) {
+            ctx.save();
+            const markerColor = rejected ? '#dc2626' : '#4f46e5';
+
+            // Solid vertical stem
+            ctx.strokeStyle = markerColor;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(sx, baseY);
+            ctx.lineTo(sx, 26);
+            ctx.stroke();
+
+            // Draggable handle circle on the X-axis
+            ctx.fillStyle = markerColor;
+            ctx.beginPath();
+            ctx.arc(sx, baseY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // Top Banner Flag for z_stat
+            const signStr = zStat >= 0 ? `+${zStat.toFixed(2)}` : zStat.toFixed(2);
+            const statusStr = rejected ? 'REJECT H₀' : 'KEEP H₀';
+            const label = `z = ${signStr} (${statusStr})`;
+
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            const textW = ctx.measureText(label).width;
+            const boxW = textW + 16;
+            const boxH = 24;
+
+            // Clamp flag inside canvas width
+            const canvasW = canvas.parentElement.clientWidth;
+            const clampedX = Math.max(boxW / 2 + 8, Math.min(canvasW - boxW / 2 - 8, sx));
+
+            ctx.fillStyle = markerColor;
+            ctx.beginPath();
+            ctx.roundRect(clampedX - boxW / 2, 8, boxW, boxH, 6);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, clampedX, 20);
+            ctx.restore();
+        }
+
+        // ============================================================================
+        // 4. STATISTICAL DECISION LOGIC & UI SYNCHRONIZATION
+        // ============================================================================
+        function isRejected(z) {
+            const crit = Z_PRESETS[currentLevel][currentTail].crit;
+            if (currentTail === 'two') {
+                return Math.abs(z) >= Math.abs(crit);
+            } else if (currentTail === 'left') {
+                return z <= crit;
+            } else {
+                return z >= crit;
+            }
+        }
+
+        function computePValue(z) {
+            if (currentTail === 'two') {
+                return 2 * (1 - normalCDF(Math.abs(z)));
+            } else if (currentTail === 'left') {
+                return normalCDF(z);
+            } else {
+                return 1 - normalCDF(z);
+            }
+        }
+
+        function updateUI() {
+            const preset = Z_PRESETS[currentLevel];
+            const tailData = preset[currentTail];
+            const rejected = isRejected(zStat);
+            const pVal = computePValue(zStat);
+            const zFormatted = (zStat >= 0 ? '+' : '') + zStat.toFixed(2);
+
+            // 1. Update Active Confidence Level Buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                const lvl = parseInt(btn.getAttribute('data-level'), 10);
+                btn.classList.toggle('preset-btn-active', lvl === currentLevel);
+            });
+
+            // 2. Update Active Tail Type Buttons
+            document.querySelectorAll('.tail-btn').forEach(btn => {
+                const tail = btn.getAttribute('data-tail');
+                btn.classList.toggle('tail-btn-active', tail === currentTail);
+            });
+
+            const tailSplitLabel = document.getElementById('tailSplitLabel');
+            if (currentTail === 'two') {
+                tailSplitLabel.innerHTML = `Two-Tailed (&alpha;/2 = ${(preset.alpha / 2).toFixed(3)} each)`;
+            } else if (currentTail === 'left') {
+                tailSplitLabel.innerHTML = `Left-Tailed (&alpha; = ${preset.alpha.toFixed(2)} in left tail)`;
+            } else {
+                tailSplitLabel.innerHTML = `Right-Tailed (&alpha; = ${preset.alpha.toFixed(2)} in right tail)`;
+            }
+
+            // 3. Update Graph Legends & Slider Badge
+            document.getElementById('legendAcceptText').textContent = `Non-Rejection Region (${preset.confidence}.0%)`;
+            document.getElementById('legendRejectText').innerHTML = `Critical / Rejection Region (&alpha; = ${(preset.alpha * 100).toFixed(0)}.0%)`;
+            document.getElementById('legendZStatText').textContent = `Test Statistic (z = ${zFormatted})`;
+            document.getElementById('zStatBadge').textContent = `z = ${zFormatted}`;
+            document.getElementById('zStatSlider').value = zStat;
+
+            // 4. Update Header & Decision Card
+            const headerBadge = document.getElementById('headerDecisionBadge');
+            const headerIcon = document.getElementById('headerDecisionIcon');
+            const headerText = document.getElementById('headerDecisionText');
+            const decisionCard = document.getElementById('decisionCard');
+            const cardStatusPill = document.getElementById('cardStatusPill');
+            const cardHeadline = document.getElementById('cardDecisionHeadline');
+            const cardReason = document.getElementById('cardDecisionReason');
+            const pValNote = document.getElementById('pValComparisonNote');
+
+            document.getElementById('cardAlphaText').textContent = preset.alpha.toFixed(2);
+            document.getElementById('statPValue').textContent = pVal.toFixed(4);
+            document.getElementById('statAlphaCompare').textContent = preset.alpha.toFixed(4);
+
+            if (rejected) {
+                headerBadge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border bg-rose-50 border-rose-300 text-rose-700';
+                headerIcon.className = 'fa-solid fa-triangle-exclamation text-rose-600';
+                headerText.textContent = `Reject H₀ (z = ${zFormatted})`;
+
+                decisionCard.className = 'rounded-2xl p-5 border transition-colors duration-200 bg-rose-50/80 border-rose-200';
+                cardStatusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-600 text-white';
+                cardStatusPill.textContent = 'In Critical Region';
+                cardHeadline.className = 'text-xl font-extrabold text-rose-950 mb-1';
+                cardHeadline.textContent = 'Reject H₀ (Statistically Significant)';
+                cardReason.innerHTML = `Since the test statistic <strong>z = ${zFormatted}</strong> falls beyond the critical cutoff (<strong>${tailData.label}</strong>), it lies inside the shaded red rejection region.`;
+                pValNote.className = 'mt-2 text-center font-mono text-xs font-semibold text-rose-700';
+                pValNote.innerHTML = `p-value (${pVal.toFixed(4)}) &le; &alpha; (${preset.alpha.toFixed(4)}) &rarr; Reject H₀`;
+            } else {
+                headerBadge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border bg-emerald-50 border-emerald-300 text-emerald-800';
+                headerIcon.className = 'fa-solid fa-circle-check text-emerald-600';
+                headerText.textContent = `Fail to Reject H₀ (z = ${zFormatted})`;
+
+                decisionCard.className = 'rounded-2xl p-5 border transition-colors duration-200 bg-emerald-50/70 border-emerald-200';
+                cardStatusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white';
+                cardStatusPill.textContent = 'Non-Rejection Region';
+                cardHeadline.className = 'text-xl font-extrabold text-emerald-950 mb-1';
+                cardHeadline.textContent = 'Fail to Reject H₀';
+                cardReason.innerHTML = `Since the test statistic <strong>z = ${zFormatted}</strong> does not cross the critical boundary (<strong>${tailData.label}</strong>), it remains in the green non-rejection region.`;
+                pValNote.className = 'mt-2 text-center font-mono text-xs font-semibold text-emerald-800';
+                pValNote.innerHTML = `p-value (${pVal.toFixed(4)}) &gt; &alpha; (${preset.alpha.toFixed(4)}) &rarr; Fail to Reject H₀`;
+            }
+
+            // 5. Update Breakdown Panel
+            document.getElementById('bkConfidence').textContent = `${preset.confidence}% (${(preset.confidence / 100).toFixed(4)})`;
+            document.getElementById('bkAlpha').textContent = `${(preset.alpha * 100).toFixed(0)}% (${preset.alpha.toFixed(4)})`;
+            document.getElementById('bkCritVal').textContent = tailData.label;
+
+            const bkTailArea = document.getElementById('bkTailArea');
+            const bkRule = document.getElementById('bkDecisionRule');
+            const zTableTip = document.getElementById('zTableTip');
+
+            if (currentTail === 'two') {
+                const halfA = preset.alpha / 2;
+                const c = tailData.crit.toFixed(3);
+                bkTailArea.innerHTML = `&alpha;/2 = ${halfA.toFixed(4)} (${(halfA * 100).toFixed(1)}% per tail)`;
+                bkRule.innerHTML = `Reject H₀ if |z| &ge; ${c} &nbsp;(z &le; -${c} or z &ge; +${c})`;
+                zTableTip.innerHTML = `For a two-tailed test, split &alpha; in half (<span class="font-mono font-bold">&alpha;/2 = ${halfA.toFixed(4)}</span>). Look up cumulative area <span class="font-mono font-bold">P(Z &lt; z*) = 1 &minus; ${halfA.toFixed(4)} = ${tailData.cumArea}</span> to find <span class="font-mono font-bold">z* = &plusmn;${c}</span>.`;
+            } else if (currentTail === 'left') {
+                const c = tailData.crit.toFixed(3);
+                bkTailArea.innerHTML = `&alpha; = ${preset.alpha.toFixed(4)} (${(preset.alpha * 100).toFixed(0)}% in left tail)`;
+                bkRule.innerHTML = `Reject H₀ if z &le; ${c}`;
+                zTableTip.innerHTML = `For a left-tailed test, all of &alpha; is in the lower tail. Look up cumulative area <span class="font-mono font-bold">P(Z &lt; z*) = ${tailData.cumArea}</span> directly in the negative Z-table to find <span class="font-mono font-bold">z* = ${c}</span>.`;
+            } else {
+                const c = tailData.crit.toFixed(3);
+                bkTailArea.innerHTML = `&alpha; = ${preset.alpha.toFixed(4)} (${(preset.alpha * 100).toFixed(0)}% in right tail)`;
+                bkRule.innerHTML = `Reject H₀ if z &ge; +${c}`;
+                zTableTip.innerHTML = `For a right-tailed test, subtract &alpha; from 1. Look up cumulative left area <span class="font-mono font-bold">P(Z &lt; z*) = 1 &minus; ${preset.alpha.toFixed(4)} = ${tailData.cumArea}</span> to find <span class="font-mono font-bold">z* = +${c}</span>.`;
+            }
+
+            // 6. Render Interactive Reference Table & Redraw Plot
+            renderReferenceTable();
+            drawPlot();
+        }
+
+        function renderReferenceTable() {
+            const tbody = document.getElementById('referenceTableBody');
+            const levels = [80, 90, 95, 98, 99];
+            let html = '';
+
+            levels.forEach(lvl => {
+                const p = Z_PRESETS[lvl];
+                const isRowActive = (lvl === currentLevel);
+                const rowBg = isRowActive ? 'bg-slate-50/90' : 'hover:bg-slate-50/50';
+
+                const twoActive = (isRowActive && currentTail === 'two') ? 'table-cell-active' : 'text-slate-700 hover:bg-slate-100';
+                const leftActive = (isRowActive && currentTail === 'left') ? 'table-cell-active' : 'text-slate-700 hover:bg-slate-100';
+                const rightActive = (isRowActive && currentTail === 'right') ? 'table-cell-active' : 'text-slate-700 hover:bg-slate-100';
+
+                html += `
+                    <tr class="${rowBg} transition">
+                        <td class="py-2.5 px-3 font-sans font-bold text-slate-900">
+                            <button onclick="selectPreset(${lvl}, currentTail)" class="flex items-center gap-2 cursor-pointer text-left w-full">
+                                <span class="w-2 h-2 rounded-full ${isRowActive ? 'bg-indigo-600' : 'bg-slate-300'}"></span>
+                                ${lvl}% Confidence
+                            </button>
+                        </td>
+                        <td class="py-2.5 px-3 text-slate-600">&alpha; = ${p.alpha.toFixed(2)}</td>
+                        <td class="py-1.5 px-2 text-center">
+                            <button onclick="selectPreset(${lvl}, 'two')" class="w-full py-1.5 px-2 rounded-md transition cursor-pointer ${twoActive}">
+                                ${p.two.label}
+                            </button>
+                        </td>
+                        <td class="py-1.5 px-2 text-center">
+                            <button onclick="selectPreset(${lvl}, 'left')" class="w-full py-1.5 px-2 rounded-md transition cursor-pointer ${leftActive}">
+                                ${p.left.label}
+                            </button>
+                        </td>
+                        <td class="py-1.5 px-2 text-center">
+                            <button onclick="selectPreset(${lvl}, 'right')" class="w-full py-1.5 px-2 rounded-md transition cursor-pointer ${rightActive}">
+                                ${p.right.label}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ============================================================================
+        // 5. INTERACTION HANDLERS
+        // ============================================================================
+        function setConfidenceLevel(level) {
+            currentLevel = level;
+            updateUI();
+        }
+
+        function setTailType(tail) {
+            currentTail = tail;
+            updateUI();
+        }
+
+        function selectPreset(level, tail) {
+            currentLevel = level;
+            currentTail = tail;
+            updateUI();
+        }
+
+        function handleZStatSlider(val) {
+            zStat = parseFloat(val);
+            updateUI();
+        }
+
+        function setZStat(val) {
+            zStat = parseFloat(val);
+            updateUI();
+        }
+
+        // Direct Canvas Pointer Dragging for z_stat
+        function updateZFromPointer(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const padLeft = 44;
+            const padRight = 32;
+            const plotW = rect.width - padLeft - padRight;
+
+            let z = Z_MIN + ((px - padLeft) / plotW) * (Z_MAX - Z_MIN);
+            z = Math.max(-3.80, Math.min(3.80, z));
+            zStat = Math.round(z * 100) / 100;
+            updateUI();
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDraggingCanvas = true;
+            updateZFromPointer(e.clientX);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDraggingCanvas) {
+                updateZFromPointer(e.clientX);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingCanvas = false;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                isDraggingCanvas = true;
+                updateZFromPointer(e.touches[0].clientX);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDraggingCanvas && e.touches.length > 0) {
+                updateZFromPointer(e.touches[0].clientX);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            isDraggingCanvas = false;
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            updateUI();
+        };
+    </script>
+</body>
+</html>

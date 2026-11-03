@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Characteristics of the t-Distribution | Interactive Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            teal: '#0b556c',
+                            purple: '#4a154b',
+                            normal: '#15803d', // Green from slide
+                            df13: '#ec4899',   // Magenta/Pink from slide
+                            df5: '#1d4ed8',    // Blue from slide
+                            active: '#f59e0b'  // Amber/Orange for interactive curve
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom styling for sliders and canvas container */
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            background: #cbd5e1;
+            height: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #0b556c;
+            height: 1.15rem;
+            width: 1.15rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background-color: #0f766e;
+        }
+
+        .slide-bullet {
+            position: relative;
+            padding-left: 1.25rem;
+        }
+        .slide-bullet::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            top: -1px;
+            color: #4a154b;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Top Header inspired by the uploaded academic slide -->
+    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#0b556c] text-white font-bold text-lg shadow-sm">
+                        <i>t</i>
+                    </span>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#0b556c]">
+                        Characteristics of the <i>t</i>-Distribution
+                    </h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                    Interactive Statistical Comparison: Student's <i>t</i>-Distribution vs. Standard Normal (<i>Z</i>)
+                </p>
+            </div>
+            
+            <!-- Quick Preset Buttons -->
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 mr-1">Quick Set:</span>
+                <button onclick="setDF(1)" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                    df = 1 (Cauchy)
+                </button>
+                <button onclick="setDF(5)" class="px-2.5 py-1 text-xs font-medium rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition">
+                    df = 5 (Slide)
+                </button>
+                <button onclick="setDF(13)" class="px-2.5 py-1 text-xs font-medium rounded-md bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 transition">
+                    df = 13 (Slide)
+                </button>
+                <button onclick="setDF(30)" class="px-2.5 py-1 text-xs font-medium rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                    df = 30
+                </button>
+                <button onclick="setDF(100)" class="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition">
+                    df = 100 (≈ Z)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: Interactive Graph & Controls (7 Cols) -->
+            <div class="lg:col-span-7 flex flex-col gap-5">
+                
+                <!-- Graph Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 flex flex-col">
+                    <!-- Graph Header & Legend -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-100">
+                        <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-medium">
+                            <!-- Standard Normal Legend -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-1 rounded-full bg-[#15803d] inline-block"></span>
+                                <span class="text-slate-700 font-semibold">Standard Normal (<i>Z</i>)</span>
+                            </div>
+                            <!-- Active t Legend -->
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-1 rounded-full bg-[#ea580c] inline-block"></span>
+                                <span class="text-slate-800 font-bold" id="legend-active-label">Active <i>t</i> (df = 5)</span>
+                            </div>
+                            <!-- Optional Slide Reference Legends -->
+                            <div id="legend-df13" class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-0.5 border-b-2 border-dashed border-[#ec4899] inline-block"></span>
+                                <span class="text-pink-600"><i>t</i> (df = 13)</span>
+                            </div>
+                            <div id="legend-df5" class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-0.5 border-b-2 border-dashed border-[#1d4ed8] inline-block"></span>
+                                <span class="text-blue-700"><i>t</i> (df = 5)</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-slate-400 flex items-center gap-1">
+                            <i class="fa-regular fa-hand-pointer"></i> Hover graph to inspect density
+                        </div>
+                    </div>
+
+                    <!-- Responsive Canvas Wrapper -->
+                    <div class="relative w-full h-[340px] sm:h-[400px] select-none">
+                        <canvas id="distCanvas" class="w-full h-full cursor-crosshair"></canvas>
+                        
+                        <!-- Floating Hover Tooltip -->
+                        <div id="graphTooltip" class="hidden absolute pointer-events-none bg-slate-900/95 text-white text-xs rounded-lg px-3 py-2 shadow-lg border border-slate-700 z-20 backdrop-blur-xs">
+                            <div class="font-mono font-semibold text-slate-300 border-b border-slate-700 pb-1 mb-1" id="tt-x">x = 0.00</div>
+                            <div class="flex items-center justify-between gap-4 text-emerald-400">
+                                <span>Normal <i>f(z)</i>:</span>
+                                <span class="font-mono font-bold" id="tt-z">0.3989</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 text-orange-400">
+                                <span id="tt-t-label"><i>t</i> (df=5) <i>f(t)</i>:</span>
+                                <span class="font-mono font-bold" id="tt-t">0.3796</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-4 text-slate-300 pt-1 mt-1 border-t border-slate-800">
+                                <span>Diff (<i>t - Z</i>):</span>
+                                <span class="font-mono" id="tt-diff">-0.0193</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tail Shading Explanation Banner -->
+                    <div id="tailBanner" class="mt-3 px-3.5 py-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-amber-600"></i>
+                            <span id="tailBannerText">
+                                <strong>Heavier Tails Visualized:</strong> Probability in the outer tails beyond |<i>x</i>| &gt; 2.0 is <strong class="underline" id="bannerTailT">10.19%</strong> for <i>t</i>(df=5) vs. <strong>4.55%</strong> for Normal <i>Z</i>.
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Controls Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <label for="dfSlider" class="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                    Degrees of Freedom (<i>df</i>)
+                                </label>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#0b556c] text-white" id="dfBadge">
+                                    df = 5
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200" id="nBadge">
+                                    Sample Size n = 6
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                Since <i>df</i> = <i>n</i> &minus; 1, increasing sample size <i>n</i> directly increases degrees of freedom.
+                            </p>
+                        </div>
+
+                        <!-- Play/Animate Button -->
+                        <button id="animateBtn" onclick="toggleAnimation()" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-[#0b556c] hover:bg-[#094254] text-white shadow-xs transition cursor-pointer shrink-0">
+                            <i id="animateIcon" class="fa-solid fa-play text-xs"></i>
+                            <span id="animateText">Animate Convergence</span>
+                        </button>
+                    </div>
+
+                    <!-- Slider -->
+                    <div class="mb-6">
+                        <input id="dfSlider" type="range" min="1" max="100" step="1" value="5" class="w-full" oninput="handleSliderChange(this.value)">
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1.5 px-1">
+                            <span>df = 1 (n=2)</span>
+                            <span>df = 5</span>
+                            <span>df = 13</span>
+                            <span>df = 30</span>
+                            <span>df = 60</span>
+                            <span>df = 100 (≈ Z)</span>
+                        </div>
+                    </div>
+
+                    <!-- Visualization Toggles -->
+                    <div class="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Reference Curves from Slide -->
+                        <div>
+                            <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                                Slide Reference Curves
+                            </span>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-700 cursor-pointer select-none">
+                                    <input type="checkbox" id="toggleDf5" checked onchange="updatePlot()" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4">
+                                    <span>Show <strong class="text-blue-700"><i>t</i> (df = 5)</strong></span>
+                                </label>
+                                <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-700 cursor-pointer select-none">
+                                    <input type="checkbox" id="toggleDf13" checked onchange="updatePlot()" class="rounded text-pink-600 focus:ring-pink-500 w-4 h-4">
+                                    <span>Show <strong class="text-pink-600"><i>t</i> (df = 13)</strong></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Tail Highlight Mode -->
+                        <div>
+                            <span class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                                Tail &amp; Spread Visualization
+                            </span>
+                            <select id="tailModeSelect" onchange="updatePlot()" class="w-full text-xs sm:text-sm rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-slate-700 font-medium focus:outline-none focus:border-[#0b556c]">
+                                <option value="prob2" selected>Highlight Tails: P(|X| &gt; 2.0)</option>
+                                <option value="crit95">95% Critical Values (&alpha; = 0.05 Two-Tailed)</option>
+                                <option value="diff">Highlight Density Difference (t vs. Z)</option>
+                                <option value="none">No Shading (Clean Curves Only)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Slide Characteristics & Live Statistical Comparison (5 Cols) -->
+            <div class="lg:col-span-5 flex flex-col gap-5">
+
+                <!-- Slide Key Characteristics Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h2 class="text-base font-bold text-[#4a154b] flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap text-[#0b556c]"></i>
+                            Core Characteristics (Slide Summary)
+                        </h2>
+                        <span class="text-[11px] font-medium px-2 py-0.5 rounded bg-purple-50 text-[#4a154b] border border-purple-100">
+                            Dynamic Notes
+                        </span>
+                    </div>
+
+                    <ul class="space-y-3.5 text-sm text-slate-700 leading-relaxed">
+                        <li class="slide-bullet">
+                            <strong class="text-slate-900">A continuous distribution:</strong>
+                            Like the standard normal distribution, <i>t</i> can take any real value from &minus;&infin; to +&infin;, and the total area under every curve equals exactly <span class="font-mono font-semibold text-slate-900">1.00</span>.
+                        </li>
+                        
+                        <li class="slide-bullet">
+                            <strong class="text-slate-900">Bell-shaped, but "flatter" and more "spread out":</strong>
+                            At <span class="font-mono font-semibold text-orange-600" id="note-df-1">df = 5</span>, the center peak is lower (<span class="font-mono font-semibold" id="note-peak">0.3796</span> vs <span class="font-mono">0.3989</span>) because uncertainty in estimating the sample standard deviation <i>s</i> pushes more probability into the tails.
+                        </li>
+
+                        <li class="slide-bullet">
+                            <strong class="text-slate-900">A family of <i>t</i>-distributions:</strong>
+                            All <i>t</i>-distributions are symmetric around a <strong class="text-slate-900">mean of 0</strong>, but their standard deviations differ according to sample size <i>n</i>:
+                            <div class="mt-1.5 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between font-mono text-xs">
+                                <span>SD = &radic;[ df / (df &minus; 2) ]</span>
+                                <span id="note-sd-badge" class="font-bold text-[#0b556c]">Current SD = 1.291</span>
+                            </div>
+                        </li>
+
+                        <li class="slide-bullet">
+                            <strong class="text-slate-900">Approaches Standard Normal as <i>n</i> increases:</strong>
+                            <span id="note-convergence-status">
+                                At <strong>df = 5</strong>, the tails are noticeably heavier than <i>Z</i>. Drag the slider right to watch the orange peak rise and the tails pull inward toward the green normal curve.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Live Statistical Comparison Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-scale-balanced text-[#0b556c]"></i>
+                                Live Distribution Comparison
+                            </h2>
+                            <span class="text-xs font-mono text-slate-500" id="table-df-header">t(df = 5) vs. Z</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                                        <th class="py-2 pr-2">Property</th>
+                                        <th class="py-2 px-2 text-emerald-700">Normal (<i>Z</i>)</th>
+                                        <th class="py-2 pl-2 text-orange-600" id="th-active-t">Active <i>t</i> (df=5)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                                    <!-- Mean -->
+                                    <tr>
+                                        <td class="py-2.5 pr-2 font-medium text-slate-700">Mean (&mu;)</td>
+                                        <td class="py-2.5 px-2 font-mono text-slate-600">0.000</td>
+                                        <td class="py-2.5 pl-2 font-mono font-semibold text-slate-900">0.000</td>
+                                    </tr>
+                                    <!-- Standard Deviation -->
+                                    <tr>
+                                        <td class="py-2.5 pr-2 font-medium text-slate-700">
+                                            Std. Deviation (&sigma;)
+                                            <span class="block text-[10px] text-slate-400 font-normal">&radic;(df / (df&minus;2))</span>
+                                        </td>
+                                        <td class="py-2.5 px-2 font-mono text-slate-600">1.000</td>
+                                        <td class="py-2.5 pl-2 font-mono font-bold text-orange-600" id="stat-sd">1.291</td>
+                                    </tr>
+                                    <!-- Peak Height at 0 -->
+                                    <tr>
+                                        <td class="py-2.5 pr-2 font-medium text-slate-700">
+                                            Peak Density <i>f</i>(0)
+                                            <span class="block text-[10px] text-slate-400 font-normal">Height at center</span>
+                                        </td>
+                                        <td class="py-2.5 px-2 font-mono text-slate-600">0.3989</td>
+                                        <td class="py-2.5 pl-2 font-mono font-bold text-orange-600" id="stat-peak">0.3796</td>
+                                    </tr>
+                                    <!-- 95% Critical Value -->
+                                    <tr>
+                                        <td class="py-2.5 pr-2 font-medium text-slate-700">
+                                            95% Critical Value
+                                            <span class="block text-[10px] text-slate-400 font-normal">Two-tailed (&alpha; = 0.05)</span>
+                                        </td>
+                                        <td class="py-2.5 px-2 font-mono text-slate-600">&plusmn;1.960</td>
+                                        <td class="py-2.5 pl-2 font-mono font-bold text-orange-600" id="stat-crit">&plusmn;2.571</td>
+                                    </tr>
+                                    <!-- Tail Area P(|X| > 2) -->
+                                    <tr>
+                                        <td class="py-2.5 pr-2 font-medium text-slate-700">
+                                            Tail Area P(|<i>X</i>| &gt; 2)
+                                            <span class="block text-[10px] text-slate-400 font-normal">Extreme events</span>
+                                        </td>
+                                        <td class="py-2.5 px-2 font-mono text-slate-600">4.55%</td>
+                                        <td class="py-2.5 pl-2 font-mono font-bold text-orange-600" id="stat-tail2">10.19%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Convergence Meter -->
+                    <div class="mt-4 pt-3 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-semibold text-slate-600">Peak Convergence to Standard Normal (<i>Z</i>)</span>
+                            <span class="font-mono font-bold text-[#0b556c]" id="convPercent">95.2%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                            <div id="convBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-600 rounded-full transition-all duration-150" style="width: 95.2%"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Mathematical Logic & Interactive Canvas Script -->
+    <script>
+        // ==========================================
+        // 1. STATISTICAL & MATHEMATICAL FUNCTIONS
+        // ==========================================
+
+        // Lanczos approximation for Log-Gamma function ln(Gamma(z))
+        function lnGamma(z) {
+            const p = [
+                676.5203681218851,
+                -1259.1392167224028,
+                771.32342877765313,
+                -176.61502916214059,
+                12.507343278686905,
+                -0.13857109526572012,
+                9.9843695780195716e-6,
+                1.5056327351493116e-7
+            ];
+            if (z < 0.5) {
+                return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - lnGamma(1 - z);
+            }
+            z -= 1;
+            let x = 0.99999999999980993;
+            for (let i = 0; i < p.length; i++) {
+                x += p[i] / (z + i + 1);
+            }
+            const t = z + p.length - 0.5;
+            return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+        }
+
+        // Standard Normal PDF f(z)
+        function normalPDF(x) {
+            return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+        }
+
+        // Student's t-distribution PDF f(t; df)
+        function tPDF(x, df) {
+            const logCoeff = lnGamma((df + 1) / 2) - lnGamma(df / 2) - 0.5 * Math.log(df * Math.PI);
+            const logKernel = -((df + 1) / 2) * Math.log(1 + (x * x) / df);
+            return Math.exp(logCoeff + logKernel);
+        }
+
+        // Numerical integration (Simpson's Rule) to calculate P(|T| <= x) from 0 to |x|
+        function integrateZeroToX(x, df, isNormal = false) {
+            const absX = Math.abs(x);
+            if (absX === 0) return 0;
+            const steps = 160; // Even number for Simpson's rule
+            const h = absX / steps;
+            let sum = isNormal ? normalPDF(0) + normalPDF(absX) : tPDF(0, df) + tPDF(absX, df);
+
+            for (let i = 1; i < steps; i++) {
+                const val = i * h;
+                const weight = (i % 2 === 0) ? 2 : 4;
+                sum += weight * (isNormal ? normalPDF(val) : tPDF(val, df));
+            }
+            return (h / 3) * sum;
+        }
+
+        // Two-tailed probability P(|T| > x)
+        function twoTailedProbBeyond(x, df, isNormal = false) {
+            const areaZeroToX = integrateZeroToX(x, df, isNormal);
+            return Math.max(0, 1 - 2 * areaZeroToX);
+        }
+
+        // Find two-tailed 95% critical value (where P(|T| <= t_crit) = 0.95, so 0 to t_crit = 0.475)
+        function getTCritical95(df) {
+            if (df === 1) return 12.706;
+            if (df === 2) return 4.303;
+            let low = 1.95996;
+            let high = 15.0;
+            for (let iter = 0; iter < 35; iter++) {
+                const mid = (low + high) / 2;
+                const area = integrateZeroToX(mid, df, false);
+                if (area < 0.475) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            return (low + high) / 2;
+        }
+
+        // ==========================================
+        // 2. APPLICATION STATE & DOM REFERENCES
+        // ==========================================
+        let currentDF = 5;
+        let isAnimating = false;
+        let animFrameId = null;
+        let lastFrameTime = 0;
+        let hoverX = null;
+
+        const canvas = document.getElementById('distCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('graphTooltip');
+
+        // Coordinate mapping constants
+        const X_MIN = -4.5;
+        const X_MAX = 4.5;
+        const Y_MAX = 0.44;
+
+        // ==========================================
+        // 3. CANVAS RENDERING ENGINE
+        // ==========================================
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawGraph();
+        }
+
+        function drawGraph() {
+            const width = canvas.parentElement.clientWidth;
+            const height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0, 0, width, height);
+
+            const padLeft = 48;
+            const padRight = 28;
+            const padTop = 26;
+            const padBottom = 42;
+
+            const plotW = width - padLeft - padRight;
+            const plotH = height - padTop - padBottom;
+
+            const toScreenX = (x) => padLeft + ((x - X_MIN) / (X_MAX - X_MIN)) * plotW;
+            const toScreenY = (y) => padTop + plotH - (y / Y_MAX) * plotH;
+            const toMathX = (px) => X_MIN + ((px - padLeft) / plotW) * (X_MAX - X_MIN);
+
+            // 1. Draw subtle horizontal grid lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+
+            for (let yVal = 0.1; yVal <= 0.4; yVal += 0.1) {
+                const sy = toScreenY(yVal);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, sy);
+                ctx.lineTo(width - padRight, sy);
+                ctx.stroke();
+                ctx.fillText(yVal.toFixed(1), padLeft - 8, sy + 4);
+            }
+
+            // 2. Tail Shading / Area Comparison
+            const tailMode = document.getElementById('tailModeSelect').value;
+            if (tailMode === 'prob2') {
+                // Shade tails beyond |x| >= 2.0 for active t-distribution
+                shadeTailRegion(toScreenX, toScreenY, X_MIN, -2.0, currentDF, false, 'rgba(234, 88, 12, 0.22)');
+                shadeTailRegion(toScreenX, toScreenY, 2.0, X_MAX, currentDF, false, 'rgba(234, 88, 12, 0.22)');
+                // Shade normal tails for visual contrast
+                shadeTailRegion(toScreenX, toScreenY, X_MIN, -2.0, 0, true, 'rgba(21, 128, 61, 0.20)');
+                shadeTailRegion(toScreenX, toScreenY, 2.0, X_MAX, 0, true, 'rgba(21, 128, 61, 0.20)');
+
+                // Draw vertical threshold markers at x = -2 and x = +2
+                drawVerticalMarker(toScreenX(-2), toScreenY(0), toScreenY(tPDF(-2, currentDF)), '#ea580c', 'x = -2');
+                drawVerticalMarker(toScreenX(2), toScreenY(0), toScreenY(tPDF(2, currentDF)), '#ea580c', 'x = +2');
+            } else if (tailMode === 'crit95') {
+                const tCrit = getTCritical95(currentDF);
+                const clampedCrit = Math.min(tCrit, X_MAX);
+                if (tCrit <= X_MAX) {
+                    shadeTailRegion(toScreenX, toScreenY, X_MIN, -clampedCrit, currentDF, false, 'rgba(234, 88, 12, 0.25)');
+                    shadeTailRegion(toScreenX, toScreenY, clampedCrit, X_MAX, currentDF, false, 'rgba(234, 88, 12, 0.25)');
+                    drawVerticalMarker(toScreenX(-tCrit), toScreenY(0), toScreenY(0.12), '#ea580c', `-t* = -${tCrit.toFixed(2)}`);
+                    drawVerticalMarker(toScreenX(tCrit), toScreenY(0), toScreenY(0.12), '#ea580c', `+t* = +${tCrit.toFixed(2)}`);
+                }
+                // Normal 1.96 markers
+                drawVerticalMarker(toScreenX(-1.96), toScreenY(0), toScreenY(0.22), '#15803d', '-1.96');
+                drawVerticalMarker(toScreenX(1.96), toScreenY(0), toScreenY(0.22), '#15803d', '+1.96');
+            } else if (tailMode === 'diff') {
+                // Shade where t > Z in orange, and where Z > t in green
+                const steps = 300;
+                const dx = (X_MAX - X_MIN) / steps;
+                for (let i = 0; i < steps; i++) {
+                    const x1 = X_MIN + i * dx;
+                    const x2 = x1 + dx;
+                    const xm = 0.5 * (x1 + x2);
+                    const yT = tPDF(xm, currentDF);
+                    const yZ = normalPDF(xm);
+                    ctx.fillStyle = (yT > yZ) ? 'rgba(234, 88, 12, 0.18)' : 'rgba(21, 128, 61, 0.14)';
+                    ctx.beginPath();
+                    ctx.moveTo(toScreenX(x1), toScreenY(tPDF(x1, currentDF)));
+                    ctx.lineTo(toScreenX(x2), toScreenY(tPDF(x2, currentDF)));
+                    ctx.lineTo(toScreenX(x2), toScreenY(normalPDF(x2)));
+                    ctx.lineTo(toScreenX(x1), toScreenY(normalPDF(x1)));
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+
+            // 3. Draw Central Axis Line at x = 0 (like the slide)
+            const zeroX = toScreenX(0);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(zeroX, padTop - 6);
+            ctx.lineTo(zeroX, toScreenY(0));
+            ctx.stroke();
+
+            // 4. Draw Optional Reference Curves from Slide: t(df=5) and t(df=13)
+            const showDf5 = document.getElementById('toggleDf5').checked;
+            const showDf13 = document.getElementById('toggleDf13').checked;
+
+            document.getElementById('legend-df5').style.display = showDf5 ? 'flex' : 'none';
+            document.getElementById('legend-df13').style.display = showDf13 ? 'flex' : 'none';
+
+            if (showDf5 && currentDF !== 5) {
+                plotCurve(toScreenX, toScreenY, (x) => tPDF(x, 5), '#1d4ed8', 2, [6, 4]);
+            }
+            if (showDf13 && currentDF !== 13) {
+                plotCurve(toScreenX, toScreenY, (x) => tPDF(x, 13), '#ec4899', 2, [6, 4]);
+            }
+
+            // 5. Draw Standard Normal Distribution Curve (Green, Solid, Prominent)
+            plotCurve(toScreenX, toScreenY, normalPDF, '#15803d', 3, []);
+
+            // 6. Draw Active t-Distribution Curve (Amber/Orange or matching slide color if on 5/13)
+            plotCurve(toScreenX, toScreenY, (x) => tPDF(x, currentDF), '#ea580c', 3.5, []);
+
+            // 7. Draw X-Axis Baseline & Ticks
+            const baseY = toScreenY(0);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, baseY);
+            ctx.lineTo(width - padRight, baseY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '12px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            for (let xTick = -4; xTick <= 4; xTick++) {
+                const sx = toScreenX(xTick);
+                ctx.beginPath();
+                ctx.moveTo(sx, baseY);
+                ctx.lineTo(sx, baseY + 5);
+                ctx.stroke();
+                ctx.fillText(xTick.toString(), sx, baseY + 20);
+            }
+
+            // Right axis label 't / z' inspired by the slide
+            ctx.font = 'italic bold 14px "Inter", sans-serif';
+            ctx.fillStyle = '#15803d';
+            ctx.fillText('z', width - padRight + 12, baseY - 12);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillText('t', width - padRight + 12, baseY + 5);
+
+            // 8. Draw Interactive Hover Crosshair & Points
+            if (hoverX !== null && hoverX >= X_MIN && hoverX <= X_MAX) {
+                const sx = toScreenX(hoverX);
+                const yZ = normalPDF(hoverX);
+                const yT = tPDF(hoverX, currentDF);
+
+                ctx.save();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(sx, padTop);
+                ctx.lineTo(sx, baseY);
+                ctx.stroke();
+                ctx.restore();
+
+                // Normal point
+                drawDot(sx, toScreenY(yZ), '#15803d');
+                // Active t point
+                drawDot(sx, toScreenY(yT), '#ea580c');
+            }
+        }
+
+        function plotCurve(toScreenX, toScreenY, pdfFunc, color, lineWidth, dashArray) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.setLineDash(dashArray);
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+
+            const steps = 360;
+            const dx = (X_MAX - X_MIN) / steps;
+            for (let i = 0; i <= steps; i++) {
+                const x = X_MIN + i * dx;
+                const y = pdfFunc(x);
+                const sx = toScreenX(x);
+                const sy = toScreenY(y);
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function shadeTailRegion(toScreenX, toScreenY, xStart, xEnd, df, isNormal, fillColor) {
+            ctx.save();
+            ctx.fillStyle = fillColor;
+            ctx.beginPath();
+            const steps = 80;
+            const dx = (xEnd - xStart) / steps;
+            ctx.moveTo(toScreenX(xStart), toScreenY(0));
+            for (let i = 0; i <= steps; i++) {
+                const x = xStart + i * dx;
+                const y = isNormal ? normalPDF(x) : tPDF(x, df);
+                ctx.lineTo(toScreenX(x), toScreenY(y));
+            }
+            ctx.lineTo(toScreenX(xEnd), toScreenY(0));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawVerticalMarker(sx, syBottom, syTop, color, label) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(sx, syBottom);
+            ctx.lineTo(sx, syTop);
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = '600 10px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, sx, syTop - 6);
+            ctx.restore();
+        }
+
+        function drawDot(x, y, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 4.5, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+        }
+
+        // ==========================================
+        // 4. UI & DASHBOARD SYNCHRONIZATION
+        // ==========================================
+        function updateUI() {
+            const df = Math.round(currentDF);
+            const n = df + 1;
+
+            // Update Badges & Headers
+            document.getElementById('dfSlider').value = df;
+            document.getElementById('dfBadge').textContent = `df = ${df}`;
+            document.getElementById('nBadge').textContent = `Sample Size n = ${n}`;
+            document.getElementById('legend-active-label').innerHTML = `Active <i>t</i> (df = ${df})`;
+            document.getElementById('table-df-header').textContent = `t(df = ${df}) vs. Z`;
+            document.getElementById('th-active-t').innerHTML = `Active <i>t</i> (df=${df})`;
+            document.getElementById('note-df-1').textContent = `df = ${df}`;
+
+            // Calculate Live Statistics
+            const peakZ = normalPDF(0);
+            const peakT = tPDF(0, df);
+            const tCrit = getTCritical95(df);
+            const tailProbT = twoTailedProbBeyond(2.0, df, false) * 100;
+
+            let sdText = '';
+            let sdNoteText = '';
+            if (df === 1) {
+                sdText = 'Undefined';
+                sdNoteText = 'SD = Undefined (Cauchy)';
+            } else if (df === 2) {
+                sdText = '∞ (Infinite)';
+                sdNoteText = 'SD = ∞ (Infinite Variance)';
+            } else {
+                const sdVal = Math.sqrt(df / (df - 2));
+                sdText = sdVal.toFixed(3);
+                sdNoteText = `Current SD = ${sdVal.toFixed(3)}`;
+            }
+
+            // Update Table Cells
+            document.getElementById('stat-sd').textContent = sdText;
+            document.getElementById('note-sd-badge').textContent = sdNoteText;
+            document.getElementById('stat-peak').textContent = peakT.toFixed(4);
+            document.getElementById('note-peak').textContent = peakT.toFixed(4);
+            document.getElementById('stat-crit').innerHTML = `&plusmn;${tCrit.toFixed(3)}`;
+            document.getElementById('stat-tail2').textContent = `${tailProbT.toFixed(2)}%`;
+
+            // Update Convergence Progress Bar
+            const convRatio = (peakT / peakZ) * 100;
+            document.getElementById('convPercent').textContent = `${convRatio.toFixed(1)}%`;
+            document.getElementById('convBar').style.width = `${Math.min(100, convRatio)}%`;
+
+            // Update Dynamic Educational Commentary
+            const statusEl = document.getElementById('note-convergence-status');
+            if (df <= 4) {
+                statusEl.innerHTML = `At <strong>df = ${df}</strong> (very small sample <i>n = ${n}</i>), the <i>t</i>-distribution has extremely heavy tails and a noticeably lower peak than <i>Z</i>.`;
+            } else if (df <= 15) {
+                statusEl.innerHTML = `At <strong>df = ${df}</strong> (<i>n = ${n}</i>), the curve is clearly rising toward the normal peak, though the tails remain fatter than <i>Z</i>.`;
+            } else if (df < 30) {
+                statusEl.innerHTML = `At <strong>df = ${df}</strong> (<i>n = ${n}</i>), the <i>t</i>-distribution is closely approaching the Standard Normal curve.`;
+            } else {
+                statusEl.innerHTML = `At <strong>df = ${df}</strong> (<i>n = ${n} &ge; 30</i>), the <i>t</i>-distribution is nearly indistinguishable from the Standard Normal distribution!`;
+            }
+
+            // Update Tail Explanation Banner
+            const tailMode = document.getElementById('tailModeSelect').value;
+            const bannerText = document.getElementById('tailBannerText');
+            if (tailMode === 'prob2') {
+                bannerText.innerHTML = `<strong>Heavier Tails Visualized:</strong> Probability in the outer tails beyond |<i>x</i>| &gt; 2.0 is <strong class="underline">${tailProbT.toFixed(2)}%</strong> for <i>t</i>(df=${df}) vs. <strong>4.55%</strong> for Normal <i>Z</i>.`;
+            } else if (tailMode === 'crit95') {
+                bannerText.innerHTML = `<strong>95% Critical Thresholds (&alpha; = 0.05):</strong> To capture 95% of the distribution, <i>t</i>(df=${df}) requires going out to <strong>&plusmn;${tCrit.toFixed(2)}</strong> vs. <strong>&plusmn;1.96</strong> for Normal <i>Z</i>.`;
+            } else if (tailMode === 'diff') {
+                bannerText.innerHTML = `<strong>Density Shift:</strong> Green shaded center shows where Normal <i>Z</i> is taller; orange shaded flanks show where <i>t</i>(df=${df}) has heavier tails.`;
+            } else {
+                bannerText.innerHTML = `<strong>Clean Curve View:</strong> Compare the green Standard Normal curve against the active orange <i>t</i>(df=${df}) curve and slide reference curves.`;
+            }
+
+            drawGraph();
+        }
+
+        function handleSliderChange(val) {
+            if (isAnimating) stopAnimation();
+            currentDF = parseInt(val, 10);
+            updateUI();
+        }
+
+        function setDF(val) {
+            if (isAnimating) stopAnimation();
+            currentDF = val;
+            updateUI();
+        }
+
+        function updatePlot() {
+            updateUI();
+        }
+
+        // ==========================================
+        // 5. ANIMATION CONTROLLER
+        // ==========================================
+        function toggleAnimation() {
+            if (isAnimating) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            isAnimating = true;
+            if (currentDF >= 98) currentDF = 1;
+            document.getElementById('animateIcon').className = 'fa-solid fa-pause text-xs';
+            document.getElementById('animateText').textContent = 'Pause Animation';
+            lastFrameTime = performance.now();
+            animFrameId = requestAnimationFrame(stepAnimation);
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            document.getElementById('animateIcon').className = 'fa-solid fa-play text-xs';
+            document.getElementById('animateText').textContent = 'Animate Convergence';
+        }
+
+        function stepAnimation(timestamp) {
+            if (!isAnimating) return;
+            const elapsed = timestamp - lastFrameTime;
+
+            // Adaptive speed: slower at low df (1 to 15) where visual changes are dramatic, faster at high df
+            const interval = currentDF < 15 ? 240 : (currentDF < 40 ? 90 : 45);
+
+            if (elapsed >= interval) {
+                lastFrameTime = timestamp;
+                currentDF += 1;
+                updateUI();
+
+                if (currentDF >= 100) {
+                    stopAnimation();
+                    return;
+                }
+            }
+            animFrameId = requestAnimationFrame(stepAnimation);
+        }
+
+        // ==========================================
+        // 6. INTERACTIVE HOVER TOOLTIP EVENTS
+        // ==========================================
+        function handlePointerMove(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const py = clientY - rect.top;
+
+            const padLeft = 48;
+            const padRight = 28;
+            const plotW = rect.width - padLeft - padRight;
+
+            if (px < padLeft || px > rect.width - padRight) {
+                hoverX = null;
+                tooltip.classList.add('hidden');
+                drawGraph();
+                return;
+            }
+
+            hoverX = X_MIN + ((px - padLeft) / plotW) * (X_MAX - X_MIN);
+            const df = Math.round(currentDF);
+            const yZ = normalPDF(hoverX);
+            const yT = tPDF(hoverX, df);
+            const diff = yT - yZ;
+
+            document.getElementById('tt-x').textContent = `x = ${hoverX >= 0 ? '+' : ''}${hoverX.toFixed(2)}`;
+            document.getElementById('tt-z').textContent = yZ.toFixed(4);
+            document.getElementById('tt-t-label').innerHTML = `<i>t</i> (df=${df}) <i>f(t)</i>:`;
+            document.getElementById('tt-t').textContent = yT.toFixed(4);
+            document.getElementById('tt-diff').textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(4)}`;
+
+            tooltip.classList.remove('hidden');
+            const ttWidth = tooltip.offsetWidth || 165;
+            let leftPos = px + 14;
+            if (leftPos + ttWidth > rect.width - 10) {
+                leftPos = px - ttWidth - 14;
+            }
+            tooltip.style.left = `${leftPos}px`;
+            tooltip.style.top = `${Math.max(12, Math.min(py - 30, rect.height - 105))}px`;
+
+            drawGraph();
+        }
+
+        canvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('mouseleave', () => {
+            hoverX = null;
+            tooltip.classList.add('hidden');
+            drawGraph();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            updateUI();
+        };
+    </script>
+</body>
+</html>

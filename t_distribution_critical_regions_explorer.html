@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>t-Distribution Critical Regions & Hypothesis Test Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Custom Sliders */
+        input[type=range].df-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range].df-slider::-webkit-slider-runnable-track {
+            background: linear-gradient(90deg, #fdba74 0%, #6366f1 40%, #10b981 100%);
+            height: 0.5rem;
+            border-radius: 999px;
+        }
+        input[type=range].df-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -5px;
+            background-color: #0f172a;
+            height: 1.2rem;
+            width: 1.2rem;
+            border-radius: 50%;
+            border: 2.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
+            transition: transform 0.15s ease;
+        }
+        input[type=range].df-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type=range].tstat-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type=range].tstat-slider::-webkit-slider-runnable-track {
+            background: linear-gradient(90deg, #fecdd3 0%, #a7f3d0 50%, #fecdd3 100%);
+            height: 0.55rem;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+        }
+        input[type=range].tstat-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-top: -6px;
+            background-color: #4f46e5;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 50%;
+            border: 2.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type=range].tstat-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background-color: #3730a3;
+        }
+
+        .preset-btn-active {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+        }
+
+        .tail-btn-active {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #4f46e5 !important;
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.25);
+        }
+
+        .df-chip-active {
+            background-color: #ea580c !important;
+            color: #ffffff !important;
+            border-color: #ea580c !important;
+        }
+
+        .table-cell-active {
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-weight: 700;
+            box-shadow: inset 0 0 0 2px #ef4444;
+            border-radius: 0.375rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center font-mono font-bold text-xl shadow-xs">
+                    <i>t</i>*
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                        Student's <i>t</i>-Distribution Critical Regions &amp; Hypothesis Explorer
+                    </h1>
+                    <p class="text-xs text-slate-500">
+                        Explore how Degrees of Freedom (<i>df</i> = <i>n</i> &minus; 1), Confidence Level (1 &minus; &alpha;), and Tail Type determine <i>t</i>* Critical Cutoffs
+                    </p>
+                </div>
+            </div>
+
+            <!-- Live Status & Decision Pill -->
+            <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+                <span id="headerDfBadge" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-orange-50 text-orange-800 border border-orange-200">
+                    df = 13 (n = 14)
+                </span>
+                <div id="headerDecisionBadge" class="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border transition-all duration-200">
+                    <i id="headerDecisionIcon" class="fa-solid fa-circle-check"></i>
+                    <span id="headerDecisionText">Do Not Reject H₀</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Control Panel Row 1: Degrees of Freedom (df), Sample Size (n), Confidence & Tail Selectors -->
+        <section class="bg-white rounded-2xl shadow-xs border border-slate-200 p-4 sm:p-5 space-y-5">
+
+            <!-- Top Sub-Row: Degrees of Freedom (df) & Sample Size (n) Controller -->
+            <div class="pb-5 border-b border-slate-100">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-3">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-sliders text-orange-600"></i>
+                                1. Degrees of Freedom (<i>df</i>) &amp; Sample Size (<i>n</i>)
+                            </span>
+                            <span class="text-xs text-slate-400 hidden sm:inline">|</span>
+                            <span class="text-xs text-slate-500">For one-sample <i>t</i>-test: <strong class="font-mono text-slate-700">df = n &minus; 1</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Quick DF Preset Chips -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">Quick <i>df</i>:</span>
+                        <button onclick="setDF(1)" data-df="1" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">1</button>
+                        <button onclick="setDF(5)" data-df="5" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">5</button>
+                        <button onclick="setDF(10)" data-df="10" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">10</button>
+                        <button onclick="setDF(13)" data-df="13" class="df-chip df-chip-active px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">13</button>
+                        <button onclick="setDF(15)" data-df="15" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">15</button>
+                        <button onclick="setDF(20)" data-df="20" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">20</button>
+                        <button onclick="setDF(25)" data-df="25" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">25</button>
+                        <button onclick="setDF(29)" data-df="29" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">29</button>
+                        <button onclick="setDF(30)" data-df="30" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">30</button>
+                        <button onclick="setDF(60)" data-df="60" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">60</button>
+                        <button onclick="setDF(120)" data-df="120" class="df-chip px-2 py-1 text-xs font-mono font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 transition cursor-pointer">120</button>
+                    </div>
+                </div>
+
+                <!-- Slider + Direct Number Inputs for df & n -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div class="md:col-span-7 lg:col-span-8">
+                        <input id="dfSlider" type="range" min="1" max="120" step="1" value="13" class="w-full df-slider" oninput="setDF(this.value)">
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1 px-1">
+                            <span>df = 1 (Heavy Tails)</span>
+                            <span>df = 15</span>
+                            <span>df = 30</span>
+                            <span>df = 60</span>
+                            <span>df = 120 (≈ Normal Z)</span>
+                        </div>
+                    </div>
+
+                    <!-- Synchronized Number Inputs for df and Sample Size n -->
+                    <div class="md:col-span-5 lg:col-span-4 flex items-center justify-end gap-3">
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                            <label for="dfInput" class="text-xs font-bold text-orange-700 mr-2"><i>df</i> =</label>
+                            <input id="dfInput" type="number" min="1" max="500" value="13" onchange="setDF(this.value)" class="w-14 font-mono font-bold text-sm text-slate-900 bg-white border border-slate-200 rounded-md px-1.5 py-0.5 text-center focus:outline-none focus:border-orange-500">
+                        </div>
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                            <label for="nInput" class="text-xs font-bold text-slate-600 mr-2"><i>n</i> =</label>
+                            <input id="nInput" type="number" min="2" max="501" value="14" onchange="setSampleSizeN(this.value)" class="w-14 font-mono font-bold text-sm text-slate-900 bg-white border border-slate-200 rounded-md px-1.5 py-0.5 text-center focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Sub-Row: Confidence Level & Tail Configuration -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+                
+                <!-- 2. Confidence Level / Alpha Selector (7 Cols) -->
+                <div class="lg:col-span-7">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-percent text-indigo-600"></i>
+                            2. Select Confidence Level (1 &minus; &alpha;) &amp; Significance (&alpha;)
+                        </label>
+                        <span class="text-xs font-mono text-slate-400">Click level to update</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button onclick="setConfidenceLevel(80)" data-level="80" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">80%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.20</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(90)" data-level="90" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">90%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.10</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(95)" data-level="95" class="level-btn preset-btn-active flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">95%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.05</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(98)" data-level="98" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">98%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.02</span>
+                        </button>
+                        <button onclick="setConfidenceLevel(99)" data-level="99" class="level-btn flex flex-col items-center justify-center py-2.5 px-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 transition cursor-pointer">
+                            <span class="text-sm sm:text-base font-extrabold">99%</span>
+                            <span class="text-[11px] font-mono opacity-75">&alpha; = 0.01</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Tail Direction Selector (5 Cols) -->
+                <div class="lg:col-span-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-code-branch text-indigo-600"></i>
+                            3. Select Alternative Hypothesis (H₁)
+                        </label>
+                        <span id="tailSplitLabel" class="text-xs font-mono font-semibold text-rose-600">Two-Tailed (&alpha;/2 each)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setTailType('two')" data-tail="two" class="tail-btn tail-btn-active py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Two-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &ne; &mu;₀</span>
+                        </button>
+                        <button onclick="setTailType('left')" data-tail="left" class="tail-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Left-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &lt; &mu;₀</span>
+                        </button>
+                        <button onclick="setTailType('right')" data-tail="right" class="tail-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs sm:text-sm font-semibold flex flex-col items-center justify-center transition cursor-pointer">
+                            <span>Right-Tailed</span>
+                            <span class="font-mono text-[11px] opacity-80">H₁: &mu; &gt; &mu;₀</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid: Canvas Visualization (8 Cols) + Live Statistical Breakdown (4 Cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: High-Precision t-Curve Canvas & Test Statistic Control (8 Cols) -->
+            <div class="lg:col-span-8 flex flex-col gap-5">
+                
+                <!-- Graph Card -->
+                <div class="bg-white rounded-2xl shadow-xs border border-slate-200 p-4 sm:p-5 flex flex-col">
+                    <!-- Graph Legend & Z Overlay Toggle -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-2 border-b border-slate-100 text-xs">
+                        <div class="flex flex-wrap items-center gap-3.5">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-xs bg-emerald-500/25 border border-emerald-600 inline-block"></span>
+                                <span class="font-semibold text-slate-700" id="legendAcceptText">Non-Rejection (95%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3.5 h-3.5 rounded-xs bg-rose-500/35 border border-rose-600 inline-block"></span>
+                                <span class="font-semibold text-slate-700" id="legendRejectText">Critical Region (&alpha; = 5%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-indigo-600 inline-block"></span>
+                                <span class="font-semibold text-indigo-700" id="legendTStatText">Test Stat (t = +1.85)</span>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Standard Normal Z Comparison Overlay -->
+                        <label class="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 cursor-pointer select-none hover:bg-slate-100 transition">
+                            <input type="checkbox" id="showZOverlay" checked onchange="updateUI()" class="rounded text-teal-600 focus:ring-teal-500 w-3.5 h-3.5">
+                            <span>Compare with Standard Normal (<i>Z</i>)</span>
+                        </label>
+                    </div>
+
+                    <!-- Responsive Canvas Container -->
+                    <div class="relative w-full h-[370px] sm:h-[430px] select-none">
+                        <canvas id="tCanvas" class="w-full h-full cursor-ew-resize"></canvas>
+                    </div>
+
+                    <!-- Small-Sample Penalty Banner comparing |t*| vs |z*| -->
+                    <div class="mt-3 px-3.5 py-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-arrows-left-right-to-line text-amber-600"></i>
+                            <span id="penaltyBannerText">
+                                <strong>Small-Sample Penalty (<i>df</i> = 13):</strong> Because <i>s</i> estimates &sigma;, the <i>t</i> critical boundary (<strong>&plusmn;2.1604</strong>) is <strong>0.2004 wider</strong> than the Normal <i>Z</i> cutoff (<strong>&plusmn;1.9600</strong>).
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Test Statistic Slider Bar -->
+                    <div class="mt-3.5 pt-3.5 border-t border-slate-100 bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/60">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    4. Test Observed Sample Statistic (<i>t</i><sub>stat</sub>):
+                                </span>
+                                <span id="tStatBadge" class="px-2.5 py-0.5 rounded-md font-mono font-bold text-sm bg-indigo-600 text-white shadow-2xs">
+                                    t = +1.85
+                                </span>
+                            </div>
+
+                            <!-- Quick Test Statistic Presets -->
+                            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                                <span class="text-slate-400 mr-1 hidden sm:inline">Preset <i>t</i><sub>stat</sub>:</span>
+                                <button onclick="setTStat(0)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition cursor-pointer">0.00</button>
+                                <button onclick="setTStat(-1.75)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition cursor-pointer">-1.75</button>
+                                <button onclick="setTStat(2.05)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition cursor-pointer" title="Rejects under Z (1.96), but Fails to Reject under t(df=13)">+2.05 (Z vs t)</button>
+                                <button onclick="setTStat(2.45)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition cursor-pointer">+2.45</button>
+                                <button onclick="setTStat(-3.10)" class="px-2 py-0.5 rounded bg-white border border-slate-200 hover:bg-slate-100 font-mono text-slate-700 transition cursor-pointer">-3.10</button>
+                            </div>
+                        </div>
+
+                        <input id="tStatSlider" type="range" min="-4.50" max="4.50" step="0.01" value="2.05" class="w-full tstat-slider" oninput="handleTStatSlider(this.value)">
+                        
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-1 px-1">
+                            <span>-4.50</span>
+                            <span>-3.00</span>
+                            <span>-1.50</span>
+                            <span>0 (Mean)</span>
+                            <span>+1.50</span>
+                            <span>+3.00</span>
+                            <span>+4.50</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Live Statistical Breakdown & Decision Panel (4 Cols) -->
+            <div class="lg:col-span-4 flex flex-col gap-5">
+
+                <!-- Hypothesis Decision & P-Value Card -->
+                <div id="decisionCard" class="rounded-2xl p-5 border transition-colors duration-200 bg-emerald-50/70 border-emerald-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Decision (&alpha; = <span id="cardAlphaText">0.05</span>, <i>df</i> = <span id="cardDfText">13</span>)
+                        </span>
+                        <span id="cardStatusPill" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white">
+                            Non-Rejection Region
+                        </span>
+                    </div>
+                    <h2 id="cardDecisionHeadline" class="text-xl font-extrabold text-emerald-950 mb-1">
+                        Do Not Reject H₀
+                    </h2>
+                    <p id="cardDecisionReason" class="text-xs text-slate-700 leading-relaxed mb-4">
+                        Since the test statistic <strong>t = +2.05</strong> lies inside the non-rejection region (between <strong>-2.1604</strong> and <strong>+2.1604</strong>), there is insufficient evidence to reject H₀.
+                    </p>
+
+                    <!-- P-value vs Alpha Comparison Box -->
+                    <div class="bg-white/90 rounded-xl p-3 border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
+                        <div class="border-r border-slate-100 pr-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Exact <i>t</i> p-value</span>
+                            <span id="statPValue" class="font-mono text-base font-bold text-indigo-700">0.0611</span>
+                        </div>
+                        <div class="pl-2">
+                            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Significance &alpha;</span>
+                            <span id="statAlphaCompare" class="font-mono text-base font-bold text-rose-600">0.0500</span>
+                        </div>
+                    </div>
+                    <div id="pValComparisonNote" class="mt-2 text-center font-mono text-xs font-semibold text-emerald-800">
+                        p-value (0.0611) &gt; &alpha; (0.0500) &rarr; Do Not Reject H₀
+                    </div>
+                </div>
+
+                <!-- Detailed Parameters & Critical Cutoff Card -->
+                <div class="bg-white rounded-2xl shadow-xs border border-slate-200 p-5 flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2.5 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-orange-600"></i>
+                            <i>t</i>-Distribution Parameters
+                        </h3>
+
+                        <dl class="divide-y divide-slate-100 text-xs sm:text-sm">
+                            <div class="py-2 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Degrees of Freedom (<i>df</i>)</dt>
+                                <dd id="bkDf" class="font-mono font-bold text-orange-700">13 (n = 14)</dd>
+                            </div>
+                            <div class="py-2 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Confidence Level (1 &minus; &alpha;)</dt>
+                                <dd id="bkConfidence" class="font-mono font-bold text-emerald-700">95% (0.9500)</dd>
+                            </div>
+                            <div class="py-2 flex items-center justify-between">
+                                <dt class="text-slate-600 font-medium">Tail Area</dt>
+                                <dd id="bkTailArea" class="font-mono font-bold text-rose-600">&alpha;/2 = 0.0250 (2.5%)</dd>
+                            </div>
+                            <div class="py-2.5 flex items-center justify-between">
+                                <dt class="text-slate-800 font-bold">Critical Value(s) <i>t</i>*</dt>
+                                <dd id="bkCritVal" class="font-mono font-extrabold text-rose-600 text-base">&plusmn;2.1604</dd>
+                            </div>
+                            <div class="py-2 flex items-center justify-between">
+                                <dt class="text-slate-500 font-medium">Normal <i>Z</i>* Benchmark (<i>df</i> = &infin;)</dt>
+                                <dd id="bkZBenchmark" class="font-mono font-semibold text-teal-700">&plusmn;1.9600</dd>
+                            </div>
+                            <div class="py-2.5">
+                                <dt class="text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-1">Decision Rule</dt>
+                                <dd id="bkDecisionRule" class="font-mono text-xs bg-rose-50 text-rose-900 border border-rose-200 px-3 py-2 rounded-lg font-semibold">
+                                    Reject H₀ if |t| &ge; 2.1604
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- t-Table Lookup Helper -->
+                    <div class="mt-3 pt-3 border-t border-slate-100">
+                        <div class="bg-orange-50/70 border border-orange-200/70 rounded-xl p-3">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-orange-950 mb-1">
+                                <i class="fa-solid fa-table-cells text-orange-600"></i>
+                                How to read from a <i>t</i>-Table:
+                            </div>
+                            <p id="tTableTip" class="text-xs text-orange-950/90 leading-relaxed">
+                                Locate row <span class="font-mono font-bold">df = 13</span> and intersect with column <span class="font-mono font-bold">Upper-Tail Area = 0.025</span> (or Two-Tail = 0.05) to find <span class="font-mono font-bold">t* = 2.1604</span>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Master Interactive t-Distribution Table -->
+        <section class="bg-white rounded-2xl shadow-xs border border-slate-200 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-orange-600"></i>
+                        Interactive Student's <i>t</i> Critical Values Reference Table
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Comparing <strong>80%, 90%, 95%, 98%, and 99%</strong> critical values across key degrees of freedom and your active <i>df</i>. Click any cell to load onto the graph!
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-auto">
+                    <span class="text-xs font-mono text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg font-semibold">
+                        Red Outline = Active Selection
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-500 uppercase text-[11px] font-bold tracking-wider bg-slate-50">
+                            <th rowspan="2" class="py-3 px-3 rounded-tl-lg border-r border-slate-200">Degrees of Freedom<br><span class="text-[10px] font-mono font-normal text-slate-400">df (n = df + 1)</span></th>
+                            <th colspan="5" class="py-2 px-3 text-center border-b border-slate-200 bg-indigo-50/50 text-indigo-950" id="tableTailBanner">
+                                Active Tail Mode: Two-Tailed Critical Values (&plusmn;t*)
+                            </th>
+                        </tr>
+                        <tr class="border-b-2 border-slate-200 text-slate-600 text-[11px] font-bold bg-slate-50/80 text-center font-mono">
+                            <th class="py-2.5 px-2">80% Conf.<br><span class="text-[10px] font-normal text-slate-400" id="colHead80">&alpha;=0.20 (&alpha;/2=0.10)</span></th>
+                            <th class="py-2.5 px-2">90% Conf.<br><span class="text-[10px] font-normal text-slate-400" id="colHead90">&alpha;=0.10 (&alpha;/2=0.05)</span></th>
+                            <th class="py-2.5 px-2">95% Conf.<br><span class="text-[10px] font-normal text-slate-400" id="colHead95">&alpha;=0.05 (&alpha;/2=0.025)</span></th>
+                            <th class="py-2.5 px-2">98% Conf.<br><span class="text-[10px] font-normal text-slate-400" id="colHead98">&alpha;=0.02 (&alpha;/2=0.01)</span></th>
+                            <th class="py-2.5 px-2 rounded-tr-lg">99% Conf.<br><span class="text-[10px] font-normal text-slate-400" id="colHead99">&alpha;=0.01 (&alpha;/2=0.005)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tReferenceTableBody" class="divide-y divide-slate-100 font-mono">
+                        <!-- Dynamically populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ============================================================================
+        // 1. HIGH-PRECISION MATHEMATICAL ENGINE FOR STUDENT'S t & NORMAL Z
+        // ============================================================================
+
+        const CONFIDENCE_LEVELS = {
+            80: { confidence: 80, alpha: 0.20 },
+            90: { confidence: 90, alpha: 0.10 },
+            95: { confidence: 95, alpha: 0.05 },
+            98: { confidence: 98, alpha: 0.02 },
+            99: { confidence: 99, alpha: 0.01 }
+        };
+
+        // Lanczos approximation for ln(Gamma(z))
+        function lnGamma(z) {
+            const p = [
+                676.5203681218851, -1259.1392167224028, 771.32342877765313,
+                -176.61502916214059, 12.507343278686905, -0.13857109526572012,
+                9.9843695780195716e-6, 1.5056327351493116e-7
+            ];
+            if (z < 0.5) {
+                return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - lnGamma(1 - z);
+            }
+            z -= 1;
+            let x = 0.99999999999980993;
+            for (let i = 0; i < p.length; i++) {
+                x += p[i] / (z + i + 1);
+            }
+            const t = z + p.length - 0.5;
+            return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+        }
+
+        // Standard Normal PDF & CDF
+        function normalPDF(x) {
+            return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+        }
+
+        function normalCDF(z) {
+            if (z < -8.0) return 0.0;
+            if (z > 8.0) return 1.0;
+            const sign = z < 0 ? -1 : 1;
+            const x = Math.abs(z) / Math.sqrt(2);
+            const t = 1.0 / (1.0 + 0.3275911 * x);
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
+            const erf = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1.0 + sign * erf);
+        }
+
+        // Acklam's / Rational Approximation for Inverse Normal CDF
+        function invNormalCDF(p) {
+            if (p <= 0) return -Infinity;
+            if (p >= 1) return Infinity;
+            if (p === 0.5) return 0;
+
+            const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+            const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+            const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+            const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+
+            const pLow = 0.02425;
+            const pHigh = 1 - pLow;
+            let q, r;
+
+            if (p < pLow) {
+                q = Math.sqrt(-2 * Math.log(p));
+                return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+                       ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+            } else if (p <= pHigh) {
+                q = p - 0.5;
+                r = q * q;
+                return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+                       (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+            } else {
+                q = Math.sqrt(-2 * Math.log(1 - p));
+                return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+                        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+            }
+        }
+
+        // Student's t-distribution PDF f(t; df)
+        function tPDF(t, df) {
+            const logCoeff = lnGamma((df + 1) / 2) - lnGamma(df / 2) - 0.5 * Math.log(df * Math.PI);
+            const logKernel = -((df + 1) / 2) * Math.log(1 + (t * t) / df);
+            return Math.exp(logCoeff + logKernel);
+        }
+
+        // Continued fraction for Regularized Incomplete Beta function I_x(a, b)
+        function betacf(a, b, x) {
+            const MAXIT = 200;
+            const EPS = 3.0e-14;
+            const FPMIN = 1.0e-30;
+            const qab = a + b;
+            const qap = a + 1.0;
+            constqam = a - 1.0;
+            let c = 1.0;
+            let d = 1.0 - qab * x / qap;
+            if (Math.abs(d) < FPMIN) d = FPMIN;
+            d = 1.0 / d;
+            let h = d;
+            for (let m = 1; m <= MAXIT; m++) {
+                const m2 = 2 * m;
+                let aa = m * (b - m) * x / ((constqam + m2) * (a + m2));
+                d = 1.0 + aa * d;
+                if (Math.abs(d) < FPMIN) d = FPMIN;
+                c = 1.0 + aa / c;
+                if (Math.abs(c) < FPMIN) c = FPMIN;
+                d = 1.0 / d;
+                h *= d * c;
+                aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+                d = 1.0 + aa * d;
+                if (Math.abs(d) < FPMIN) d = FPMIN;
+                c = 1.0 + aa / c;
+                if (Math.abs(c) < FPMIN) c = FPMIN;
+                d = 1.0 / d;
+                const del = d * c;
+                h *= del;
+                if (Math.abs(del - 1.0) < EPS) break;
+            }
+            return h;
+        }
+
+        function regIncompleteBeta(x, a, b) {
+            if (x <= 0.0) return 0.0;
+            if (x >= 1.0) return 1.0;
+            const bt = Math.exp(lnGamma(a + b) - lnGamma(a) - lnGamma(b) + a * Math.log(x) + b * Math.log(1.0 - x));
+            if (x < (a + 1.0) / (a + b + 2.0)) {
+                return bt * betacf(a, b, x) / a;
+            } else {
+                return 1.0 - bt * betacf(b, a, 1.0 - x) / b;
+            }
+        }
+
+        // Exact Student's t Cumulative Distribution Function P(T <= t)
+        function tCDF(t, df) {
+            if (t === 0) return 0.5;
+            const x = df / (df + t * t);
+            const ib = 0.5 * regIncompleteBeta(x, df / 2.0, 0.5);
+            return t > 0 ? 1.0 - ib : ib;
+        }
+
+        // Exact Upper-Tail Inverse t-Distribution via Halley / Newton-Raphson refinement
+        // Returns positive t* such that P(T > t*) = upperTailProb (where 0 < upperTailProb < 0.5)
+        function getUpperTCritical(upperTailProb, df) {
+            if (df === 1) {
+                // Exact analytical Cauchy quantile for df = 1
+                return Math.tan(Math.PI * (0.5 - upperTailProb));
+            }
+            if (df === 2) {
+                // Exact analytical quantile for df = 2
+                const p = 1.0 - upperTailProb;
+                return (2.0 * p - 1.0) / Math.sqrt(2.0 * p * (1.0 - p));
+            }
+
+            const targetCDF = 1.0 - upperTailProb;
+            const z = invNormalCDF(targetCDF);
+            // Cornish-Fisher expansion initial guess
+            const g1 = (Math.pow(z, 3) + z) / 4.0;
+            const g2 = (5 * Math.pow(z, 5) + 16 * Math.pow(z, 3) + 3 * z) / 96.0;
+            let tGuess = z + g1 / df + g2 / (df * df);
+
+            // Refine with Newton-Raphson to machine precision
+            for (let i = 0; i < 12; i++) {
+                const err = tCDF(tGuess, df) - targetCDF;
+                if (Math.abs(err) < 1e-12) break;
+                const slope = tPDF(tGuess, df);
+                tGuess -= err / slope;
+            }
+            return tGuess;
+        }
+
+        // Helper to get Critical Value for current (level, tail, df)
+        function getCriticalT(level, tail, df) {
+            const alpha = CONFIDENCE_LEVELS[level].alpha;
+            if (tail === 'two') {
+                return getUpperTCritical(alpha / 2.0, df); // returns positive magnitude |t*|
+            } else if (tail === 'left') {
+                return -getUpperTCritical(alpha, df);
+            } else {
+                return getUpperTCritical(alpha, df);
+            }
+        }
+
+        function getCriticalZ(level, tail) {
+            const alpha = CONFIDENCE_LEVELS[level].alpha;
+            if (tail === 'two') {
+                return invNormalCDF(1.0 - alpha / 2.0);
+            } else if (tail === 'left') {
+                return -invNormalCDF(1.0 - alpha);
+            } else {
+                return invNormalCDF(1.0 - alpha);
+            }
+        }
+
+        // ============================================================================
+        // 2. APPLICATION STATE
+        // ============================================================================
+        let currentDF = 13;
+        let currentLevel = 95;   // 80, 90, 95, 98, 99
+        let currentTail = 'two'; // 'two', 'left', 'right'
+        let tStat = 2.05;        // Default +2.05 highlights the difference between Z* (1.96) and t* (2.16)
+        let isDraggingCanvas = false;
+
+        const canvas = document.getElementById('tCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Dynamic X range so extreme small-df critical values remain visible
+        function getPlotBounds() {
+            const absCrit = Math.abs(getCriticalT(currentLevel, currentTail, currentDF));
+            const maxExtent = Math.max(4.4, Math.min(14.0, Math.max(absCrit * 1.25, Math.abs(tStat) * 1.15)));
+            return { xMin: -maxExtent, xMax: maxExtent, yMax: 0.45 };
+        }
+
+        // ============================================================================
+        // 3. CANVAS RENDERING ENGINE
+        // ============================================================================
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawPlot();
+        }
+
+        function drawPlot() {
+            const width = canvas.parentElement.clientWidth;
+            const height = canvas.parentElement.clientHeight;
+            ctx.clearRect(0, 0, width, height);
+
+            const padLeft = 46;
+            const padRight = 32;
+            const padTop = 42;
+            const padBottom = 54;
+
+            const plotW = width - padLeft - padRight;
+            const plotH = height - padTop - padBottom;
+
+            const { xMin, xMax, yMax } = getPlotBounds();
+
+            const toScreenX = (t) => padLeft + ((t - xMin) / (xMax - xMin)) * plotW;
+            const toScreenY = (y) => padTop + plotH - (y / yMax) * plotH;
+            const baseY = toScreenY(0);
+
+            const confObj = CONFIDENCE_LEVELS[currentLevel];
+            const tCrit = getCriticalT(currentLevel, currentTail, currentDF);
+            const zCrit = getCriticalZ(currentLevel, currentTail);
+            const showZ = document.getElementById('showZOverlay').checked;
+
+            // 1. Horizontal Grid Lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+
+            for (let yTick = 0.1; yTick <= 0.4; yTick += 0.1) {
+                const sy = toScreenY(yTick);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, sy);
+                ctx.lineTo(width - padRight, sy);
+                ctx.stroke();
+                ctx.fillText(yTick.toFixed(1), padLeft - 8, sy + 4);
+            }
+
+            // 2. Shade Regions under the Active t-Distribution Curve
+            const acceptFill = 'rgba(16, 185, 129, 0.18)';
+            const rejectFill = 'rgba(244, 63, 94, 0.36)';
+
+            if (currentTail === 'two') {
+                const c = Math.min(Math.abs(tCrit), xMax);
+                if (Math.abs(tCrit) < xMax) {
+                    shadeUnderTCurve(toScreenX, toScreenY, xMin, -c, currentDF, rejectFill);
+                    shadeUnderTCurve(toScreenX, toScreenY, c, xMax, currentDF, rejectFill);
+                }
+                shadeUnderTCurve(toScreenX, toScreenY, -c, c, currentDF, acceptFill);
+            } else if (currentTail === 'left') {
+                const c = Math.max(tCrit, xMin);
+                if (tCrit > xMin) {
+                    shadeUnderTCurve(toScreenX, toScreenY, xMin, c, currentDF, rejectFill);
+                }
+                shadeUnderTCurve(toScreenX, toScreenY, c, xMax, currentDF, acceptFill);
+            } else {
+                const c = Math.min(tCrit, xMax);
+                shadeUnderTCurve(toScreenX, toScreenY, xMin, c, currentDF, acceptFill);
+                if (tCrit < xMax) {
+                    shadeUnderTCurve(toScreenX, toScreenY, c, xMax, currentDF, rejectFill);
+                }
+            }
+
+            // 3. Draw Center Mean Axis at t = 0
+            const zeroX = toScreenX(0);
+            ctx.save();
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(zeroX, toScreenY(Math.max(normalPDF(0), tPDF(0, currentDF))));
+            ctx.lineTo(zeroX, baseY);
+            ctx.stroke();
+            ctx.restore();
+
+            // 4. Optional Standard Normal (Z) Curve & Z* Markers Overlay
+            if (showZ) {
+                ctx.save();
+                ctx.strokeStyle = '#0d9488'; // Teal dashed curve for Z
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                const steps = 320;
+                const dx = (xMax - xMin) / steps;
+                for (let i = 0; i <= steps; i++) {
+                    const x = xMin + i * dx;
+                    const sx = toScreenX(x);
+                    const sy = toScreenY(normalPDF(x));
+                    if (i === 0) ctx.moveTo(sx, sy);
+                    else ctx.lineTo(sx, sy);
+                }
+                ctx.stroke();
+                ctx.restore();
+
+                // Subtle Z* vertical reference markers
+                if (currentTail === 'two') {
+                    const zc = Math.abs(zCrit);
+                    drawZBenchmarkLine(toScreenX(-zc), baseY, toScreenY(normalPDF(-zc)), `-z*=-${zc.toFixed(2)}`);
+                    drawZBenchmarkLine(toScreenX(zc), baseY, toScreenY(normalPDF(zc)), `+z*=+${zc.toFixed(2)}`);
+                } else if (currentTail === 'left') {
+                    drawZBenchmarkLine(toScreenX(zCrit), baseY, toScreenY(normalPDF(zCrit)), `z*=${zCrit.toFixed(2)}`);
+                } else {
+                    drawZBenchmarkLine(toScreenX(zCrit), baseY, toScreenY(normalPDF(zCrit)), `z*=+${zCrit.toFixed(2)}`);
+                }
+            }
+
+            // 5. Draw Active Student's t-Distribution Curve
+            ctx.save();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2.8;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            const steps = 380;
+            const dt = (xMax - xMin) / steps;
+            for (let i = 0; i <= steps; i++) {
+                const t = xMin + i * dt;
+                const sx = toScreenX(t);
+                const sy = toScreenY(tPDF(t, currentDF));
+                if (i === 0) ctx.moveTo(sx, sy);
+                else ctx.lineTo(sx, sy);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // 6. Draw Critical t* Boundaries & Callouts
+            if (currentTail === 'two') {
+                const c = Math.abs(tCrit);
+                const halfAlphaPct = ((confObj.alpha / 2) * 100).toFixed(1) + '%';
+                if (c <= xMax) {
+                    drawTCriticalBoundary(toScreenX(-c), baseY, toScreenY(tPDF(-c, currentDF)), `-t* = -${c.toFixed(3)}`, `α/2 = ${halfAlphaPct}`, 'left');
+                    drawTCriticalBoundary(toScreenX(c), baseY, toScreenY(tPDF(c, currentDF)), `+t* = +${c.toFixed(3)}`, `α/2 = ${halfAlphaPct}`, 'right');
+                }
+            } else if (currentTail === 'left') {
+                const c = tCrit;
+                const alphaPct = (confObj.alpha * 100).toFixed(0) + '%';
+                if (c >= xMin) {
+                    drawTCriticalBoundary(toScreenX(c), baseY, toScreenY(tPDF(c, currentDF)), `t* = ${c.toFixed(3)}`, `α = ${alphaPct}`, 'left');
+                }
+            } else {
+                const c = tCrit;
+                const alphaPct = (confObj.alpha * 100).toFixed(0) + '%';
+                if (c <= xMax) {
+                    drawTCriticalBoundary(toScreenX(c), baseY, toScreenY(tPDF(c, currentDF)), `t* = +${c.toFixed(3)}`, `α = ${alphaPct}`, 'right');
+                }
+            }
+
+            // 7. Center Non-Rejection Area Pill
+            const centerLabelX = currentTail === 'left' ? toScreenX(0.45) : (currentTail === 'right' ? toScreenX(-0.45) : zeroX);
+            const centerLabelY = toScreenY(0.14);
+            drawPillLabel(centerLabelX, centerLabelY, `1 - α = ${confObj.confidence}% (df=${currentDF})`, '#065f46', '#d1fae5', '#10b981');
+
+            // 8. X-Axis Baseline & Ticks
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.75;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, baseY);
+            ctx.lineTo(width - padRight, baseY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#475569';
+            ctx.font = '600 12px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            const tickStep = (xMax > 7) ? 2 : 1;
+            const maxTick = Math.floor(xMax);
+            for (let tTick = -maxTick; tTick <= maxTick; tTick++) {
+                if (tTick % tickStep !== 0 && tTick !== 0) continue;
+                const sx = toScreenX(tTick);
+                ctx.beginPath();
+                ctx.moveTo(sx, baseY);
+                ctx.lineTo(sx, baseY + 6);
+                ctx.stroke();
+                ctx.fillText(tTick === 0 ? '0' : (tTick > 0 ? `+${tTick}` : `${tTick}`), sx, baseY + 21);
+            }
+
+            ctx.font = '600 12px "Inter", sans-serif';
+            ctx.fillStyle = '#64748b';
+            ctx.fillText(`Student's t-Scale (df = ${currentDF}, Sample Size n = ${currentDF + 1})`, zeroX, height - 8);
+
+            // 9. Draw Draggable Test Statistic Marker
+            const clampedTStat = Math.max(xMin, Math.min(xMax, tStat));
+            drawTestStatisticMarker(toScreenX(clampedTStat), baseY, isRejected(tStat));
+        }
+
+        function shadeUnderTCurve(toScreenX, toScreenY, tStart, tEnd, df, fillStyle) {
+            ctx.save();
+            ctx.fillStyle = fillStyle;
+            ctx.beginPath();
+            const steps = 100;
+            const dt = (tEnd - tStart) / steps;
+            ctx.moveTo(toScreenX(tStart), toScreenY(0));
+            for (let i = 0; i <= steps; i++) {
+                const t = tStart + i * dt;
+                ctx.lineTo(toScreenX(t), toScreenY(tPDF(t, df)));
+            }
+            ctx.lineTo(toScreenX(tEnd), toScreenY(0));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawZBenchmarkLine(sx, baseY, curveY, label) {
+            ctx.save();
+            ctx.strokeStyle = '#0d9488';
+            ctx.lineWidth = 1.4;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(sx, baseY);
+            ctx.lineTo(sx, curveY - 12);
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f766e';
+            ctx.font = '600 10px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, sx, curveY - 16);
+            ctx.restore();
+        }
+
+        function drawTCriticalBoundary(sx, baseY, curveY, critText, areaText, side) {
+            ctx.save();
+            const topY = Math.min(curveY - 30, baseY - 130);
+            ctx.strokeStyle = '#e11d48';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(sx, baseY);
+            ctx.lineTo(sx, topY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            drawPillLabel(sx, topY - 10, critText, '#ffffff', '#e11d48', '#be123c');
+
+            const offsetX = side === 'left' ? -38 : 38;
+            ctx.fillStyle = '#be123c';
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(areaText, sx + offsetX, baseY - 14);
+            ctx.restore();
+        }
+
+        function drawPillLabel(x, y, text, textColor, bgColor, borderColor) {
+            ctx.save();
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            const paddingX = 8;
+            const textW = ctx.measureText(text).width;
+            const boxW = textW + paddingX * 2;
+            const boxH = 22;
+
+            const canvasW = canvas.parentElement.clientWidth;
+            const clampedX = Math.max(boxW / 2 + 6, Math.min(canvasW - boxW / 2 - 6, x));
+
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(clampedX - boxW / 2, y - boxH / 2, boxW, boxH, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = textColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, clampedX, y + 0.5);
+            ctx.restore();
+        }
+
+        function drawTestStatisticMarker(sx, baseY, rejected) {
+            ctx.save();
+            const markerColor = rejected ? '#dc2626' : '#4f46e5';
+
+            ctx.strokeStyle = markerColor;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(sx, baseY);
+            ctx.lineTo(sx, 28);
+            ctx.stroke();
+
+            ctx.fillStyle = markerColor;
+            ctx.beginPath();
+            ctx.arc(sx, baseY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            const signStr = tStat >= 0 ? `+${tStat.toFixed(2)}` : tStat.toFixed(2);
+            const statusStr = rejected ? 'REJECT H₀' : 'KEEP H₀';
+            const label = `t = ${signStr} (${statusStr})`;
+
+            ctx.font = '700 11px "JetBrains Mono", monospace';
+            const textW = ctx.measureText(label).width;
+            const boxW = textW + 16;
+            const boxH = 24;
+
+            const canvasW = canvas.parentElement.clientWidth;
+            const clampedX = Math.max(boxW / 2 + 8, Math.min(canvasW - boxW / 2 - 8, sx));
+
+            ctx.fillStyle = markerColor;
+            ctx.beginPath();
+            ctx.roundRect(clampedX - boxW / 2, 8, boxW, boxH, 6);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, clampedX, 20);
+            ctx.restore();
+        }
+
+        // ============================================================================
+        // 4. STATISTICAL DECISION LOGIC & UI SYNCHRONIZATION
+        // ============================================================================
+        function isRejected(tVal) {
+            const crit = getCriticalT(currentLevel, currentTail, currentDF);
+            if (currentTail === 'two') {
+                return Math.abs(tVal) >= Math.abs(crit);
+            } else if (currentTail === 'left') {
+                return tVal <= crit;
+            } else {
+                return tVal >= crit;
+            }
+        }
+
+        function computeTPValue(tVal, df) {
+            if (currentTail === 'two') {
+                return 2.0 * (1.0 - tCDF(Math.abs(tVal), df));
+            } else if (currentTail === 'left') {
+                return tCDF(tVal, df);
+            } else {
+                return 1.0 - tCDF(tVal, df);
+            }
+        }
+
+        function formatCritLabel(val, tail) {
+            if (tail === 'two') return `±${Math.abs(val).toFixed(4)}`;
+            if (tail === 'left') return `${val.toFixed(4)}`;
+            return `+${val.toFixed(4)}`;
+        }
+
+        function updateUI() {
+            const confObj = CONFIDENCE_LEVELS[currentLevel];
+            const tCrit = getCriticalT(currentLevel, currentTail, currentDF);
+            const zCrit = getCriticalZ(currentLevel, currentTail);
+            const rejected = isRejected(tStat);
+            const pVal = computeTPValue(tStat, currentDF);
+            const tFormatted = (tStat >= 0 ? '+' : '') + tStat.toFixed(2);
+            const tCritLabel = formatCritLabel(tCrit, currentTail);
+            const zCritLabel = formatCritLabel(zCrit, currentTail);
+
+            // Sync DF & Sample Size Inputs
+            document.getElementById('dfSlider').value = Math.min(120, currentDF);
+            document.getElementById('dfInput').value = currentDF;
+            document.getElementById('nInput').value = currentDF + 1;
+            document.getElementById('headerDfBadge').textContent = `df = ${currentDF} (n = ${currentDF + 1})`;
+
+            // Highlight Quick DF Chips
+            document.querySelectorAll('.df-chip').forEach(btn => {
+                const d = parseInt(btn.getAttribute('data-df'), 10);
+                btn.classList.toggle('df-chip-active', d === currentDF);
+            });
+
+            // Highlight Confidence Buttons
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                const lvl = parseInt(btn.getAttribute('data-level'), 10);
+                btn.classList.toggle('preset-btn-active', lvl === currentLevel);
+            });
+
+            // Highlight Tail Buttons
+            document.querySelectorAll('.tail-btn').forEach(btn => {
+                const tail = btn.getAttribute('data-tail');
+                btn.classList.toggle('tail-btn-active', tail === currentTail);
+            });
+
+            const tailSplitLabel = document.getElementById('tailSplitLabel');
+            if (currentTail === 'two') {
+                tailSplitLabel.innerHTML = `Two-Tailed (&alpha;/2 = ${(confObj.alpha / 2).toFixed(3)} each)`;
+            } else if (currentTail === 'left') {
+                tailSplitLabel.innerHTML = `Left-Tailed (&alpha; = ${confObj.alpha.toFixed(2)} in left tail)`;
+            } else {
+                tailSplitLabel.innerHTML = `Right-Tailed (&alpha; = ${confObj.alpha.toFixed(2)} in right tail)`;
+            }
+
+            // Update Legends & Banner
+            document.getElementById('legendAcceptText').textContent = `Non-Rejection (${confObj.confidence}%)`;
+            document.getElementById('legendRejectText').innerHTML = `Critical Region (&alpha; = ${(confObj.alpha * 100).toFixed(0)}%)`;
+            document.getElementById('legendTStatText').textContent = `Test Stat (t = ${tFormatted})`;
+            document.getElementById('tStatBadge').textContent = `t = ${tFormatted}`;
+            document.getElementById('tStatSlider').value = tStat;
+
+            const penaltyDiff = Math.abs(tCrit) - Math.abs(zCrit);
+            document.getElementById('penaltyBannerText').innerHTML =
+                `<strong>Small-Sample Penalty (<i>df</i> = ${currentDF}):</strong> Because sample <i>s</i> estimates &sigma;, the <i>t</i>* cutoff (<strong>${tCritLabel}</strong>) is <strong>+${penaltyDiff.toFixed(4)} wider</strong> than the Normal <i>Z</i>* cutoff (<strong>${zCritLabel}</strong>).`;
+
+            // Update Decision Card
+            const headerBadge = document.getElementById('headerDecisionBadge');
+            const headerIcon = document.getElementById('headerDecisionIcon');
+            const headerText = document.getElementById('headerDecisionText');
+            const decisionCard = document.getElementById('decisionCard');
+            const cardStatusPill = document.getElementById('cardStatusPill');
+            const cardHeadline = document.getElementById('cardDecisionHeadline');
+            const cardReason = document.getElementById('cardDecisionReason');
+            const pValNote = document.getElementById('pValComparisonNote');
+
+            document.getElementById('cardAlphaText').textContent = confObj.alpha.toFixed(2);
+            document.getElementById('cardDfText').textContent = currentDF;
+            document.getElementById('statPValue').textContent = pVal.toFixed(4);
+            document.getElementById('statAlphaCompare').textContent = confObj.alpha.toFixed(4);
+
+            if (rejected) {
+                headerBadge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border bg-rose-50 border-rose-300 text-rose-700';
+                headerIcon.className = 'fa-solid fa-triangle-exclamation text-rose-600';
+                headerText.textContent = `Reject H₀ (t = ${tFormatted})`;
+
+                decisionCard.className = 'rounded-2xl p-5 border transition-colors duration-200 bg-rose-50/80 border-rose-200';
+                cardStatusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-600 text-white';
+                cardStatusPill.textContent = 'In Critical Region';
+                cardHeadline.className = 'text-xl font-extrabold text-rose-950 mb-1';
+                cardHeadline.textContent = 'Reject H₀ (Statistically Significant)';
+                cardReason.innerHTML = `Since <strong>t = ${tFormatted}</strong> falls beyond the critical cutoff (<strong>${tCritLabel}</strong>) for <i>df</i> = ${currentDF}, it lies inside the shaded red rejection region.`;
+                pValNote.className = 'mt-2 text-center font-mono text-xs font-semibold text-rose-700';
+                pValNote.innerHTML = `p-value (${pVal.toFixed(4)}) &le; &alpha; (${confObj.alpha.toFixed(4)}) &rarr; Reject H₀`;
+            } else {
+                headerBadge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border bg-emerald-50 border-emerald-300 text-emerald-800';
+                headerIcon.className = 'fa-solid fa-circle-check text-emerald-600';
+                headerText.textContent = `Do Not Reject H₀ (t = ${tFormatted})`;
+
+                decisionCard.className = 'rounded-2xl p-5 border transition-colors duration-200 bg-emerald-50/70 border-emerald-200';
+                cardStatusPill.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-600 text-white';
+                cardStatusPill.textContent = 'Non-Rejection Region';
+                cardHeadline.className = 'text-xl font-extrabold text-emerald-950 mb-1';
+                cardHeadline.textContent = 'Do Not Reject H₀';
+                cardReason.innerHTML = `Since <strong>t = ${tFormatted}</strong> does not cross the critical boundary (<strong>${tCritLabel}</strong>) for <i>df</i> = ${currentDF}, it remains inside the green non-rejection region.`;
+                pValNote.className = 'mt-2 text-center font-mono text-xs font-semibold text-emerald-800';
+                pValNote.innerHTML = `p-value (${pVal.toFixed(4)}) &gt; &alpha; (${confObj.alpha.toFixed(4)}) &rarr; Do Not Reject H₀`;
+            }
+
+            // Update Right Breakdown Panel
+            document.getElementById('bkDf').textContent = `${currentDF} (n = ${currentDF + 1})`;
+            document.getElementById('bkConfidence').textContent = `${confObj.confidence}% (${(confObj.confidence / 100).toFixed(4)})`;
+            document.getElementById('bkCritVal').textContent = tCritLabel;
+            document.getElementById('bkZBenchmark').textContent = zCritLabel;
+
+            const bkTailArea = document.getElementById('bkTailArea');
+            const bkRule = document.getElementById('bkDecisionRule');
+            const tTableTip = document.getElementById('tTableTip');
+
+            if (currentTail === 'two') {
+                const halfA = confObj.alpha / 2;
+                const c = Math.abs(tCrit).toFixed(4);
+                bkTailArea.innerHTML = `&alpha;/2 = ${halfA.toFixed(4)} (${(halfA * 100).toFixed(1)}% per tail)`;
+                bkRule.innerHTML = `Reject H₀ if |t| &ge; ${c} &nbsp;(t &le; -${c} or t &ge; +${c})`;
+                tTableTip.innerHTML = `Go to row <span class="font-mono font-bold">df = ${currentDF}</span> and column <span class="font-mono font-bold">Upper-Tail Area = ${halfA.toFixed(3)}</span> (Two-Tailed &alpha; = ${confObj.alpha.toFixed(2)}) to read <span class="font-mono font-bold">t* = &plusmn;${c}</span>.`;
+            } else if (currentTail === 'left') {
+                const c = tCrit.toFixed(4);
+                bkTailArea.innerHTML = `&alpha; = ${confObj.alpha.toFixed(4)} (${(confObj.alpha * 100).toFixed(0)}% in left tail)`;
+                bkRule.innerHTML = `Reject H₀ if t &le; ${c}`;
+                tTableTip.innerHTML = `By symmetry, look up row <span class="font-mono font-bold">df = ${currentDF}</span> and <span class="font-mono font-bold">One-Tail Area = ${confObj.alpha.toFixed(2)}</span>, then attach a minus sign: <span class="font-mono font-bold">t* = ${c}</span>.`;
+            } else {
+                const c = tCrit.toFixed(4);
+                bkTailArea.innerHTML = `&alpha; = ${confObj.alpha.toFixed(4)} (${(confObj.alpha * 100).toFixed(0)}% in right tail)`;
+                bkRule.innerHTML = `Reject H₀ if t &ge; +${c}`;
+                tTableTip.innerHTML = `Go to row <span class="font-mono font-bold">df = ${currentDF}</span> and <span class="font-mono font-bold">Upper-Tail Area = ${confObj.alpha.toFixed(2)}</span> to read <span class="font-mono font-bold">t* = +${c}</span>.`;
+            }
+
+            renderMasterTTable();
+            drawPlot();
+        }
+
+        function renderMasterTTable() {
+            const levels = [80, 90, 95, 98, 99];
+            // Update Table Column Headers for current tail mode
+            const banner = document.getElementById('tableTailBanner');
+            if (currentTail === 'two') {
+                banner.innerHTML = `Active Tail Mode: <strong>Two-Tailed Critical Values (&plusmn;t<sub>&alpha;/2, df</sub>)</strong>`;
+            } else if (currentTail === 'left') {
+                banner.innerHTML = `Active Tail Mode: <strong>Left-Tailed Critical Values (&minus;t<sub>&alpha;, df</sub>)</strong>`;
+            } else {
+                banner.innerHTML = `Active Tail Mode: <strong>Right-Tailed Critical Values (+t<sub>&alpha;, df</sub>)</strong>`;
+            }
+
+            levels.forEach(lvl => {
+                const a = CONFIDENCE_LEVELS[lvl].alpha;
+                const el = document.getElementById(`colHead${lvl}`);
+                if (currentTail === 'two') {
+                    el.innerHTML = `&alpha;=${a.toFixed(2)} (&alpha;/2=${(a / 2).toFixed(3)})`;
+                } else {
+                    el.innerHTML = `One-Tail &alpha;=${a.toFixed(2)}`;
+                }
+            });
+
+            // Build list of Degrees of Freedom rows to display (standard benchmarks + active currentDF sorted)
+            const standardDFs = [1, 5, 10, 13, 15, 20, 25, 30, 60, 120];
+            if (!standardDFs.includes(currentDF)) {
+                standardDFs.push(currentDF);
+                standardDFs.sort((a, b) => a - b);
+            }
+
+            const tbody = document.getElementById('tReferenceTableBody');
+            let html = '';
+
+            standardDFs.forEach(dfVal => {
+                const isRowActive = (dfVal === currentDF);
+                const rowBg = isRowActive ? 'bg-orange-50/70' : 'hover:bg-slate-50/80';
+
+                html += `<tr class="${rowBg} transition">`;
+                html += `
+                    <td class="py-2 px-3 border-r border-slate-200 font-sans">
+                        <button onclick="setDF(${dfVal})" class="flex items-center justify-between w-full text-left cursor-pointer">
+                            <span class="font-bold ${isRowActive ? 'text-orange-700' : 'text-slate-800'}">
+                                df = ${dfVal}
+                            </span>
+                            <span class="text-[11px] font-mono text-slate-400">n=${dfVal + 1}</span>
+                        </button>
+                    </td>
+                `;
+
+                levels.forEach(lvl => {
+                    const isCellActive = (isRowActive && lvl === currentLevel);
+                    const cellClass = isCellActive ? 'table-cell-active' : 'text-slate-700 hover:bg-slate-100';
+                    const val = getCriticalT(lvl, currentTail, dfVal);
+                    const formatted = formatCritLabel(val, currentTail);
+
+                    html += `
+                        <td class="py-1.5 px-2 text-center">
+                            <button onclick="selectTableCell(${dfVal}, ${lvl})" class="w-full py-1.5 px-2 rounded-md transition cursor-pointer ${cellClass}">
+                                ${formatted}
+                            </button>
+                        </td>
+                    `;
+                });
+
+                html += `</tr>`;
+            });
+
+            // Add Bottom Row for Standard Normal (Z, df = infinity) Comparison
+            html += `<tr class="bg-teal-50/50 border-t-2 border-teal-200 font-semibold text-teal-900">`;
+            html += `
+                <td class="py-2.5 px-3 border-r border-teal-200 font-sans">
+                    <div class="flex items-center justify-between">
+                        <span>Normal (<i>Z</i>, df = &infin;)</span>
+                        <span class="text-[10px] font-mono uppercase bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded">Benchmark</span>
+                    </div>
+                </td>
+            `;
+            levels.forEach(lvl => {
+                const zVal = getCriticalZ(lvl, currentTail);
+                const zFormatted = formatCritLabel(zVal, currentTail);
+                const isColActive = (lvl === currentLevel);
+                html += `
+                    <td class="py-2 px-2 text-center font-mono ${isColActive ? 'font-extrabold underline text-teal-950' : 'text-teal-800'}">
+                        ${zFormatted}
+                    </td>
+                `;
+            });
+            html += `</tr>`;
+
+            tbody.innerHTML = html;
+        }
+
+        // ============================================================================
+        // 5. EVENT HANDLERS & DIRECT CANVAS DRAGGING
+        // ============================================================================
+        function setDF(val) {
+            let parsed = parseInt(val, 10);
+            if (isNaN(parsed) || parsed < 1) parsed = 1;
+            if (parsed > 500) parsed = 500;
+            currentDF = parsed;
+            updateUI();
+        }
+
+        function setSampleSizeN(val) {
+            let parsedN = parseInt(val, 10);
+            if (isNaN(parsedN) || parsedN < 2) parsedN = 2;
+            if (parsedN > 501) parsedN = 501;
+            currentDF = parsedN - 1;
+            updateUI();
+        }
+
+        function setConfidenceLevel(level) {
+            currentLevel = level;
+            updateUI();
+        }
+
+        function setTailType(tail) {
+            currentTail = tail;
+            updateUI();
+        }
+
+        function selectTableCell(dfVal, level) {
+            currentDF = dfVal;
+            currentLevel = level;
+            updateUI();
+        }
+
+        function handleTStatSlider(val) {
+            tStat = parseFloat(val);
+            updateUI();
+        }
+
+        function setTStat(val) {
+            tStat = parseFloat(val);
+            updateUI();
+        }
+
+        function updateTFromPointer(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            const px = clientX - rect.left;
+            const padLeft = 46;
+            const padRight = 32;
+            const plotW = rect.width - padLeft - padRight;
+            const { xMin, xMax } = getPlotBounds();
+
+            let t = xMin + ((px - padLeft) / plotW) * (xMax - xMin);
+            t = Math.max(-4.50, Math.min(4.50, t));
+            tStat = Math.round(t * 100) / 100;
+            updateUI();
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDraggingCanvas = true;
+            updateTFromPointer(e.clientX);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDraggingCanvas) {
+                updateTFromPointer(e.clientX);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingCanvas = false;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                isDraggingCanvas = true;
+                updateTFromPointer(e.touches[0].clientX);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDraggingCanvas && e.touches.length > 0) {
+                updateTFromPointer(e.touches[0].clientX);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            isDraggingCanvas = false;
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            updateUI();
+        };
+    </script>
+</body>
+</html>
