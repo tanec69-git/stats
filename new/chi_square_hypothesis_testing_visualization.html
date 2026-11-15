@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi-Square Hypothesis Testing Visualization</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jStat -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 12px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #edf2f7;
+            font-weight: 600;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+        .chart-container {
+            position: relative;
+            height: 50vh;
+            min-height: 400px;
+            width: 100%;
+        }
+        .result-box {
+            transition: all 0.3s ease;
+        }
+        .bg-reject {
+            background-color: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+        .bg-fail {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Chi-Square (χ²) Distribution Visualization</h2>
+        <p class="text-muted">Interactive hypothesis testing with dynamic critical regions.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Inputs Column -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header text-primary">
+                    <i class="bi bi-sliders"></i> Test Parameters
+                </div>
+                <div class="card-body d-flex flex-column gap-3">
+                    
+                    <div>
+                        <label for="testType" class="form-label fw-semibold">Test Type</label>
+                        <select id="testType" class="form-select">
+                            <option value="right-tailed" selected>Right-Tailed (>)</option>
+                            <option value="left-tailed">Left-Tailed (<)</option>
+                            <option value="two-tailed">Two-Tailed (≠)</option>
+                        </select>
+                        <small class="text-muted">Chi-square tests are usually right-tailed.</small>
+                    </div>
+
+                    <div>
+                        <label for="inputDf" class="form-label fw-semibold">Degrees of Freedom (df)</label>
+                        <input type="number" id="inputDf" class="form-control" min="1" step="1" value="5">
+                    </div>
+
+                    <div>
+                        <label for="inputAlpha" class="form-label fw-semibold">Significance Level (α)</label>
+                        <input type="number" id="inputAlpha" class="form-control" min="0.001" max="0.999" step="0.01" value="0.05">
+                    </div>
+
+                    <div>
+                        <label for="inputStat" class="form-label fw-semibold">Test Statistic (χ²)</label>
+                        <input type="number" id="inputStat" class="form-control" step="0.01" min="0" value="12.5">
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <button id="btnCalculate" class="btn btn-primary w-100 py-2 fw-bold">Calculate & Plot</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart and Results Column -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="chiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div id="resultBox" class="card result-box">
+                <div class="card-body text-center p-4">
+                    <h5 class="text-uppercase fw-bold opacity-75 mb-1" style="font-size: 0.85rem;">Conclusion</h5>
+                    <h3 id="conclusionText" class="fw-bold mb-2">Ready</h3>
+                    <p id="conclusionDetails" class="mb-0"></p>
+                    <hr class="opacity-25 my-3">
+                    <div id="critValText" class="font-monospace fw-semibold"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let chartInstance = null;
+
+    function generateChiCurveData(min, max, df, step = 0.1) {
+        const data = [];
+        for (let x = min; x <= max; x += step) {
+            let px = x;
+            // PDF approaches infinity at x=0 for df=1. Start slightly above 0.
+            if (px === 0 && df === 1) px = 0.05; 
+            
+            // For df < 1 jStat might throw or return NaN, safe guard
+            if (df < 1) df = 1;
+
+            const y = jStat.chisquare.pdf(px, df);
+            data.push({ x: px, y: isFinite(y) ? y : null });
+        }
+        return data;
+    }
+
+    function updateApp() {
+        // 1. Gather Inputs
+        const testType = document.getElementById('testType').value;
+        const df = Math.max(1, parseInt(document.getElementById('inputDf').value) || 1);
+        const alpha = Math.max(0.001, Math.min(0.999, parseFloat(document.getElementById('inputAlpha').value) || 0.05));
+        const stat = Math.max(0, parseFloat(document.getElementById('inputStat').value) || 0);
+
+        // 2. Calculations
+        let critLeft = null;
+        let critRight = null;
+        let isRejected = false;
+        let conditionText = "";
+        let critText = "";
+
+        if (testType === 'right-tailed') {
+            critRight = jStat.chisquare.inv(1 - alpha, df);
+            isRejected = stat >= critRight;
+            conditionText = `Test Statistic (${stat.toFixed(3)}) is ${isRejected ? '≥' : '<'} Critical Value (${critRight.toFixed(3)})`;
+            critText = `χ²_critical = ${critRight.toFixed(3)}`;
+        } else if (testType === 'left-tailed') {
+            critLeft = jStat.chisquare.inv(alpha, df);
+            isRejected = stat <= critLeft;
+            conditionText = `Test Statistic (${stat.toFixed(3)}) is ${isRejected ? '≤' : '>'} Critical Value (${critLeft.toFixed(3)})`;
+            critText = `χ²_critical = ${critLeft.toFixed(3)}`;
+        } else if (testType === 'two-tailed') {
+            critLeft = jStat.chisquare.inv(alpha / 2, df);
+            critRight = jStat.chisquare.inv(1 - alpha / 2, df);
+            isRejected = stat <= critLeft || stat >= critRight;
+            conditionText = `Test Statistic (${stat.toFixed(3)}) falls ${isRejected ? 'inside' : 'outside'} the rejection regions (≤ ${critLeft.toFixed(3)} or ≥ ${critRight.toFixed(3)})`;
+            critText = `χ²_critical_left = ${critLeft.toFixed(3)}, χ²_critical_right = ${critRight.toFixed(3)}`;
+        }
+
+        // 3. Determine Chart Bounds
+        // Standard deviation of Chi-Square is sqrt(2*df)
+        const stdDev = Math.sqrt(2 * df);
+        const mean = df;
+        let maxX = Math.max(mean + 4 * stdDev, stat * 1.2, critRight ? critRight * 1.2 : 0);
+        let minX = 0;
+        
+        // Capping extreme bounds for drawing
+        if (maxX > 200) maxX = Math.max(stat * 1.1, critRight * 1.1, 200);
+
+        // Find peak density to scale the test statistic line
+        // Mode of chi-square is max(df - 2, 0). For df=1 or 2, peak is at 0.
+        const modeX = df > 2 ? df - 2 : (df === 1 ? 0.05 : 0);
+        const peakY = jStat.chisquare.pdf(modeX, df);
+
+        // 4. Build Datasets
+        const datasets = [];
+
+        // Helper for rejection regions
+        const addRegion = (start, end, label) => {
+            datasets.push({
+                label: label,
+                data: generateChiCurveData(start, end, df, (end - start) / 50),
+                backgroundColor: 'rgba(220, 53, 69, 0.4)', // Bootstrap Danger Red
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1,
+                fill: 'origin',
+                pointRadius: 0,
+                showLine: true
+            });
+        };
+
+        if (testType === 'left-tailed' || testType === 'two-tailed') {
+            addRegion(minX === 0 && df === 1 ? 0.05 : minX, critLeft, 'Rejection Region (Left)');
+        }
+        if (testType === 'right-tailed' || testType === 'two-tailed') {
+            addRegion(critRight, maxX, 'Rejection Region (Right)');
+        }
+
+        // Main Chi-Square Curve
+        datasets.push({
+            label: `χ² Distribution (df=${df})`,
+            data: generateChiCurveData(minX, maxX, df, maxX / 150),
+            borderColor: '#0d6efd', // Bootstrap Primary Blue
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            showLine: true,
+            order: 10
+        });
+
+        // Test Statistic Line
+        datasets.push({
+            label: 'Test Statistic',
+            data: [
+                { x: stat, y: 0 },
+                { x: stat, y: peakY * 1.05 }
+            ],
+            borderColor: '#212529', // Bootstrap Dark
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointBackgroundColor: '#212529',
+            pointRadius: [0, 4], // Dot only at top
+            fill: false,
+            showLine: true,
+            order: 20
+        });
+
+        // 5. Update Chart
+        const ctx = document.getElementById('chiChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'scatter',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `χ²: ${ctx.parsed.x.toFixed(2)}, p: ${ctx.parsed.y.toFixed(4)}`
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            filter: (item) => !item.text.includes('(Left)') // Hide duplicate legend
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: minX,
+                        max: maxX,
+                        title: { display: true, text: 'Chi-Square (χ²) Value', font: { weight: 'bold' } }
+                    },
+                    y: {
+                        min: 0,
+                        // Cap y-axis if df=1 to prevent chart from scaling to infinity visually
+                        max: df === 1 ? Math.min(peakY, 1.5) : peakY * 1.2,
+                        title: { display: true, text: 'Probability Density' }
+                    }
+                }
+            }
+        });
+
+        // 6. Update DOM UI
+        const resultBox = document.getElementById('resultBox');
+        const textH = document.getElementById('conclusionText');
+        const textD = document.getElementById('conclusionDetails');
+        
+        document.getElementById('critValText').textContent = critText;
+        textD.textContent = conditionText;
+
+        if (isRejected) {
+            resultBox.className = 'card result-box bg-reject';
+            textH.textContent = "Reject the Null Hypothesis (H₀)";
+        } else {
+            resultBox.className = 'card result-box bg-fail';
+            textH.textContent = "Fail to Reject the Null Hypothesis (H₀)";
+        }
+    }
+
+    // Initialize & Listeners
+    window.addEventListener('DOMContentLoaded', () => {
+        updateApp();
+        document.getElementById('btnCalculate').addEventListener('click', updateApp);
+        
+        const inputs = ['inputDf', 'inputAlpha', 'inputStat', 'testType'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('change', updateApp);
+            if (id !== 'testType') {
+                document.getElementById(id).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') updateApp();
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>

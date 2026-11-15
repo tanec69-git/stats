@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confidence Interval Width Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jStat for statistical functions -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    
+    <!-- MathJax for rendering equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom range slider styling for better UX */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #7e22ce; /* purple-700 */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        .reference-text {
+            color: #6b2fa5; /* Matching the purple from the uploaded image */
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 sm:p-8 flex flex-col items-center">
+
+    <div class="max-w-6xl w-full space-y-6">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-slate-900">Factors Affecting Confidence Interval Width</h1>
+            <p class="text-slate-500 mt-2">Use the sliders to see how Sample Size and Confidence Level impact the interval.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Column: Controls & Reference Text -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                
+                <!-- Reference Image Text Panel -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 bg-purple-50/30">
+                    <h2 class="text-lg font-semibold reference-text mb-4">
+                        State and explain briefly TWO (2) factors that could decrease the width of the confidence interval for the population proportion.
+                    </h2>
+                    
+                    <div class="space-y-4 text-slate-700 leading-relaxed text-sm">
+                        <p>
+                            <strong class="text-slate-900">Increasing the sample size</strong> reduces the margin of error, which in turn narrows the confidence interval and makes the estimate of the population proportion more precise.
+                        </p>
+                        <p>
+                            <strong class="text-slate-900">Choosing a lower confidence level</strong> decreases the critical value (z), which reduces the margin of error and results in a narrower confidence interval.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Sliders -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-grow">
+                    <h3 class="text-base font-bold uppercase tracking-wider text-slate-500 mb-5 border-b pb-2">Interactive Controls</h3>
+                    
+                    <!-- Fixed Proportion Note -->
+                    <div class="mb-6 p-3 bg-slate-50 rounded-lg text-xs text-slate-500 border border-slate-100">
+                        <strong>Note:</strong> For this demonstration, the sample proportion ($\hat{p}$) is fixed at <strong>0.50</strong> to simulate the maximum possible variance, allowing us to focus purely on $n$ and $z$.
+                    </div>
+
+                    <div class="space-y-8">
+                        <!-- Slider: Sample Size (n) -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <label for="sliderN" class="block text-sm font-semibold text-slate-700">
+                                    Sample Size ($n$)
+                                </label>
+                                <span id="valN" class="text-lg font-bold text-purple-700">100</span>
+                            </div>
+                            <input type="range" id="sliderN" min="20" max="1000" step="10" value="100">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                <span>20 (Wider CI)</span>
+                                <span>1000 (Narrower CI)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider: Confidence Level -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <label for="sliderCL" class="block text-sm font-semibold text-slate-700">
+                                    Confidence Level
+                                </label>
+                                <span id="valCL" class="text-lg font-bold text-purple-700">95%</span>
+                            </div>
+                            <input type="range" id="sliderCL" min="80" max="99.9" step="0.1" value="95">
+                            <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                <span>80% (Narrower CI)</span>
+                                <span>99.9% (Wider CI)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Visualization and Math -->
+            <div class="lg:col-span-7 flex flex-col gap-6">
+                
+                <!-- Chart Container -->
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-bold uppercase tracking-wider text-slate-500">Sampling Distribution</h3>
+                        <span class="px-2.5 py-1 rounded bg-purple-100 text-purple-800 text-xs font-semibold">
+                            Fixed X-Axis to show absolute width changes
+                        </span>
+                    </div>
+                    <div class="w-full aspect-[4/3] relative">
+                        <canvas id="ciChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Dynamic Calculations Readout -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Critical Value ($z$)</div>
+                        <div id="outZ" class="text-xl font-bold text-slate-800 mt-1">1.960</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Standard Error</div>
+                        <div id="outSE" class="text-xl font-bold text-slate-800 mt-1">0.050</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Margin of Error</div>
+                        <div id="outE" class="text-xl font-bold text-purple-700 mt-1">0.098</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Interval Width</div>
+                        <div id="outWidth" class="text-xl font-bold text-purple-700 mt-1">0.196</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+        const P_HAT = 0.5; // Fixed for demonstration
+
+        // DOM Elements
+        const sliderN = document.getElementById('sliderN');
+        const sliderCL = document.getElementById('sliderCL');
+        const valN = document.getElementById('valN');
+        const valCL = document.getElementById('valCL');
+        
+        const outZ = document.getElementById('outZ');
+        const outSE = document.getElementById('outSE');
+        const outE = document.getElementById('outE');
+        const outWidth = document.getElementById('outWidth');
+
+        function updateApp() {
+            // Get inputs
+            const n = parseInt(sliderN.value);
+            const clPercent = parseFloat(sliderCL.value);
+            
+            // Update labels
+            valN.textContent = n;
+            valCL.textContent = clPercent.toFixed(1) + '%';
+
+            // Calculations
+            const clDecimal = clPercent / 100;
+            const alpha = 1 - clDecimal;
+            
+            // Calculate Z critical value (two-tailed)
+            const z = Math.abs(jStat.normal.inv(alpha / 2, 0, 1));
+            
+            // Calculate Standard Error
+            const se = Math.sqrt((P_HAT * (1 - P_HAT)) / n);
+            
+            // Calculate Margin of Error
+            const e = z * se;
+            
+            // Calculate bounds
+            const lower = P_HAT - e;
+            const upper = P_HAT + e;
+            const width = upper - lower;
+
+            // Update DOM Math
+            outZ.textContent = z.toFixed(3);
+            outSE.textContent = se.toFixed(4);
+            outE.textContent = e.toFixed(3);
+            outWidth.textContent = width.toFixed(3);
+
+            // Update Chart
+            renderChart(se, lower, upper);
+        }
+
+        function renderChart(se, lower, upper) {
+            // We fix the X axis from 0.3 to 0.7 so the user can visually 
+            // see the curve get narrower/wider in absolute terms.
+            const minX = 0.3;
+            const maxX = 0.7;
+            const step = (maxX - minX) / 200;
+
+            const fullCurve = [];
+            const shadedRegion = [];
+
+            for (let x = minX; x <= maxX; x += step) {
+                const roundedX = Math.round(x * 1000) / 1000;
+                // PDF of the sampling distribution: Normal(mean = p_hat, stdDev = se)
+                const y = jStat.normal.pdf(roundedX, P_HAT, se);
+                
+                fullCurve.push({ x: roundedX, y: y });
+                
+                if (roundedX >= lower && roundedX <= upper) {
+                    shadedRegion.push({ x: roundedX, y: y });
+                }
+            }
+
+            // Ensure exact bounds are included in the shaded region for clean edges
+            shadedRegion.unshift({ x: lower, y: jStat.normal.pdf(lower, P_HAT, se) });
+            shadedRegion.push({ x: upper, y: jStat.normal.pdf(upper, P_HAT, se) });
+
+            const ctx = document.getElementById('ciChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Confidence Interval (Shaded)',
+                            data: shadedRegion,
+                            backgroundColor: 'rgba(126, 34, 206, 0.4)', // purple-700 transparent
+                            borderColor: 'rgba(126, 34, 206, 1)',
+                            borderWidth: 1,
+                            fill: 'origin',
+                            pointRadius: 0,
+                            showLine: true,
+                            order: 2
+                        },
+                        {
+                            label: 'Sampling Distribution',
+                            data: fullCurve,
+                            borderColor: '#334155', // slate-700
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0,
+                            showLine: true,
+                            order: 1
+                        },
+                        {
+                            // Markers for lower and upper bounds
+                            label: 'Bounds',
+                            data: [
+                                { x: lower, y: 0 },
+                                { x: upper, y: 0 }
+                            ],
+                            backgroundColor: '#be185d', // pink-700
+                            borderColor: 'transparent',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            showLine: false,
+                            order: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 300 // smooth transition when sliding
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `Proportion: ${ctx.parsed.x.toFixed(3)}, Density: ${ctx.parsed.y.toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: minX,
+                            max: maxX,
+                            title: {
+                                display: true,
+                                text: 'Sample Proportion (p̂)',
+                                font: { weight: 'bold' }
+                            },
+                            grid: {
+                                color: (ctx) => ctx.tick.value === P_HAT ? '#cbd5e1' : '#f1f5f9',
+                                lineWidth: (ctx) => ctx.tick.value === P_HAT ? 2 : 1
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            // We allow Y to auto-scale so the curve doesn't clip when n is large (and SE is tiny).
+                            // The visual narrowing is preserved because the X-axis is fixed.
+                            title: {
+                                display: true,
+                                text: 'Probability Density'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialization and Event Listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            updateApp();
+
+            // Listen for slider changes
+            sliderN.addEventListener('input', updateApp);
+            sliderCL.addEventListener('input', updateApp);
+        });
+    </script>
+</body>
+</html>

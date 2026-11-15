@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>t-Distribution Confidence Interval Practice</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & STIX Two Math for authentic math typesetting -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=STIX+Two+Math&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-font {
+            font-family: 'STIX Two Math', 'Cambria Math', 'Times New Roman', serif;
+        }
+        /* Fraction styling to match textbook mathematical layout */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.2rem;
+        }
+        .fraction-top {
+            border-bottom: 1.8px solid currentColor;
+            padding: 0 0.35rem 0.1rem 0.35rem;
+            line-height: 1.1;
+        }
+        .fraction-bottom {
+            padding: 0.15rem 0.35rem 0 0.35rem;
+            line-height: 1.1;
+        }
+        /* Highlight animation for table row */
+        @keyframes pulse-highlight {
+            0%, 100% { background-color: rgba(147, 51, 234, 0.15); }
+            50% { background-color: rgba(147, 51, 234, 0.3); }
+        }
+        .highlight-cell {
+            animation: pulse-highlight 2s infinite;
+            font-weight: 700;
+            color: #6b21a8;
+            border: 2px solid #9333ea;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Top Header -->
+    <header class="bg-gradient-to-r from-purple-800 via-purple-700 to-indigo-800 text-white shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-5 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-900/60 text-purple-200 border border-purple-500/40 mb-1">
+                    Statistics Interactive Lab • Small Sample (σ Unknown)
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">
+                    Confidence Interval of the Population Mean (<span class="math-font italic font-normal">t</span>-Distribution)
+                </h1>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="btnOpenTable" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition shadow-sm cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <span><span class="math-font italic">t</span>-Distribution Table</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 sm:px-6 space-y-6">
+
+        <!-- Control Bar -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button id="btnGenerate" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-purple-600 hover:bg-purple-700 active:bg-purple-800 shadow-sm hover:shadow transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Generate Question
+                </button>
+
+                <button id="btnLoadOriginal" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 transition text-sm cursor-pointer" title="Load the exact reference problem from the slide">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                    Original Reference Example
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <button id="btnToggleSolution" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition cursor-pointer">
+                    <svg id="iconEye" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                    </svg>
+                    <span id="txtToggleSolution">Hide Solution</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+            <div class="flex items-center justify-between mb-3">
+                <span id="badgeScenario" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                    Scenario #1 • Reference Example
+                </span>
+                <span class="text-xs font-medium text-slate-400">Round answers to 3 decimal places</span>
+            </div>
+
+            <!-- Question Text matching exact color and phrasing style of the uploaded image -->
+            <p id="questionText" class="text-xl sm:text-2xl leading-relaxed font-normal text-[#6b2fa5]">
+                <!-- Populated by JS -->
+            </p>
+
+            <!-- Interactive Student Practice Box -->
+            <div class="mt-6 pt-5 border-t border-slate-100">
+                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                    <div class="flex-grow">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                            Test Your Answer Before Revealing Solution (3 decimal places)
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label for="inputCriticalT" class="block text-xs text-slate-600 mb-1">
+                                    Critical Value (<span class="math-font italic">t</span>) <span class="text-slate-400">(optional)</span>
+                                </label>
+                                <input type="number" step="0.001" id="inputCriticalT" placeholder="e.g. 2.861"
+                                    class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm outline-none transition">
+                            </div>
+                            <div>
+                                <label for="inputLower" class="block text-xs text-slate-600 mb-1">
+                                    Lower Bound <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" step="0.001" id="inputLower" placeholder="e.g. 28.690"
+                                    class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm outline-none transition">
+                            </div>
+                            <div>
+                                <label for="inputUpper" class="block text-xs text-slate-600 mb-1">
+                                    Upper Bound <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" step="0.001" id="inputUpper" placeholder="e.g. 36.110"
+                                    class="w-full px-3.5 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnCheckAnswer" class="px-5 py-2 rounded-lg font-semibold text-sm bg-slate-800 hover:bg-slate-900 text-white transition shadow-sm cursor-pointer h-[38px]">
+                            Check Answer
+                        </button>
+                    </div>
+                </div>
+                <!-- Feedback Banner -->
+                <div id="feedbackBox" class="hidden mt-3 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2"></div>
+            </div>
+        </section>
+
+        <!-- Solution & Statistical Graph Container -->
+        <div id="solutionContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all duration-300">
+
+            <!-- Left Column: Step-by-Step Mathematical Solution (Modeled directly after reference image) -->
+            <section class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
+                        <h2 class="text-base font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                            Step-by-Step Solution
+                        </h2>
+                        <span class="text-xs text-slate-400">Textbook Format</span>
+                    </div>
+
+                    <!-- Mathematical Work Area matching the reference image -->
+                    <div class="math-font text-xl sm:text-2xl text-slate-900 space-y-5 pl-1 sm:pl-3 select-all">
+                        
+                        <!-- Line 1: n, x-bar, s -->
+                        <div class="flex flex-wrap items-baseline gap-x-8 gap-y-2">
+                            <div>
+                                <span class="italic">n</span> = <span id="solN">20</span>
+                            </div>
+                            <div>
+                                <span class="italic">x&#772;</span> = <span id="solXbar">32.4</span> <span id="solUnit1" class="italic">years</span>
+                            </div>
+                            <div>
+                                <span class="italic">s</span> = <span id="solS">5.8</span> <span id="solUnit2" class="italic">years</span>
+                            </div>
+                        </div>
+
+                        <!-- Line 2 & 3: df and critical t -->
+                        <div class="space-y-2 pl-2 sm:pl-6">
+                            <div>
+                                <span class="italic">df</span> = <span id="solN2">20</span> &minus; 1 = <span id="solDf">19</span>
+                            </div>
+                            <div>
+                                <span class="italic">t</span><sub class="text-sm sm:text-base"><span id="solAlpha">0.01</span> <span class="italic">two tails</span>,<span id="solDfSub">19</span></sub> = <span id="solT" class="text-purple-800 font-semibold">2.861</span>
+                            </div>
+                        </div>
+
+                        <!-- Line 4: Confidence Interval Header -->
+                        <div class="pt-2">
+                            <h3 class="font-sans font-bold text-lg sm:text-xl text-slate-900 mb-3">
+                                <span id="solConfLevel">99</span>% Confidence Interval:
+                            </h3>
+
+                            <!-- Formula and Substitution -->
+                            <div class="leading-relaxed flex flex-wrap items-center gap-y-3">
+                                <span><span class="italic">x&#772;</span> &plusmn; <span class="italic">t</span></span>
+                                <span class="fraction">
+                                    <span class="fraction-top italic">s</span>
+                                    <span class="fraction-bottom">&radic;<span class="italic" style="text-decoration: overline;">n</span></span>
+                                </span>
+                                <span class="mx-1.5">=</span>
+                                <span id="solXbar2">32.4</span>
+                                <span class="mx-1.5">&plusmn;</span>
+                                <span>(<span id="solT2">2.861</span>)</span>
+                                <span class="fraction">
+                                    <span class="fraction-top" id="solS2">5.8</span>
+                                    <span class="fraction-bottom">&radic;<span id="solN3" style="text-decoration: overline;">20</span></span>
+                                </span>
+                                <span class="mx-1.5">=</span>
+                                <span id="solXbar3">32.4</span>
+                                <span class="mx-1.5">&plusmn;</span>
+                                <span id="solMarginError" class="text-indigo-700 font-semibold">3.710</span>
+                            </div>
+
+                            <!-- Final Interval Result -->
+                            <div class="mt-4 text-2xl sm:text-[26px] font-semibold text-emerald-900 bg-emerald-50/80 border border-emerald-200 rounded-xl px-4 py-3 inline-block">
+                                = (<span id="solLower">28.690</span> ; <span id="solUpper">36.110</span>) <span id="solUnit3" class="italic font-normal">years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Helpful Rounding Note -->
+                <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-purple-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p>
+                        <strong>Note on Margin of Error (<span class="math-font italic">E</span>):</strong> 
+                        <span class="math-font">E = t &times; (s / &radic;n) = <span id="noteUnroundedE">3.71049...</span> &approx; <span id="noteRoundedE">3.710</span></span>. 
+                        Subtracting and adding <span id="noteRoundedE2">3.710</span> from <span class="math-font italic">x&#772;</span> = <span id="noteXbar">32.4</span> yields the interval endpoints.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Right Column: Interactive Dual-Axis Student's t-Distribution Graph -->
+            <section class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
+                        <div>
+                            <h2 class="text-base font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                                Student's <span class="math-font italic lowercase">t</span>-Distribution Graph
+                            </h2>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs font-medium">
+                            <span class="inline-flex items-center gap-1.5 text-purple-800">
+                                <span class="w-3 h-3 rounded-sm bg-purple-500/30 border border-purple-600 inline-block"></span>
+                                <span id="legendConf">99% Confidence</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 text-rose-700">
+                                <span class="w-3 h-3 rounded-sm bg-rose-500/35 border border-rose-600 inline-block"></span>
+                                <span id="legendTail">&alpha; = 0.01 (2 tails)</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Responsive SVG Graph Container -->
+                    <div class="w-full bg-slate-50/70 rounded-xl border border-slate-200/80 p-2 sm:p-3">
+                        <svg id="tGraphSvg" viewBox="0 0 620 350" class="w-full h-auto select-none overflow-visible"></svg>
+                    </div>
+                </div>
+
+                <!-- Interpretation Box -->
+                <div class="mt-4 bg-indigo-50/60 border border-indigo-100 rounded-xl p-3.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                    <span class="font-semibold text-indigo-950">Statistical Interpretation:</span>
+                    We are <span id="interpConf" class="font-semibold text-purple-800">99%</span> confident that the true population mean <span id="interpVariable">age of the technical support staff</span> lies between <span id="interpLower" class="font-semibold text-slate-900">28.690</span> and <span id="interpUpper" class="font-semibold text-slate-900">36.110</span> <span id="interpUnit">years</span>.
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal: Student's t-Distribution Lookup Table (df = 1 to 30) -->
+    <div id="tableModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 bg-purple-800 text-white flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold">Critical Values of the <span class="math-font italic">t</span>-Distribution (Two-Tailed)</h3>
+                    <p class="text-xs text-purple-200">Highlighted cell corresponds to the active problem's <span class="math-font italic">df</span> and <span class="math-font italic">&alpha;</span></p>
+                </div>
+                <button id="btnCloseTable" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="overflow-y-auto p-4 sm:p-6">
+                <table class="w-full text-sm text-center border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b-2 border-slate-300">
+                            <th class="py-2.5 px-3 font-bold border-r border-slate-200" rowspan="2">Degrees of Freedom (<span class="math-font italic">df</span>)</th>
+                            <th class="py-1.5 px-3 font-semibold border-b border-slate-200" colspan="4">Confidence Level (<span class="math-font">1 &minus; &alpha;</span>) / Two-Tailed Area (<span class="math-font">&alpha;</span>)</th>
+                        </tr>
+                        <tr class="bg-slate-50 text-xs text-slate-600 border-b border-slate-300">
+                            <th class="py-2 px-2">90%<br><span class="math-font text-slate-500">(&alpha; = 0.10)</span></th>
+                            <th class="py-2 px-2">95%<br><span class="math-font text-slate-500">(&alpha; = 0.05)</span></th>
+                            <th class="py-2 px-2">98%<br><span class="math-font text-slate-500">(&alpha; = 0.02)</span></th>
+                            <th class="py-2 px-2">99%<br><span class="math-font text-slate-500">(&alpha; = 0.01)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tTableBody" class="divide-y divide-slate-200 math-font text-base">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Complete two-tailed critical t-values table for df = 1 to 30
+         * Keys correspond to Confidence Level (90, 95, 98, 99)
+         * Values are rounded to 3 decimal places to match standard statistics tables
+         */
+        const T_TABLE = {
+            1:  { 90: 6.314, 95: 12.706, 98: 31.821, 99: 63.657 },
+            2:  { 90: 2.920, 95: 4.303,  98: 6.965,  99: 9.925 },
+            3:  { 90: 2.353, 95: 3.182,  98: 4.541,  99: 5.841 },
+            4:  { 90: 2.132, 95: 2.776,  98: 3.747,  99: 4.604 },
+            5:  { 90: 2.015, 95: 2.571,  98: 3.365,  99: 4.032 },
+            6:  { 90: 1.943, 95: 2.447,  98: 3.143,  99: 3.707 },
+            7:  { 90: 1.895, 95: 2.365,  98: 2.998,  99: 3.499 },
+            8:  { 90: 1.860, 95: 2.306,  98: 2.896,  99: 3.355 },
+            9:  { 90: 1.833, 95: 2.262,  98: 2.821,  99: 3.250 },
+            10: { 90: 1.812, 95: 2.228,  98: 2.764,  99: 3.169 },
+            11: { 90: 1.796, 95: 2.201,  98: 2.718,  99: 3.106 },
+            12: { 90: 1.782, 95: 2.179,  98: 2.681,  99: 3.055 },
+            13: { 90: 1.771, 95: 2.160,  98: 2.650,  99: 3.012 },
+            14: { 90: 1.761, 95: 2.145,  98: 2.624,  99: 2.977 },
+            15: { 90: 1.753, 95: 2.131,  98: 2.602,  99: 2.947 },
+            16: { 90: 1.746, 95: 2.120,  98: 2.583,  99: 2.921 },
+            17: { 90: 1.740, 95: 2.110,  98: 2.567,  99: 2.898 },
+            18: { 90: 1.734, 95: 2.101,  98: 2.552,  99: 2.878 },
+            19: { 90: 1.729, 95: 2.093,  98: 2.539,  99: 2.861 },
+            20: { 90: 1.725, 95: 2.086,  98: 2.528,  99: 2.845 },
+            21: { 90: 1.721, 95: 2.080,  98: 2.518,  99: 2.831 },
+            22: { 90: 1.717, 95: 2.074,  98: 2.508,  99: 2.819 },
+            23: { 90: 1.714, 95: 2.069,  98: 2.500,  99: 2.807 },
+            24: { 90: 1.711, 95: 2.064,  98: 2.492,  99: 2.797 },
+            25: { 90: 1.708, 95: 2.060,  98: 2.485,  99: 2.787 },
+            26: { 90: 1.706, 95: 2.056,  98: 2.479,  99: 2.779 },
+            27: { 90: 1.703, 95: 2.052,  98: 2.473,  99: 2.771 },
+            28: { 90: 1.701, 95: 2.048,  98: 2.467,  99: 2.763 },
+            29: { 90: 1.699, 95: 2.045,  98: 2.462,  99: 2.756 },
+            30: { 90: 1.697, 95: 2.042,  98: 2.457,  99: 2.750 }
+        };
+
+        /**
+         * Word problem scenario templates modeled after the exact structure of the reference question
+         */
+        const SCENARIO_TEMPLATES = [
+            {
+                title: "IT Support Staff Age",
+                buildText: (n, xbar, s, conf) => 
+                    `A survey of ${n} technical support staff at a large IT company found that the mean age of the staff is ${xbar} years, with a sample standard deviation of ${s} years. Find the ${conf}% confidence interval of the population mean age. (Express answers to THREE (3) decimal places)`,
+                unit: "years",
+                variableDesc: "age of the technical support staff",
+                meanRange: [26.0, 42.0],
+                sdRange: [3.2, 7.5]
+            },
+            {
+                title: "Daily Commute Time",
+                buildText: (n, xbar, s, conf) => 
+                    `A survey of ${n} commuters in a metropolitan area found that the mean daily commute time is ${xbar} minutes, with a sample standard deviation of ${s} minutes. Find the ${conf}% confidence interval of the population mean commute time. (Express answers to THREE (3) decimal places)`,
+                unit: "minutes",
+                variableDesc: "daily commute time of commuters",
+                meanRange: [28.0, 56.0],
+                sdRange: [4.5, 11.5]
+            },
+            {
+                title: "Laptop Battery Life",
+                buildText: (n, xbar, s, conf) => 
+                    `A quality control test of ${n} laptops from a production line found that the mean battery life is ${xbar} hours, with a sample standard deviation of ${s} hours. Find the ${conf}% confidence interval of the population mean battery life. (Express answers to THREE (3) decimal places)`,
+                unit: "hours",
+                variableDesc: "battery life of the laptops",
+                meanRange: [8.5, 15.5],
+                sdRange: [1.1, 2.8]
+            },
+            {
+                title: "Parcel Delivery Weight",
+                buildText: (n, xbar, s, conf) => 
+                    `A random sample of ${n} express parcels at a logistics hub found that the mean weight of the parcels is ${xbar} kg, with a sample standard deviation of ${s} kg. Find the ${conf}% confidence interval of the population mean weight. (Express answers to THREE (3) decimal places)`,
+                unit: "kg",
+                variableDesc: "weight of the express parcels",
+                meanRange: [4.2, 18.5],
+                sdRange: [0.9, 3.6]
+            },
+            {
+                title: "Clinic Waiting Time",
+                buildText: (n, xbar, s, conf) => 
+                    `A survey of ${n} patients at a medical clinic found that the mean waiting time is ${xbar} minutes, with a sample standard deviation of ${s} minutes. Find the ${conf}% confidence interval of the population mean waiting time. (Express answers to THREE (3) decimal places)`,
+                unit: "minutes",
+                variableDesc: "waiting time of patients at the clinic",
+                meanRange: [14.0, 35.0],
+                sdRange: [2.8, 6.9]
+            },
+            {
+                title: "Coffee Cup Volume",
+                buildText: (n, xbar, s, conf) => 
+                    `A random sample of ${n} cups dispensed by an automated café machine found that the mean volume is ${xbar} mL, with a sample standard deviation of ${s} mL. Find the ${conf}% confidence interval of the population mean volume. (Express answers to THREE (3) decimal places)`,
+                unit: "mL",
+                variableDesc: "volume dispensed by the machine",
+                meanRange: [235.0, 355.0],
+                sdRange: [4.2, 9.8]
+            },
+            {
+                title: "Fresh Graduate Starting Salary",
+                buildText: (n, xbar, s, conf) => 
+                    `A survey of ${n} recent software engineering graduates found that the mean monthly starting salary is ${xbar} thousand dollars, with a sample standard deviation of ${s} thousand dollars. Find the ${conf}% confidence interval of the population mean monthly starting salary. (Express answers to THREE (3) decimal places)`,
+                unit: "thousand dollars",
+                variableDesc: "monthly starting salary",
+                meanRange: [4.2, 7.8],
+                sdRange: [0.4, 1.3]
+            }
+        ];
+
+        // Current active problem state
+        let currentProblem = null;
+        let isSolutionVisible = true;
+        let questionCounter = 1;
+
+        /**
+         * Loads the exact original problem from the user's uploaded image
+         */
+        function loadOriginalReferenceQuestion() {
+            questionCounter = 1;
+            const n = 20;
+            const xbar = 32.4;
+            const s = 5.8;
+            const conf = 99;
+            const scenario = SCENARIO_TEMPLATES[0];
+
+            setProblemState({
+                badge: "Scenario #1 • Reference Example",
+                n,
+                xbar,
+                s,
+                conf,
+                scenario
+            });
+        }
+
+        /**
+         * Generates a randomized new question
+         */
+        function generateRandomQuestion() {
+            questionCounter++;
+            const scenarioIndex = Math.floor(Math.random() * SCENARIO_TEMPLATES.length);
+            const scenario = SCENARIO_TEMPLATES[scenarioIndex];
+
+            // Random sample size n between 8 and 30
+            const n = Math.floor(Math.random() * (30 - 8 + 1)) + 8;
+
+            // Random confidence level from 90, 95, 98, 99
+            const confOptions = [90, 95, 98, 99];
+            const conf = confOptions[Math.floor(Math.random() * confOptions.length)];
+
+            // Random realistic mean and standard deviation (1 decimal place)
+            const rawMean = scenario.meanRange[0] + Math.random() * (scenario.meanRange[1] - scenario.meanRange[0]);
+            const xbar = Number(rawMean.toFixed(1));
+
+            const rawSd = scenario.sdRange[0] + Math.random() * (scenario.sdRange[1] - scenario.sdRange[0]);
+            const s = Number(rawSd.toFixed(1));
+
+            setProblemState({
+                badge: `Question #${questionCounter} • ${scenario.title}`,
+                n,
+                xbar,
+                s,
+                conf,
+                scenario
+            });
+        }
+
+        /**
+         * Computes all statistical values and updates UI + Graph
+         */
+        function setProblemState({ badge, n, xbar, s, conf, scenario }) {
+            const df = n - 1;
+            const alpha = Number(((100 - conf) / 100).toFixed(2));
+            const alphaFormatted = alpha.toFixed(2);
+            const tCrit = T_TABLE[df][conf];
+
+            // Margin of error E = t * (s / sqrt(n)) rounded to 3 decimal places as shown in the reference image
+            const unroundedE = tCrit * (s / Math.sqrt(n));
+            const roundedE = Number(unroundedE.toFixed(3));
+
+            // Lower and Upper bounds using the 3-decimal-place margin of error (and also store exact unrounded for flexible student checking)
+            const lower = Number((xbar - roundedE).toFixed(3));
+            const upper = Number((xbar + roundedE).toFixed(3));
+            const lowerUnrounded = Number((xbar - unroundedE).toFixed(3));
+            const upperUnrounded = Number((xbar + unroundedE).toFixed(3));
+
+            currentProblem = {
+                badge,
+                n,
+                df,
+                xbar,
+                s,
+                conf,
+                alpha,
+                alphaFormatted,
+                tCrit,
+                unroundedE,
+                roundedE,
+                lower,
+                upper,
+                lowerUnrounded,
+                upperUnrounded,
+                scenario
+            };
+
+            // Reset student inputs & feedback
+            document.getElementById('inputCriticalT').value = '';
+            document.getElementById('inputLower').value = '';
+            document.getElementById('inputUpper').value = '';
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.classList.add('hidden');
+
+            updateDOM();
+            renderTDistributionGraph();
+            populateTTableModal();
+        }
+
+        /**
+         * Updates the question text and step-by-step solution DOM elements
+         */
+        function updateDOM() {
+            const p = currentProblem;
+
+            document.getElementById('badgeScenario').textContent = p.badge;
+            document.getElementById('questionText').textContent = p.scenario.buildText(
+                p.n,
+                p.xbar.toFixed(1),
+                p.s.toFixed(1),
+                p.conf
+            );
+
+            // Solution values
+            document.getElementById('solN').textContent = p.n;
+            document.getElementById('solXbar').textContent = p.xbar.toFixed(1);
+            document.getElementById('solUnit1').textContent = p.scenario.unit;
+            document.getElementById('solS').textContent = p.s.toFixed(1);
+            document.getElementById('solUnit2').textContent = p.scenario.unit;
+
+            document.getElementById('solN2').textContent = p.n;
+            document.getElementById('solDf').textContent = p.df;
+            document.getElementById('solAlpha').textContent = p.alphaFormatted;
+            document.getElementById('solDfSub').textContent = p.df;
+            document.getElementById('solT').textContent = p.tCrit.toFixed(3);
+
+            document.getElementById('solConfLevel').textContent = p.conf;
+            document.getElementById('solXbar2').textContent = p.xbar.toFixed(1);
+            document.getElementById('solT2').textContent = p.tCrit.toFixed(3);
+            document.getElementById('solS2').textContent = p.s.toFixed(1);
+            document.getElementById('solN3').textContent = p.n;
+            document.getElementById('solXbar3').textContent = p.xbar.toFixed(1);
+            document.getElementById('solMarginError').textContent = p.roundedE.toFixed(3);
+
+            document.getElementById('solLower').textContent = p.lower.toFixed(3);
+            document.getElementById('solUpper').textContent = p.upper.toFixed(3);
+            document.getElementById('solUnit3').textContent = p.scenario.unit;
+
+            // Rounding footnote
+            document.getElementById('noteUnroundedE').textContent = p.unroundedE.toFixed(5) + '...';
+            document.getElementById('noteRoundedE').textContent = p.roundedE.toFixed(3);
+            document.getElementById('noteRoundedE2').textContent = p.roundedE.toFixed(3);
+            document.getElementById('noteXbar').textContent = p.xbar.toFixed(1);
+
+            // Legend & Interpretation
+            document.getElementById('legendConf').textContent = `${p.conf}% Confidence`;
+            document.getElementById('legendTail').textContent = `α = ${p.alphaFormatted} (2 tails)`;
+            document.getElementById('interpConf').textContent = `${p.conf}%`;
+            document.getElementById('interpVariable').textContent = p.scenario.variableDesc;
+            document.getElementById('interpLower').textContent = p.lower.toFixed(3);
+            document.getElementById('interpUpper').textContent = p.upper.toFixed(3);
+            document.getElementById('interpUnit').textContent = p.scenario.unit;
+        }
+
+        /**
+         * Student's t-distribution probability density function (unnormalized peak = 1 for clean visual scaling,
+         * or exact PDF using Gamma approximation)
+         */
+        function tPDF(t, df) {
+            return Math.pow(1 + (t * t) / df, -(df + 1) / 2);
+        }
+
+        /**
+         * Renders the SVG Student's t-Distribution bell curve with dual horizontal axes:
+         * Axis 1: Standardized t-scale (-t_crit, 0, +t_crit)
+         * Axis 2: Actual sample mean scale (Lower bound, x-bar, Upper bound)
+         */
+        function renderTDistributionGraph() {
+            const svg = document.getElementById('tGraphSvg');
+            const p = currentProblem;
+
+            const width = 620;
+            const height = 350;
+            const margin = { top: 38, right: 35, bottom: 105, left: 35 };
+            const plotW = width - margin.left - margin.right;
+            const plotH = height - margin.top - margin.bottom;
+            const baselineY = margin.top + plotH;
+
+            // Determine horizontal t-range so tails and critical values are always well-proportioned
+            const maxT = Math.max(4.0, Math.min(5.2, p.tCrit * 1.45));
+            const minT = -maxT;
+
+            const xScale = (t) => margin.left + ((t - minT) / (maxT - minT)) * plotW;
+            const yScale = (density) => baselineY - density * (plotH * 0.88);
+
+            // Generate smooth curve points
+            const numSteps = 160;
+            const step = (maxT - minT) / numSteps;
+            const allPoints = [];
+            for (let i = 0; i <= numSteps; i++) {
+                const tVal = minT + i * step;
+                allPoints.push({ t: tVal, x: xScale(tVal), y: yScale(tPDF(tVal, p.df)) });
+            }
+
+            // Helper to build shaded polygon path between [tStart, tEnd]
+            function buildAreaPath(tStart, tEnd) {
+                const subSteps = 80;
+                const dStep = (tEnd - tStart) / subSteps;
+                let d = `M ${xScale(tStart).toFixed(2)} ${baselineY.toFixed(2)}`;
+                for (let i = 0; i <= subSteps; i++) {
+                    const tVal = tStart + i * dStep;
+                    const px = xScale(tVal).toFixed(2);
+                    const py = yScale(tPDF(tVal, p.df)).toFixed(2);
+                    d += ` L ${px} ${py}`;
+                }
+                d += ` L ${xScale(tEnd).toFixed(2)} ${baselineY.toFixed(2)} Z`;
+                return d;
+            }
+
+            const centerAreaPath = buildAreaPath(-p.tCrit, p.tCrit);
+            const leftTailPath = buildAreaPath(minT, -p.tCrit);
+            const rightTailPath = buildAreaPath(p.tCrit, maxT);
+
+            const fullCurvePath = allPoints
+                .map((pt, idx) => `${idx === 0 ? 'M' : 'L'} ${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`)
+                .join(' ');
+
+            const xCritLeft = xScale(-p.tCrit);
+            const yCritLeft = yScale(tPDF(-p.tCrit, p.df));
+            const xCritRight = xScale(p.tCrit);
+            const yCritRight = yScale(tPDF(p.tCrit, p.df));
+            const xCenter = xScale(0);
+            const yPeak = yScale(tPDF(0, p.df));
+
+            const halfAlpha = (p.alpha / 2).toFixed(3).replace(/0$/, '');
+
+            // Secondary axis Y position (Actual variable scale: x-bar)
+            const xBarAxisY = baselineY + 58;
+
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="gradConfidence" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#9333ea" stop-opacity="0.38" />
+                        <stop offset="100%" stop-color="#9333ea" stop-opacity="0.10" />
+                    </linearGradient>
+                    <linearGradient id="gradTail" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#e11d48" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="#e11d48" stop-opacity="0.15" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Top Header Badge inside SVG -->
+                <text x="${width / 2}" y="20" text-anchor="middle" fill="#475569" font-size="13" font-weight="600">
+                    Student's t-Distribution (df = ${p.df}) • Two-Tailed ${p.conf}% Confidence Interval
+                </text>
+
+                <!-- Shaded Central Confidence Area -->
+                <path d="${centerAreaPath}" fill="url(#gradConfidence)" />
+
+                <!-- Shaded Left & Right Tail Rejection Areas -->
+                <path d="${leftTailPath}" fill="url(#gradTail)" />
+                <path d="${rightTailPath}" fill="url(#gradTail)" />
+
+                <!-- Center Mean Dashed Vertical Line -->
+                <line x1="${xCenter}" y1="${yPeak}" x2="${xCenter}" y2="${xBarAxisY}" 
+                      stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 4" />
+
+                <!-- Critical Value Dashed Vertical Connectors extending to both axes -->
+                <line x1="${xCritLeft}" y1="${yCritLeft}" x2="${xCritLeft}" y2="${xBarAxisY}" 
+                      stroke="#7e22ce" stroke-width="2" stroke-dasharray="4 3" />
+                <line x1="${xCritRight}" y1="${yCritRight}" x2="${xCritRight}" y2="${xBarAxisY}" 
+                      stroke="#7e22ce" stroke-width="2" stroke-dasharray="4 3" />
+
+                <!-- Bell Curve Outline -->
+                <path d="${fullCurvePath}" fill="none" stroke="#581c87" stroke-width="2.75" stroke-linecap="round" />
+
+                <!-- Central Confidence Percentage Label -->
+                <rect x="${xCenter - 46}" y="${baselineY - plotH * 0.48}" width="92" height="28" rx="6" 
+                      fill="#ffffff" fill-opacity="0.9" stroke="#d8b4fe" stroke-width="1.2" />
+                <text x="${xCenter}" y="${baselineY - plotH * 0.48 + 19}" text-anchor="middle" 
+                      fill="#6b21a8" font-size="14" font-weight="700">
+                    ${p.conf}% (${(p.conf / 100).toFixed(2)})
+                </text>
+
+                <!-- Left Tail Alpha/2 Callout -->
+                <text x="${Math.max(52, xCritLeft - 38)}" y="${baselineY - 36}" text-anchor="middle" 
+                      fill="#be123c" font-size="12" font-weight="600">
+                    α/2 = ${halfAlpha}
+                </text>
+                <line x1="${Math.max(52, xCritLeft - 38)}" y1="${baselineY - 31}" 
+                      x2="${(xScale(minT) + xCritLeft) / 2}" y2="${baselineY - 8}" 
+                      stroke="#be123c" stroke-width="1.2" />
+
+                <!-- Right Tail Alpha/2 Callout -->
+                <text x="${Math.min(width - 52, xCritRight + 38)}" y="${baselineY - 36}" text-anchor="middle" 
+                      fill="#be123c" font-size="12" font-weight="600">
+                    α/2 = ${halfAlpha}
+                </text>
+                <line x1="${Math.min(width - 52, xCritRight + 38)}" y1="${baselineY - 31}" 
+                      x2="${(xScale(maxT) + xCritRight) / 2}" y2="${baselineY - 8}" 
+                      stroke="#be123c" stroke-width="1.2" />
+
+                <!-- ================= AXIS 1: Standardized t-Axis ================= -->
+                <line x1="${margin.left - 8}" y1="${baselineY}" x2="${width - margin.right + 8}" y2="${baselineY}" 
+                      stroke="#334155" stroke-width="1.8" />
+                <text x="${width - margin.right + 14}" y="${baselineY + 4}" text-anchor="start" 
+                      fill="#334155" font-size="14" font-weight="700" font-style="italic" font-family="STIX Two Math, serif">
+                    t
+                </text>
+
+                <!-- Tick & Label: -t -->
+                <line x1="${xCritLeft}" y1="${baselineY - 4}" x2="${xCritLeft}" y2="${baselineY + 5}" stroke="#581c87" stroke-width="2" />
+                <rect x="${xCritLeft - 38}" y="${baselineY + 7}" width="76" height="20" rx="4" fill="#f3e8ff" />
+                <text x="${xCritLeft}" y="${baselineY + 21}" text-anchor="middle" fill="#581c87" font-size="12.5" font-weight="700">
+                    −t = −${p.tCrit.toFixed(3)}
+                </text>
+
+                <!-- Tick & Label: 0 -->
+                <line x1="${xCenter}" y1="${baselineY - 4}" x2="${xCenter}" y2="${baselineY + 5}" stroke="#334155" stroke-width="1.8" />
+                <text x="${xCenter}" y="${baselineY + 21}" text-anchor="middle" fill="#475569" font-size="12.5" font-weight="600">
+                    0
+                </text>
+
+                <!-- Tick & Label: +t -->
+                <line x1="${xCritRight}" y1="${baselineY - 4}" x2="${xCritRight}" y2="${baselineY + 5}" stroke="#581c87" stroke-width="2" />
+                <rect x="${xCritRight - 38}" y="${baselineY + 7}" width="76" height="20" rx="4" fill="#f3e8ff" />
+                <text x="${xCritRight}" y="${baselineY + 21}" text-anchor="middle" fill="#581c87" font-size="12.5" font-weight="700">
+                    +t = +${p.tCrit.toFixed(3)}
+                </text>
+
+                <!-- ================= AXIS 2: Actual Variable Scale (CI Endpoints & x-bar) ================= -->
+                <line x1="${margin.left - 8}" y1="${xBarAxisY}" x2="${width - margin.right + 8}" y2="${xBarAxisY}" 
+                      stroke="#0f766e" stroke-width="1.8" />
+                <text x="${width - margin.right + 14}" y="${xBarAxisY + 4}" text-anchor="start" 
+                      fill="#0f766e" font-size="14" font-weight="700" font-style="italic" font-family="STIX Two Math, serif">
+                    x&#772;
+                </text>
+
+                <!-- Confidence Interval Bracket Highlight on Axis 2 -->
+                <line x1="${xCritLeft}" y1="${xBarAxisY}" x2="${xCritRight}" y2="${xBarAxisY}" 
+                      stroke="#0d9488" stroke-width="4.5" />
+
+                <!-- Lower Bound Marker -->
+                <circle cx="${xCritLeft}" cy="${xBarAxisY}" r="4.5" fill="#0f766e" stroke="#ffffff" stroke-width="1.5" />
+                <rect x="${xCritLeft - 42}" y="${xBarAxisY + 8}" width="84" height="22" rx="4" fill="#ecfdf5" stroke="#a7f3d0" />
+                <text x="${xCritLeft}" y="${xBarAxisY + 23}" text-anchor="middle" fill="#065f46" font-size="12.5" font-weight="700">
+                    ${p.lower.toFixed(3)}
+                </text>
+
+                <!-- Sample Mean x-bar Marker -->
+                <circle cx="${xCenter}" cy="${xBarAxisY}" r="4" fill="#334155" stroke="#ffffff" stroke-width="1.5" />
+                <text x="${xCenter}" y="${xBarAxisY + 22}" text-anchor="middle" fill="#334155" font-size="12.5" font-weight="700">
+                    x&#772; = ${p.xbar.toFixed(1)}
+                </text>
+
+                <!-- Upper Bound Marker -->
+                <circle cx="${xCritRight}" cy="${xBarAxisY}" r="4.5" fill="#0f766e" stroke="#ffffff" stroke-width="1.5" />
+                <rect x="${xCritRight - 42}" y="${xBarAxisY + 8}" width="84" height="22" rx="4" fill="#ecfdf5" stroke="#a7f3d0" />
+                <text x="${xCritRight}" y="${xBarAxisY + 23}" text-anchor="middle" fill="#065f46" font-size="12.5" font-weight="700">
+                    ${p.upper.toFixed(3)}
+                </text>
+
+                <!-- Margin of Error E Arrows between Center and Bounds -->
+                <text x="${(xCenter + xCritLeft) / 2}" y="${xBarAxisY - 7}" text-anchor="middle" fill="#0f766e" font-size="11.5" font-weight="600">
+                    −E = −${p.roundedE.toFixed(3)}
+                </text>
+                <text x="${(xCenter + xCritRight) / 2}" y="${xBarAxisY - 7}" text-anchor="middle" fill="#0f766e" font-size="11.5" font-weight="600">
+                    +E = +${p.roundedE.toFixed(3)}
+                </text>
+
+                <!-- Bottom Unit Caption -->
+                <text x="${width / 2}" y="${height - 4}" text-anchor="middle" fill="#64748b" font-size="11.5">
+                    Confidence Interval in ${p.scenario.unit}: (${p.lower.toFixed(3)} ; ${p.upper.toFixed(3)})
+                </text>
+            `;
+        }
+
+        /**
+         * Populates the t-table modal and highlights the row & cell for the active question
+         */
+        function populateTTableModal() {
+            const tbody = document.getElementById('tTableBody');
+            const p = currentProblem;
+            const confLevels = [90, 95, 98, 99];
+
+            let html = '';
+            for (let df = 1; df <= 30; df++) {
+                const isTargetRow = df === p.df;
+                const rowClass = isTargetRow ? 'bg-purple-50/80 font-semibold' : 'hover:bg-slate-50';
+
+                html += `<tr id="tRow_${df}" class="${rowClass}">`;
+                html += `<td class="py-2 px-3 border-r border-slate-200 font-sans ${isTargetRow ? 'text-purple-800 font-bold' : 'text-slate-700'}">${df}</td>`;
+
+                for (const c of confLevels) {
+                    const isTargetCell = isTargetRow && c === p.conf;
+                    const cellClass = isTargetCell ? 'highlight-cell rounded' : 'text-slate-600';
+                    html += `<td class="py-2 px-3 ${cellClass}">${T_TABLE[df][c].toFixed(3)}</td>`;
+                }
+                html += `</tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        /**
+         * Checks the student's entered Lower and Upper bounds (and optional critical t-value)
+         */
+        function checkStudentAnswer() {
+            const p = currentProblem;
+            const feedbackBox = document.getElementById('feedbackBox');
+
+            const valT = document.getElementById('inputCriticalT').value.trim();
+            const valLower = document.getElementById('inputLower').value.trim();
+            const valUpper = document.getElementById('inputUpper').value.trim();
+
+            if (valLower === '' || valUpper === '') {
+                feedbackBox.className = 'mt-3 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 bg-amber-50 text-amber-800 border border-amber-200';
+                feedbackBox.innerHTML = `<span>Please enter both the <strong>Lower Bound</strong> and <strong>Upper Bound</strong> to check your answer.</span>`;
+                return;
+            }
+
+            const numLower = parseFloat(valLower);
+            const numUpper = parseFloat(valUpper);
+            const numT = valT !== '' ? parseFloat(valT) : null;
+
+            // Accept within 0.002 tolerance to accommodate intermediate rounding vs unrounded E
+            const lowerMatch = Math.abs(numLower - p.lower) <= 0.002 || Math.abs(numLower - p.lowerUnrounded) <= 0.002;
+            const upperMatch = Math.abs(numUpper - p.upper) <= 0.002 || Math.abs(numUpper - p.upperUnrounded) <= 0.002;
+            const tMatch = numT === null || Math.abs(numT - p.tCrit) <= 0.001;
+
+            if (lowerMatch && upperMatch && tMatch) {
+                feedbackBox.className = 'mt-3 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200';
+                feedbackBox.innerHTML = `
+                    <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Correct!</strong> The ${p.conf}% confidence interval is <strong>(${p.lower.toFixed(3)} ; ${p.upper.toFixed(3)}) ${p.scenario.unit}</strong> with critical value <em>t</em> = ${p.tCrit.toFixed(3)}.</span>
+                `;
+            } else {
+                let hints = [];
+                if (!tMatch) hints.push(`check your critical value <em>t</em> for <em>df</em> = ${p.df} and ${p.conf}% confidence`);
+                if (!lowerMatch) hints.push(`check your Lower Bound`);
+                if (!upperMatch) hints.push(`check your Upper Bound`);
+
+                feedbackBox.className = 'mt-3 px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 bg-rose-50 text-rose-800 border border-rose-200';
+                feedbackBox.innerHTML = `
+                    <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span><strong>Not quite yet:</strong> Please ${hints.join(' and ')}. (Tip: Click "Show Solution" or open the <em>t</em>-Table if you need help!)</span>
+                `;
+            }
+        }
+
+        /**
+         * Toggles the visibility of the step-by-step solution and graph
+         */
+        function toggleSolutionVisibility() {
+            isSolutionVisible = !isSolutionVisible;
+            const container = document.getElementById('solutionContainer');
+            const btnText = document.getElementById('txtToggleSolution');
+            const iconEye = document.getElementById('iconEye');
+
+            if (isSolutionVisible) {
+                container.classList.remove('hidden');
+                btnText.textContent = 'Hide Solution';
+                iconEye.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>`;
+            } else {
+                container.classList.add('hidden');
+                btnText.textContent = 'Show Solution';
+                iconEye.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+            }
+        }
+
+        // Event Listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            loadOriginalReferenceQuestion();
+
+            document.getElementById('btnGenerate').addEventListener('click', generateRandomQuestion);
+            document.getElementById('btnLoadOriginal').addEventListener('click', loadOriginalReferenceQuestion);
+            document.getElementById('btnToggleSolution').addEventListener('click', toggleSolutionVisibility);
+            document.getElementById('btnCheckAnswer').addEventListener('click', checkStudentAnswer);
+
+            // Modal controls
+            const modal = document.getElementById('tableModal');
+            document.getElementById('btnOpenTable').addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                const targetRow = document.getElementById(`tRow_${currentProblem.df}`);
+                if (targetRow) {
+                    targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+            document.getElementById('btnCloseTable').addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

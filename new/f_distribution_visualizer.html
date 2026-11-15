@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F-Distribution Visualizer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js & Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    
+    <!-- jStat for Statistical Functions -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen p-4 md:p-8 text-slate-800">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">F-Distribution Visualizer</h1>
+            <p class="text-slate-600 max-w-2xl">
+                Explore how the numerator and denominator degrees of freedom affect the shape of the F-distribution. 
+                Input your test statistic to see if it falls within the critical region (right tail) based on your chosen alpha level.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Controls & Summary -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Inputs Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                        Test Parameters
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="df1" class="block text-sm font-semibold text-slate-700 mb-1">Numerator df (df₁)</label>
+                            <input type="number" id="df1" value="5" min="1" max="200" step="1" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                        </div>
+                        
+                        <div>
+                            <label for="df2" class="block text-sm font-semibold text-slate-700 mb-1">Denominator df (df₂)</label>
+                            <input type="number" id="df2" value="20" min="1" max="200" step="1" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                        </div>
+
+                        <div>
+                            <label for="alpha" class="block text-sm font-semibold text-slate-700 mb-1">Significance Level (α)</label>
+                            <select id="alpha" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                                <option value="0.10">0.10 (10%)</option>
+                                <option value="0.05" selected>0.05 (5%)</option>
+                                <option value="0.01">0.01 (1%)</option>
+                                <option value="0.001">0.001 (0.1%)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="fStat" class="block text-sm font-semibold text-slate-700 mb-1">F Test Statistic</label>
+                            <input type="number" id="fStat" value="3.5" min="0" step="0.1" 
+                                class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Test Conclusion
+                    </h2>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <span class="text-slate-500">Critical Value (F-crit):</span>
+                            <span id="resCrit" class="font-mono font-bold text-slate-800">0.000</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <span class="text-slate-500">P-Value:</span>
+                            <span id="resPval" class="font-mono font-bold text-slate-800">0.000</span>
+                        </div>
+                        <div class="pt-2">
+                            <span class="block text-slate-500 mb-2">Decision (Null Hypothesis):</span>
+                            <div id="resDecision" class="w-full py-2 px-4 rounded-lg font-bold text-center text-white bg-slate-300 transition-colors duration-300">
+                                Calculating...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Chart -->
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 h-full min-h-[400px] flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Distribution Curve</h2>
+                        <div class="flex items-center space-x-4 text-xs font-medium text-slate-500">
+                            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span> PDF</div>
+                            <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-rose-200 mr-2 border border-rose-500"></span> Critical Region</div>
+                        </div>
+                    </div>
+                    <div class="relative flex-grow w-full h-full min-h-[400px]">
+                        <canvas id="fChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const elDf1 = document.getElementById('df1');
+        const elDf2 = document.getElementById('df2');
+        const elAlpha = document.getElementById('alpha');
+        const elFStat = document.getElementById('fStat');
+        
+        const elResCrit = document.getElementById('resCrit');
+        const elResPval = document.getElementById('resPval');
+        const elResDecision = document.getElementById('resDecision');
+
+        let fChartInstance = null;
+
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('fChart').getContext('2d');
+            
+            fChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Critical Region',
+                            data: [],
+                            borderColor: 'rgba(244, 63, 94, 0.8)', // Rose 500
+                            backgroundColor: 'rgba(244, 63, 94, 0.2)', // Rose 500 w/ opacity
+                            borderWidth: 1,
+                            fill: 'origin',
+                            pointRadius: 0,
+                            pointHitRadius: 0
+                        },
+                        {
+                            label: 'F-Distribution PDF',
+                            data: [],
+                            borderColor: 'rgba(99, 102, 241, 1)', // Indigo 500
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0,
+                            pointHitRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'F Value',
+                                font: { weight: 'bold' }
+                            },
+                            min: 0
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Probability Density',
+                                font: { weight: 'bold' }
+                            },
+                            min: 0
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Density: ${context.parsed.y.toFixed(4)}`;
+                                }
+                            }
+                        },
+                        legend: { display: false },
+                        annotation: {
+                            annotations: {}
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calculate and Update
+        function updateVisualization() {
+            // Get values
+            const df1 = parseInt(elDf1.value);
+            const df2 = parseInt(elDf2.value);
+            const alpha = parseFloat(elAlpha.value);
+            const fStat = parseFloat(elFStat.value);
+
+            // Validation
+            if (isNaN(df1) || df1 < 1 || isNaN(df2) || df2 < 1 || isNaN(fStat) || fStat < 0) {
+                return;
+            }
+
+            // Statistical Calculations
+            const fCrit = jStat.centralF.inv(1 - alpha, df1, df2);
+            const pValue = 1 - jStat.centralF.cdf(fStat, df1, df2);
+            const rejectNull = fStat > fCrit;
+
+            // Update UI Texts
+            elResCrit.textContent = fCrit.toFixed(4);
+            elResPval.textContent = pValue.toFixed(4) + (pValue < 0.001 ? " (< 0.001)" : "");
+            
+            if (rejectNull) {
+                elResDecision.textContent = "Reject Null Hypothesis";
+                elResDecision.className = "w-full py-2 px-4 rounded-lg font-bold text-center text-white bg-rose-500 shadow-sm transition-colors duration-300";
+            } else {
+                elResDecision.textContent = "Fail to Reject Null";
+                elResDecision.className = "w-full py-2 px-4 rounded-lg font-bold text-center text-slate-700 bg-emerald-100 border border-emerald-200 shadow-sm transition-colors duration-300";
+            }
+
+            // Generate Chart Data
+            // Determine X-axis maximum based on critical value and statistic to ensure visibility
+            const xMax = Math.max(5, fCrit * 1.5, fStat * 1.2);
+            const step = xMax / 250;
+            
+            const pdfData = [];
+            const critData = [];
+            let maxY = 0;
+
+            // F-distribution goes to infinity near 0 if df1 == 1. 
+            // We start slightly above 0 to prevent charting errors, or use a strict y-axis cap.
+            const startX = (df1 <= 2) ? 0.02 : 0;
+
+            for (let x = startX; x <= xMax; x += step) {
+                let y = jStat.centralF.pdf(x, df1, df2);
+                
+                if (!isFinite(y)) continue;
+                
+                pdfData.push({ x: x, y: y });
+                
+                // Track max Y (ignoring the extreme spike near 0 for df1=1 or 2)
+                if (x > 0.1 && y > maxY) maxY = y;
+
+                // Fill critical region
+                if (x >= fCrit) {
+                    critData.push({ x: x, y: y });
+                }
+            }
+
+            // Inject the exact critical value point to ensure precise shading boundary
+            const yCrit = jStat.centralF.pdf(fCrit, df1, df2);
+            if (isFinite(yCrit)) {
+                critData.unshift({ x: fCrit, y: yCrit });
+                // We also ensure it's in the PDF line for smoothness
+                pdfData.push({ x: fCrit, y: yCrit }); 
+                pdfData.sort((a, b) => a.x - b.x); // re-sort after injection
+            }
+
+            // Update Chart
+            fChartInstance.data.datasets[1].data = pdfData; // Main curve
+            fChartInstance.data.datasets[0].data = critData; // Shaded region
+
+            // Dynamic Y-axis scaling to avoid extreme spikes ruining the visual
+            let suggestedMaxY = (df1 <= 2) ? maxY * 1.5 : undefined; 
+            fChartInstance.options.scales.y.max = suggestedMaxY;
+            fChartInstance.options.scales.x.max = xMax;
+
+            // Annotations for F-Statistic
+            fChartInstance.options.plugins.annotation.annotations = {
+                fStatLine: {
+                    type: 'line',
+                    xMin: fStat,
+                    xMax: fStat,
+                    borderColor: rejectNull ? '#f43f5e' : '#10b981', // Rose 500 or Emerald 500
+                    borderWidth: 2,
+                    borderDash: [6, 6],
+                    label: {
+                        display: true,
+                        content: `F = ${fStat.toFixed(2)}`,
+                        position: 'start',
+                        backgroundColor: rejectNull ? 'rgba(244, 63, 94, 0.9)' : 'rgba(16, 185, 129, 0.9)',
+                        color: 'white',
+                        font: { weight: 'bold', size: 12 },
+                        yAdjust: 10
+                    }
+                }
+            };
+
+            fChartInstance.update();
+        }
+
+        // Event Listeners
+        const inputs = [elDf1, elDf2, elAlpha, elFStat];
+        inputs.forEach(input => {
+            input.addEventListener('input', updateVisualization);
+            input.addEventListener('change', updateVisualization);
+        });
+
+        // Bootstrap
+        window.onload = () => {
+            initChart();
+            updateVisualization();
+        };
+
+    </script>
+</body>
+</html>

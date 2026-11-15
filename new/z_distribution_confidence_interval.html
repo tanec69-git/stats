@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Distribution Confidence Interval</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jStat -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    
+    <!-- MathJax for rendering equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 12px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #edf2f7;
+            font-weight: 600;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            min-height: 350px;
+            width: 100%;
+        }
+        .math-display {
+            font-size: 1.15rem;
+            overflow-x: auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container max-w-6xl">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Confidence Interval of the Population Mean (Z-Distribution)</h2>
+        <p class="text-muted">Calculate and visualize the confidence interval using the standard normal distribution.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Inputs Column -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calculator me-1 mb-1" viewBox="0 0 16 16">
+                      <path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/>
+                      <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/>
+                    </svg> Parameters
+                </div>
+                <div class="card-body d-flex flex-column gap-3">
+                    
+                    <div>
+                        <label for="inputN" class="form-label fw-semibold">Sample Size ($n$)</label>
+                        <input type="number" id="inputN" class="form-control" min="1" step="1" value="40">
+                    </div>
+
+                    <div>
+                        <label for="inputMean" class="form-label fw-semibold">Sample Mean ($\bar{x}$)</label>
+                        <input type="number" id="inputMean" class="form-control" step="0.1" value="32.4">
+                    </div>
+
+                    <div>
+                        <label for="inputStdDev" class="form-label fw-semibold">Standard Deviation ($s$)</label>
+                        <input type="number" id="inputStdDev" class="form-control" step="0.1" min="0.01" value="5.8">
+                    </div>
+
+                    <div>
+                        <label for="inputUnits" class="form-label fw-semibold">Units (Optional)</label>
+                        <input type="text" id="inputUnits" class="form-control" value="years" placeholder="e.g., years, kg, cm">
+                    </div>
+
+                    <div>
+                        <label for="inputCL" class="form-label fw-semibold">Confidence Level</label>
+                        <select id="inputCL" class="form-select">
+                            <option value="0.90" selected>90%</option>
+                            <option value="0.95">95%</option>
+                            <option value="0.98">98%</option>
+                            <option value="0.99">99%</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <button id="btnCalculate" class="btn btn-primary w-100 py-2 fw-bold">Generate & Plot</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Math & Chart Column -->
+        <div class="col-lg-8 d-flex flex-column gap-4">
+            
+            <!-- Mathematical Steps (MathJax) -->
+            <div class="math-display shadow-sm" id="mathContainer">
+                <!-- MathJax content will be injected here -->
+            </div>
+
+            <!-- Visualization -->
+            <div class="card shadow-sm h-100">
+                <div class="card-header text-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up me-1 mb-1" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+                    </svg> Standard Normal (Z) Distribution
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="zChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let chartInstance = null;
+
+    // Normal PDF helper for the chart
+    function generateZCurveData(min, max, step = 0.05) {
+        const data = [];
+        for (let x = min; x <= max; x += step) {
+            const roundedX = Math.round(x * 1000) / 1000;
+            const y = jStat.normal.pdf(roundedX, 0, 1);
+            data.push({ x: roundedX, y: y });
+        }
+        return data;
+    }
+
+    function calculateAndPlot() {
+        // 1. Get Inputs
+        const n = parseInt(document.getElementById('inputN').value);
+        const xbar = parseFloat(document.getElementById('inputMean').value);
+        const s = parseFloat(document.getElementById('inputStdDev').value);
+        let units = document.getElementById('inputUnits').value.trim();
+        const confLevel = parseFloat(document.getElementById('inputCL').value);
+        
+        if (isNaN(n) || isNaN(xbar) || isNaN(s) || n <= 0 || s <= 0) {
+            alert("Please ensure valid positive numbers for Sample Size and Standard Deviation.");
+            return;
+        }
+
+        // Space out units if provided
+        if (units.length > 0) units = `\\text{ ${units}}`;
+
+        // 2. Statistical Calculations
+        const alpha = 1 - confLevel;
+        // z-critical (two-tailed)
+        const zCrit = jStat.normal.inv(1 - alpha / 2, 0, 1); 
+        
+        // Margin of Error E = z * (s / sqrt(n))
+        const se = s / Math.sqrt(n);
+        const marginOfError = zCrit * se;
+        
+        const lowerBound = xbar - marginOfError;
+        const upperBound = xbar + marginOfError;
+
+        // Formatting values to match image style
+        const zStr = zCrit.toFixed(3);
+        const eStr = marginOfError.toFixed(2);
+        const lowerStr = lowerBound.toFixed(2);
+        const upperStr = upperBound.toFixed(2);
+        const confPercent = Math.round(confLevel * 100);
+
+        // 3. Generate MathJax LaTeX String
+        const texString = `
+            \\begin{align*}
+            n = ${n} \\quad \\bar{x} = ${xbar} ${units} \\quad s = ${s} ${units} \\\\[1em]
+            z_{${alpha.toFixed(2)}, \\text{two tails}} = ${zStr} \\\\[1.5em]
+            \\textbf{${confPercent}\\% Confidence Interval} \\\\[1em]
+            \\bar{x} \\pm z \\frac{s}{\\sqrt{n}} &= ${xbar} \\pm (${zStr}) \\frac{${s}}{\\sqrt{${n}}} = ${xbar} \\pm ${eStr} \\\\[1em]
+            &= (${lowerStr} \\, ; \\, ${upperStr}) ${units}
+            \\end{align*}
+        `;
+
+        // Inject and Typeset MathJax
+        const mathContainer = document.getElementById('mathContainer');
+        mathContainer.innerHTML = `$$ ${texString} $$`;
+        
+        // Only call typesetPromise if MathJax has fully loaded its functions. 
+        // On initial load, MathJax will automatically process the DOM once ready.
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+            MathJax.typesetPromise([mathContainer]).catch((err) => console.error('MathJax error:', err));
+        }
+
+        // 4. Update Chart
+        updateChart(zCrit, confPercent);
+    }
+
+    function updateChart(zCrit, confPercent) {
+        const minZ = -4;
+        const maxZ = 4;
+        
+        const fullCurve = generateZCurveData(minZ, maxZ);
+        
+        // Generate Shaded Center Region Data
+        const shadedRegion = generateZCurveData(-zCrit, zCrit, 0.02);
+        
+        // Tails for visual context
+        const leftTail = generateZCurveData(minZ, -zCrit, 0.05);
+        const rightTail = generateZCurveData(zCrit, maxZ, 0.05);
+
+        const datasets = [];
+
+        // Left Tail (Alpha/2)
+        datasets.push({
+            label: 'Alpha/2 Tail',
+            data: leftTail,
+            backgroundColor: 'rgba(239, 68, 68, 0.2)', // Light Red
+            borderColor: 'transparent',
+            fill: 'origin',
+            pointRadius: 0,
+            showLine: true
+        });
+
+        // Right Tail (Alpha/2)
+        datasets.push({
+            label: 'Alpha/2 Tail',
+            data: rightTail,
+            backgroundColor: 'rgba(239, 68, 68, 0.2)', // Light Red
+            borderColor: 'transparent',
+            fill: 'origin',
+            pointRadius: 0,
+            showLine: true
+        });
+
+        // Center Confidence Interval Region
+        datasets.push({
+            label: `${confPercent}% Confidence Region`,
+            data: shadedRegion,
+            backgroundColor: 'rgba(59, 130, 246, 0.4)', // Light Blue
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            fill: 'origin',
+            pointRadius: 0,
+            showLine: true,
+            order: 2
+        });
+
+        // Main Curve Outline
+        datasets.push({
+            label: 'Standard Normal (Z)',
+            data: fullCurve,
+            borderColor: '#1e293b', // Slate 800
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0,
+            showLine: true,
+            order: 1
+        });
+
+        // Markers for Z critical values
+        datasets.push({
+            label: 'Critical Boundaries',
+            data: [
+                { x: -zCrit, y: jStat.normal.pdf(-zCrit, 0, 1) },
+                { x: zCrit, y: jStat.normal.pdf(zCrit, 0, 1) }
+            ],
+            borderColor: 'transparent',
+            pointBackgroundColor: '#1e3a8a', // Dark blue
+            pointRadius: 5,
+            showLine: false,
+            order: 0
+        });
+
+        const ctx = document.getElementById('zChart').getContext('2d');
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'scatter',
+            data: { datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            filter: function(item) {
+                                // Hide duplicate tails and boundary markers from legend to keep it clean
+                                return !item.text.includes('Alpha/2') && !item.text.includes('Boundaries');
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `Z: ${context.parsed.x.toFixed(3)}, Density: ${context.parsed.y.toFixed(3)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: minZ,
+                        max: maxZ,
+                        title: { display: true, text: 'Z Score', font: { weight: 'bold' } },
+                        grid: {
+                            color: (ctx) => ctx.tick.value === 0 ? '#94a3b8' : '#e2e8f0',
+                            lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                // Highlight critical values on axis if they fall near a tick
+                                if (Math.abs(value - zCrit) < 0.1) return `+${zCrit.toFixed(2)}`;
+                                if (Math.abs(value + zCrit) < 0.1) return `-${zCrit.toFixed(2)}`;
+                                return value;
+                            }
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 0.45, // Standard normal peak is ~0.398
+                        title: { display: true, text: 'Probability Density' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialization and Event Listeners
+    window.addEventListener('DOMContentLoaded', () => {
+        calculateAndPlot();
+
+        document.getElementById('btnCalculate').addEventListener('click', calculateAndPlot);
+        
+        // Auto update on enter key
+        const inputIds = ['inputN', 'inputMean', 'inputStdDev', 'inputUnits', 'inputCL'];
+        inputIds.forEach(id => {
+            document.getElementById(id).addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') calculateAndPlot();
+            });
+            
+            // For the select dropdown, update on change
+            if (id === 'inputCL') {
+                document.getElementById(id).addEventListener('change', calculateAndPlot);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

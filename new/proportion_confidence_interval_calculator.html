@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proportion Confidence Interval Calculator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax for rendering equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .math-display {
+            font-size: 1.25rem;
+            overflow-x: auto;
+            padding: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 sm:p-8 flex flex-col items-center">
+
+    <div class="max-w-4xl w-full space-y-6">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900">Proportion Confidence Interval</h1>
+            <p class="text-slate-500 mt-2">Calculate and visualize the confidence interval for a population proportion.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Inputs Section -->
+            <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                <h2 class="text-lg font-semibold mb-4 border-b pb-2">Parameters</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="inputN" class="block text-sm font-medium text-slate-700 mb-1">Sample Size (n)</label>
+                        <input type="number" id="inputN" min="1" value="40" 
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+                    
+                    <div>
+                        <label for="inputP" class="block text-sm font-medium text-slate-700 mb-1">Sample Proportion (p)</label>
+                        <input type="number" id="inputP" min="0" max="1" step="0.01" value="0.7" 
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+
+                    <div>
+                        <label for="inputCL" class="block text-sm font-medium text-slate-700 mb-1">Confidence Level</label>
+                        <select id="inputCL" 
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            <option value="1.645">90%</option>
+                            <option value="1.960" selected>95%</option>
+                            <option value="2.326">98%</option>
+                            <option value="2.576">99%</option>
+                        </select>
+                    </div>
+
+                    <button id="btnCalculate" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow transition">
+                        Calculate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results & Visuals Section -->
+            <div class="md:col-span-2 space-y-6">
+                
+                <!-- Calculations Display -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 id="clTitle" class="text-xl font-bold text-center mb-4">95% Confidence Interval</h2>
+                    <div id="math-container" class="math-display text-slate-900">
+                        <!-- MathJax will render here -->
+                    </div>
+                </div>
+
+                <!-- Statistical Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold mb-4">Sampling Distribution</h2>
+                    <div class="w-full aspect-[2/1] relative">
+                        <canvas id="distChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        // Normal PDF function
+        function normalPDF(x, mean, stdDev) {
+            const variance = stdDev * stdDev;
+            return (1 / Math.sqrt(2 * Math.PI * variance)) * Math.exp(-Math.pow(x - mean, 2) / (2 * variance));
+        }
+
+        function calculate() {
+            // Get inputs
+            const n = parseInt(document.getElementById('inputN').value);
+            const p = parseFloat(document.getElementById('inputP').value);
+            const clSelect = document.getElementById('inputCL');
+            const z = parseFloat(clSelect.value);
+            const clText = clSelect.options[clSelect.selectedIndex].text;
+
+            if (isNaN(n) || isNaN(p) || n < 1 || p < 0 || p > 1) {
+                alert("Please enter valid numbers: n ≥ 1 and 0 ≤ p ≤ 1");
+                return;
+            }
+
+            // Update Title
+            document.getElementById('clTitle').textContent = `${clText} Confidence Interval`;
+
+            // Calculations
+            const q = 1 - p;
+            const se = Math.sqrt((p * q) / n);
+            const marginOfError = z * se;
+            
+            // Bounds (rounded to 2 decimal places as per image)
+            const lowerBound = Math.max(0, p - marginOfError);
+            const upperBound = Math.min(1, p + marginOfError);
+            
+            const lowerStr = lowerBound.toFixed(2);
+            const upperStr = upperBound.toFixed(2);
+
+            // Build MathJax String matching the image exactly
+            const texString = `
+                \\begin{align*}
+                & p \\pm z \\sqrt{\\frac{p(1-p)}{n}} \\\\[1.5em]
+                & = ${p} \\pm (${z}) \\sqrt{\\frac{${p}(1 - ${p})}{${n}}} \\\\[1.5em]
+                & = (${lowerStr} \\, ; \\, ${upperStr})
+                \\end{align*}
+            `;
+
+            // Update DOM and render MathJax
+            const mathContainer = document.getElementById('math-container');
+            mathContainer.innerHTML = `$$ ${texString} $$`;
+            if (window.MathJax) {
+                MathJax.typesetPromise([mathContainer]);
+            }
+
+            // Update Chart
+            updateChart(p, se, lowerBound, upperBound);
+        }
+
+        function updateChart(mean, stdDev, lowerBound, upperBound) {
+            const ctx = document.getElementById('distChart').getContext('2d');
+            
+            // Define range for the chart (±4 standard deviations)
+            const minX = Math.max(0, mean - 4 * stdDev);
+            const maxX = Math.min(1, mean + 4 * stdDev);
+            
+            const points = 200;
+            const step = (maxX - minX) / points;
+            
+            const labels = [];
+            const dataCurve = [];
+            const dataFill = [];
+
+            for (let x = minX; x <= maxX; x += step) {
+                const y = normalPDF(x, mean, stdDev);
+                labels.push(x.toFixed(3));
+                dataCurve.push({ x: x, y: y });
+
+                // Fill data only within confidence interval bounds
+                if (x >= lowerBound && x <= upperBound) {
+                    dataFill.push({ x: x, y: y });
+                }
+            }
+            
+            // Make sure the fill goes exactly to the bounds
+            dataFill.unshift({ x: lowerBound, y: normalPDF(lowerBound, mean, stdDev) });
+            dataFill.push({ x: upperBound, y: normalPDF(upperBound, mean, stdDev) });
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Sampling Distribution',
+                            data: dataCurve,
+                            borderColor: '#2563eb', // blue-600
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false,
+                            order: 2
+                        },
+                        {
+                            label: 'Confidence Interval',
+                            data: dataFill,
+                            backgroundColor: 'rgba(59, 130, 246, 0.3)', // blue-500 transparent
+                            borderColor: 'transparent',
+                            pointRadius: 0,
+                            fill: 'origin',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: minX,
+                            max: maxX,
+                            ticks: {
+                                callback: function(value) {
+                                    // Highlight mean and bounds on x-axis
+                                    if (Math.abs(value - mean) < step) return mean.toFixed(2);
+                                    if (Math.abs(value - lowerBound) < step) return lowerBound.toFixed(2);
+                                    if (Math.abs(value - upperBound) < step) return upperBound.toFixed(2);
+                                    return value.toFixed(2);
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Sample Proportion (p̂)'
+                            }
+                        },
+                        y: {
+                            display: false // Hide Y axis as density value isn't strictly necessary for intuition
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculate(); // Uses default HTML values
+            
+            // Add listener to button
+            document.getElementById('btnCalculate').addEventListener('click', calculate);
+        });
+    </script>
+</body>
+</html>

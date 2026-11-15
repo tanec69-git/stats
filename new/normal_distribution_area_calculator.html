@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution Area Calculator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jStat for statistical functions -->
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <!-- MathJax for rendering equations -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .math-display {
+            font-size: 1.25rem;
+            overflow-x: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 p-4 sm:p-8 flex flex-col items-center">
+
+    <div class="max-w-5xl w-full space-y-6">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900">Standard Normal (Z) Area Calculator</h1>
+            <p class="text-slate-500 mt-2">Visualize probabilities and areas under the standard normal curve.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Inputs Section -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                <h2 class="text-lg font-semibold mb-4 border-b pb-2 text-blue-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    Parameters
+                </h2>
+                
+                <div class="space-y-5">
+                    <!-- Area Type -->
+                    <div>
+                        <label for="areaType" class="block text-sm font-medium text-slate-700 mb-1">Find Area:</label>
+                        <select id="areaType" 
+                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white text-sm">
+                            <option value="left">To the Left of Z ( P(Z < z) )</option>
+                            <option value="right">To the Right of Z ( P(Z > z) )</option>
+                            <option value="between" selected>Between two Z values</option>
+                            <option value="outside">Outside two Z values</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Z1 Input -->
+                    <div>
+                        <label for="zVal1" id="labelZ1" class="block text-sm font-medium text-slate-700 mb-1">
+                            Z-Score 1
+                        </label>
+                        <input type="number" id="zVal1" step="0.01" value="-1.5" 
+                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm">
+                    </div>
+
+                    <!-- Z2 Input -->
+                    <div id="zVal2Container">
+                        <label for="zVal2" class="block text-sm font-medium text-slate-700 mb-1">
+                            Z-Score 2
+                        </label>
+                        <input type="number" id="zVal2" step="0.01" value="1.0" 
+                            class="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-sm">
+                    </div>
+
+                    <button id="btnCalculate" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-4 rounded-lg shadow-sm transition">
+                        Calculate & Graph
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visualization and Math Section -->
+            <div class="lg:col-span-2 space-y-6 flex flex-col">
+                
+                <!-- Math Output Container -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold uppercase tracking-wide text-slate-400 mb-3 text-center">Probability Result</h3>
+                    <div id="mathContainer" class="math-display text-blue-900 font-semibold min-h-[3rem] flex items-center justify-center">
+                        <!-- MathJax injected here -->
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex-grow">
+                    <h3 class="text-sm font-bold uppercase tracking-wide text-slate-400 mb-4 text-center">Standard Normal Curve View</h3>
+                    <div class="w-full aspect-[4/3] sm:aspect-[16/9] relative">
+                        <canvas id="zChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        // Generate coordinates for drawing curves and shaded areas
+        function generateZCurveData(min, max, step = 0.02) {
+            const data = [];
+            for (let x = min; x <= max; x += step) {
+                const roundedX = Math.round(x * 1000) / 1000;
+                const y = jStat.normal.pdf(roundedX, 0, 1);
+                data.push({ x: roundedX, y: y });
+            }
+            return data;
+        }
+
+        // Handle UI toggles based on the select box
+        function handleTypeChange() {
+            const areaType = document.getElementById('areaType').value;
+            const z2Container = document.getElementById('zVal2Container');
+            const labelZ1 = document.getElementById('labelZ1');
+
+            if (areaType === 'left' || areaType === 'right') {
+                z2Container.classList.add('hidden');
+                labelZ1.textContent = "Z-Score (z)";
+            } else {
+                z2Container.classList.remove('hidden');
+                labelZ1.textContent = "Z-Score 1 (z₁)";
+            }
+            
+            calculateAndPlot();
+        }
+
+        function calculateAndPlot() {
+            const areaType = document.getElementById('areaType').value;
+            let z1 = parseFloat(document.getElementById('zVal1').value);
+            let z2 = parseFloat(document.getElementById('zVal2').value);
+
+            if (isNaN(z1)) z1 = 0;
+            if (isNaN(z2)) z2 = 0;
+
+            // Enforce z1 < z2 for 'between' and 'outside'
+            if ((areaType === 'between' || areaType === 'outside') && z1 > z2) {
+                const temp = z1;
+                z1 = z2;
+                z2 = temp;
+                document.getElementById('zVal1').value = z1;
+                document.getElementById('zVal2').value = z2;
+            }
+
+            // Statistical calculations
+            let area = 0;
+            let texString = "";
+            let shadedRegions = []; // Array of {min, max} to shade
+            
+            const minChart = -4.5;
+            const maxChart = 4.5;
+
+            // Build MathJax formulas and shaded bounds
+            if (areaType === 'left') {
+                area = jStat.normal.cdf(z1, 0, 1);
+                texString = `P(Z < ${z1}) = ${area.toFixed(4)}`;
+                shadedRegions.push({ min: minChart, max: z1 });
+                
+            } else if (areaType === 'right') {
+                area = 1 - jStat.normal.cdf(z1, 0, 1);
+                texString = `P(Z > ${z1}) = ${area.toFixed(4)}`;
+                shadedRegions.push({ min: z1, max: maxChart });
+                
+            } else if (areaType === 'between') {
+                area = jStat.normal.cdf(z2, 0, 1) - jStat.normal.cdf(z1, 0, 1);
+                texString = `P(${z1} < Z < ${z2}) = ${area.toFixed(4)}`;
+                shadedRegions.push({ min: z1, max: z2 });
+                
+            } else if (areaType === 'outside') {
+                const areaLeft = jStat.normal.cdf(z1, 0, 1);
+                const areaRight = 1 - jStat.normal.cdf(z2, 0, 1);
+                area = areaLeft + areaRight;
+                texString = `P(Z < ${z1} \\text{ or } Z > ${z2}) = ${area.toFixed(4)}`;
+                shadedRegions.push({ min: minChart, max: z1 });
+                shadedRegions.push({ min: z2, max: maxChart });
+            }
+
+            // Update MathJax
+            const mathContainer = document.getElementById('mathContainer');
+            mathContainer.innerHTML = `$$ ${texString} $$`;
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                MathJax.typesetPromise([mathContainer]).catch(err => console.error(err));
+            }
+
+            // Draw Chart
+            updateChart(minChart, maxChart, shadedRegions, areaType, z1, z2);
+        }
+
+        function updateChart(minZ, maxZ, shadedRegions, areaType, z1, z2) {
+            const datasets = [];
+            const fullCurve = generateZCurveData(minZ, maxZ);
+
+            // Shaded Regions
+            shadedRegions.forEach((region, index) => {
+                // Constrain shading to visible chart bounds to prevent overdrawing
+                const plotMin = Math.max(minZ, region.min);
+                const plotMax = Math.min(maxZ, region.max);
+                
+                datasets.push({
+                    label: `Shaded Area ${index + 1}`,
+                    data: generateZCurveData(plotMin, plotMax),
+                    backgroundColor: 'rgba(59, 130, 246, 0.45)', // Blue-500 transparent
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    fill: 'origin',
+                    pointRadius: 0,
+                    showLine: true
+                });
+            });
+
+            // Main Curve Outline
+            datasets.push({
+                label: 'Standard Normal Distribution',
+                data: fullCurve,
+                borderColor: '#1e293b', // Slate 800
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                showLine: true,
+                order: 10
+            });
+
+            // Z-Value Markers (Vertical lines at specified Zs)
+            const markers = [];
+            if (areaType === 'left' || areaType === 'right') {
+                markers.push({ x: z1, y: jStat.normal.pdf(z1, 0, 1) });
+            } else {
+                markers.push({ x: z1, y: jStat.normal.pdf(z1, 0, 1) });
+                markers.push({ x: z2, y: jStat.normal.pdf(z2, 0, 1) });
+            }
+
+            if (markers.length > 0) {
+                datasets.push({
+                    label: 'Z Boundary Markers',
+                    data: markers,
+                    backgroundColor: '#1d4ed8', // Blue 700
+                    borderColor: 'transparent',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    showLine: false,
+                    order: 20
+                });
+            }
+
+            const ctx = document.getElementById('zChart').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    if (context.dataset.label.includes('Markers')) {
+                                        return `Z = ${context.parsed.x}`;
+                                    }
+                                    return `Z: ${context.parsed.x.toFixed(2)}, Density: ${context.parsed.y.toFixed(3)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            min: minZ,
+                            max: maxZ,
+                            title: { display: true, text: 'Z Score', font: { weight: 'bold' } },
+                            grid: {
+                                color: (ctx) => ctx.tick.value === 0 ? '#94a3b8' : '#e2e8f0',
+                                lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 0.45,
+                            title: { display: true, text: 'Probability Density' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize and setup event listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('areaType').addEventListener('change', handleTypeChange);
+            document.getElementById('btnCalculate').addEventListener('click', calculateAndPlot);
+            
+            // Auto update on enter key
+            const inputs = ['zVal1', 'zVal2'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') calculateAndPlot();
+                });
+            });
+
+            // Initial calculation
+            handleTypeChange();
+        });
+    </script>
+</body>
+</html>
